@@ -19,7 +19,10 @@ import kotlinx.serialization.Serializable
 object Home
 
 @Serializable
-object Profile
+object Create
+
+@Serializable
+object Survey
 
 @Composable
 fun MainNavGraph(modifier: Modifier = Modifier,navController: NavHostController) {
@@ -35,11 +38,18 @@ fun MainNavGraph(modifier: Modifier = Modifier,navController: NavHostController)
                 Text("deneme")
             }
         }
-        composable<Profile> {
+        composable<Create> {
             Box(
                 modifier = modifier.fillMaxSize()
             ){
                 Text("2222")
+            }
+        }
+        composable<Survey> {
+            Box(
+                modifier = modifier.fillMaxSize()
+            ){
+                Text("3333")
             }
         }
 

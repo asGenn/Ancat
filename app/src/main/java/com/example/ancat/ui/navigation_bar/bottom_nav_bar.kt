@@ -1,6 +1,7 @@
 package com.example.ancat.ui.navigation_bar
 
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Create
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.Icon
@@ -10,13 +11,17 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.vectorResource
 import androidx.navigation.NavController
 import androidx.navigation.NavDestination.Companion.hasRoute
 import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.compose.currentBackStackEntryAsState
+import com.example.ancat.R
+import com.example.ancat.core.navigation.Create
 import com.example.ancat.core.navigation.Home
-import com.example.ancat.core.navigation.Profile
+import com.example.ancat.core.navigation.Survey
 
 
 data class TopLevelRoute<T : Any>(val route: T, val icon: ImageVector,val label:String)
@@ -24,10 +29,9 @@ data class TopLevelRoute<T : Any>(val route: T, val icon: ImageVector,val label:
 @Composable
 fun BottomNavigationBar(navController: NavController ) {
     val bottomRoutes = listOf(
-        TopLevelRoute(route = Home, icon = Icons.Default.Home, label = "Home"),
-        TopLevelRoute(route = Profile, icon = Icons.Default.Person, label = "Profile"),
-
-
+        TopLevelRoute(route = Home, icon = ImageVector.vectorResource(R.drawable.ic_analyse), label = "Analyze"),
+        TopLevelRoute(route = Create, icon = ImageVector.vectorResource(R.drawable.ic_add), label = "Create"),
+        TopLevelRoute(route = Survey, icon = ImageVector.vectorResource(R.drawable.ic_questionnaire_24_24), label = "Survey"),
     )
     NavigationBar {
         val navBackStackEntry by navController.currentBackStackEntryAsState()
