@@ -13,6 +13,8 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.example.ancat.ui.component.FloatingMenuScreen
+import com.example.ancat.ui.views.CreateScreen
 import kotlinx.serialization.Serializable
 
 @Serializable
@@ -35,21 +37,24 @@ fun MainNavGraph(modifier: Modifier = Modifier,navController: NavHostController)
             Box(
                 modifier = modifier.fillMaxSize()
             ){
-                Text("deneme")
+                Text("Home Screen")
             }
         }
         composable<Create> {
             Box(
                 modifier = modifier.fillMaxSize()
             ){
-                Text("2222")
+                Text("Create Screen")
+                CreateScreen()
+                FloatingMenuScreen()
+
             }
         }
         composable<Survey> {
             Box(
                 modifier = modifier.fillMaxSize()
             ){
-                Text("3333")
+                Text("Surveys Screen")
             }
         }
 
