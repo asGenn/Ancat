@@ -6,7 +6,8 @@ import android.graphics.Paint
 import android.graphics.pdf.PdfDocument
 import android.os.Environment
 import android.widget.Toast
-import org.json.JSONObject
+import com.example.ancat.data.MultipleChoiceQuest
+import org.json.JSONArray
 import java.io.File
 import java.io.FileOutputStream
 
@@ -27,21 +28,50 @@ class SurveyHelper {
          * ÖRNEK DATA
          */
         val data = """
-            {
-              "1": {
-                "type": "1",
-                "question": "Adın ne?"
-              },
-              "2": {
-                "type": "1",
-                "question": "Soyadın ne?"
-              },
-              "3": {
-                "type": "1",
-                "question": "ne?"
-              }
-              
-            }
+            [
+                {
+                    "type": "1",
+                    "questions": [
+                        "Soru 1",
+                        "Soru 2",
+                        "Soru 3",
+                        "Soru 4",
+                        "Soru 5",
+                        "Soru 6"
+                    ]
+                },
+                {
+                    "type": "2",
+                    "questions": [
+                        {
+                            question: "Soru1",
+                            options: [
+                                "Şık1",
+                                "Şık2"
+                            ]
+                        },
+                        {
+                            question: "Soru2",
+                            options: [
+                                "Şık1",
+                                "Şık2",
+                                "Şık3"
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "type": "1",
+                    "questions": [
+                        "Soru 1",
+                        "Soru 2",
+                        "Soru 3",
+                        "Soru 4",
+                        "Soru 5",
+                        "Soru 6"
+                    ]
+                }
+            ]
         """.trimIndent()
 
         /**
@@ -49,17 +79,35 @@ class SurveyHelper {
          */
 
 
-        val jsonObject = JSONObject(data)
+        val jsonArray = JSONArray(data)
+        val questionsHelper = QuestionsHelper()
 
         // JSON içindeki anahtarları dolaşalım
-        for (key in jsonObject.keys()) {
-            val questionObject = jsonObject.getJSONObject(key)
+        for (i in 0 until jsonArray.length()) {
+            val questionObject = jsonArray.getJSONObject(i)
             val type = questionObject.getString("type")
-            val question = questionObject.getString("question")
+            val questions = questionObject.getJSONArray("questions")
 
             cursorPos = when (type) {
-                "1" -> QuestionsHelper().ratingQuestion(canvas, paint, question, cursorPos)
-                else -> return
+                "1" -> {
+                    val questionList = List(questions.length()) { questions.getString(it) }
+                    questionsHelper.ratingQuestion(canvas, paint, questionList, cursorPos)
+                }
+
+                "2" -> {
+                    val questionList = List(questions.length()) {
+                        val questionObj = questions.getJSONObject(it)
+                        val question = questionObj.getString("question")
+                        val options = List(questionObj.getJSONArray("options").length()) { index ->
+                            questionObj.getJSONArray("options").getString(index)
+                        }
+                        MultipleChoiceQuest(question, options)
+                    }
+                    questionsHelper.multipleChoiceQuestion(canvas, paint, questionList, cursorPos)
+
+                }
+
+                else -> {cursorPos }
             }
         }
 
