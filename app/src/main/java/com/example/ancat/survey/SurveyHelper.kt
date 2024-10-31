@@ -3,6 +3,7 @@ package com.example.ancat.survey
 import android.content.Context
 import android.graphics.Canvas
 import android.graphics.Paint
+import android.graphics.Typeface
 import android.graphics.pdf.PdfDocument
 import android.os.Environment
 import android.widget.Toast
@@ -21,8 +22,10 @@ class SurveyHelper {
         val paint = Paint().apply {
             textSize = 12f
         }
-
-        var cursorPos = 30f //Default
+        val paintTitle = Paint().apply {
+            textSize = 16f
+            typeface = Typeface.create(Typeface.DEFAULT, Typeface.BOLD)
+        }
 
         /**
          * ÖRNEK DATA
@@ -30,7 +33,17 @@ class SurveyHelper {
         val data = """
             [
                 {
+                    "type": "0",
+                    "title": "Anket Başlığı",
+                    "questions": [
+                        "Açıklama 1",
+                        "Açıklama 2",
+                        "Açıklama 3"
+                    ]
+                },
+                {
                     "type": "1",
+                    "title": "Soru 1 Başlığı",
                     "questions": [
                         "Soru 1",
                         "Soru 2",
@@ -42,6 +55,7 @@ class SurveyHelper {
                 },
                 {
                     "type": "2",
+                    "title": "Soru 2 Başlığı",
                     "questions": [
                         {
                             question: "Soru1",
@@ -62,6 +76,7 @@ class SurveyHelper {
                 },
                 {
                     "type": "1",
+                    "title": "Soru 1.1 Başlığı",
                     "questions": [
                         "Soru 1",
                         "Soru 2",
@@ -81,17 +96,25 @@ class SurveyHelper {
 
         val jsonArray = JSONArray(data)
         val questionsHelper = QuestionsHelper()
+        var cursorPos = 0f
 
         // JSON içindeki anahtarları dolaşalım
         for (i in 0 until jsonArray.length()) {
             val questionObject = jsonArray.getJSONObject(i)
             val type = questionObject.getString("type")
+            val title = questionObject.getString("title")
             val questions = questionObject.getJSONArray("questions")
 
             cursorPos = when (type) {
+                "0" -> {
+                    val commitList = List(questions.length()) { questions.getString(it) }
+                    val cursorPosition = questionsHelper.surveyTitleCommit(canvas, paint, paintTitle, title, commitList)
+                    questionsHelper.surveyFrame(canvas, paint, cursorPosition)
+                }
+
                 "1" -> {
                     val questionList = List(questions.length()) { questions.getString(it) }
-                    questionsHelper.ratingQuestion(canvas, paint, questionList, cursorPos)
+                    questionsHelper.ratingQuestion(canvas, paint, title, questionList, cursorPos)
                 }
 
                 "2" -> {
@@ -103,11 +126,13 @@ class SurveyHelper {
                         }
                         MultipleChoiceQuest(question, options)
                     }
-                    questionsHelper.multipleChoiceQuestion(canvas, paint, questionList, cursorPos)
+                    questionsHelper.multipleChoiceQuestion(canvas, paint, title, questionList, cursorPos)
 
                 }
 
-                else -> {cursorPos }
+                else -> {
+                    cursorPos
+                }
             }
         }
 

@@ -9,8 +9,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
 import androidx.compose.ui.Modifier
 import androidx.navigation.compose.rememberNavController
-import com.example.ancat.core.navigation.Create
-import com.example.ancat.core.navigation.Home
 import com.example.ancat.core.navigation.MainNavGraph
 
 import com.example.ancat.ui.navigation_bar.BottomNavigationBar
@@ -24,12 +22,9 @@ class MainActivity : ComponentActivity() {
         setContent {
             AncatTheme {
                 val navController = rememberNavController()
-                val bottomNav = listOf(Home,Create)
                 Scaffold(modifier = Modifier.fillMaxSize(),
                     bottomBar = {
                       BottomNavigationBar(navController)
-
-
                     }) { innerPadding ->
                    MainNavGraph(modifier = Modifier.padding(innerPadding),navController)
                 }
