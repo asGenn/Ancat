@@ -13,23 +13,26 @@ import com.example.ancat.core.navigation.MainNavGraph
 
 import com.example.ancat.ui.navigation_bar.BottomNavigationBar
 import com.example.ancat.ui.theme.AncatTheme
+import dagger.hilt.android.AndroidEntryPoint
 
-
+@AndroidEntryPoint
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
+
         setContent {
             AncatTheme {
                 val navController = rememberNavController()
                 Scaffold(modifier = Modifier.fillMaxSize(),
                     bottomBar = {
-                      BottomNavigationBar(navController)
+                        BottomNavigationBar(navController)
                     }) { innerPadding ->
-                   MainNavGraph(modifier = Modifier.padding(innerPadding),navController)
+                    MainNavGraph(modifier = Modifier.padding(innerPadding), navController)
                 }
             }
         }
+
     }
 }
 
