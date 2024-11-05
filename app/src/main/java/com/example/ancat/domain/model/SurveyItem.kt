@@ -19,7 +19,7 @@ data class SurveyItem(
 @Serializable
 sealed class Question {
     @Serializable
-    data class SimpleQuestion(val text: String) : Question()
+    data class SimpleQuestion(val question: String) : Question()
 
     @Serializable
     data class MultipleChoiceQuestion(val question: String, val options: List<String>) : Question()

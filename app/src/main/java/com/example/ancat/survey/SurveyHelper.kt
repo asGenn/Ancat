@@ -23,7 +23,7 @@ class SurveyHelper {
         return pdfDocument.startPage(pageInfo)
     }
 
-    fun createPdf(context: Context) {
+    fun createPdf(context: Context, data: String) {
         val pdfDocument = PdfDocument()
         var pageNum = 1
         var page = createPage(pdfDocument, pageNum)
@@ -37,7 +37,7 @@ class SurveyHelper {
             typeface = Typeface.create(Typeface.DEFAULT, Typeface.BOLD)
         }
 
-        val jsonArray = JSONArray(jsonData)
+        val jsonArray = JSONArray(data)
         val questionsHelper = QuestionsHelper()
         var cursorPos = 30f
 
@@ -49,7 +49,8 @@ class SurveyHelper {
 
             cursorPos = when (type) {
                 "0" -> {
-                    val commitList = List(questions.length()) { questions.getString(it) }
+                    val commitList = List(questions.length()) {val questionObj = questions.getJSONObject(it)
+                        questionObj.getString("question")}
                     val cursorPosition = questionsHelper.surveyTitleCommit(canvas, paint, paintTitle, title, commitList)
                     questionsHelper.surveyFrame(canvas, paint, cursorPosition)
                 }

@@ -1,9 +1,11 @@
 package com.example.ancat.ui.views.create_survey_screen
 
+import android.content.Context
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -16,6 +18,7 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -32,6 +35,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -39,6 +43,10 @@ import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import com.example.ancat.domain.model.Question
 import com.example.ancat.domain.model.SurveyItem
+import com.example.ancat.survey.SurveyHelper
+import kotlinx.serialization.encodeToString
+import kotlinx.serialization.json.Json
+import kotlin.coroutines.coroutineContext
 
 @Composable
 fun CreateSurveyScreen(modifier: Modifier = Modifier, title: String) {
@@ -52,6 +60,7 @@ fun CreateSurveyScreen(modifier: Modifier = Modifier, title: String) {
 fun SurveyCreator(title: String, viewModel: CreateSurveyViewModel) {
     val showBottomSheet = remember { mutableStateOf(false) }
     val surveyItem = remember { mutableStateListOf<SurveyItem>() }
+    val context = LocalContext.current
 
     Scaffold(
         floatingActionButton = {
@@ -76,35 +85,68 @@ fun SurveyCreator(title: String, viewModel: CreateSurveyViewModel) {
             Spacer(modifier = Modifier.height(16.dp))
 
             surveyItem.forEachIndexed { index, item ->
-                Column {
+                Row (
+                    modifier = Modifier.fillMaxWidth().padding(16.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    Column {
 
-                    item.questions.forEach { question ->
-                        when (question) {
-                            is Question.SimpleQuestion -> {
-                                Text("Soru: ${question.text}")
+                        item.questions.forEach { question ->
+                            when (question) {
+                                is Question.SimpleQuestion -> {
+                                    Text(question.question)
 
-                            }
-                            is Question.MultipleChoiceQuestion -> {
-                                Text("Soru: ${question.question}")
-                                question.options.forEachIndexed { index, option ->
-                                    Text("Seçenek ${index + 1}: $option")
+                                }
+
+                                is Question.MultipleChoiceQuestion -> {
+                                    Text("Soru: ${question.question}")
+                                    question.options.forEachIndexed { index, option ->
+                                        Row (
+                                            verticalAlignment = Alignment.CenterVertically,
+
+                                        ){
+                                            RadioButton(
+                                                selected = false,
+                                                onClick = { },
+
+                                            )
+                                            Text(option)
+                                        }
+
+                                    }
                                 }
                             }
                         }
-                    }
-                    Spacer(modifier = Modifier.height(8.dp))
 
+
+                    }
                     Button(
                         onClick = {
                             surveyItem.removeAt(index)
                         },
-                        modifier = Modifier.align(Alignment.End)
+
                     ) {
                         Text("Sil")
                     }
                 }
                 Spacer(modifier = Modifier.height(16.dp))
             }
+            Button(
+                onClick = {
+                    val data = Json.encodeToString(surveyItem.toList())
+                    SurveyHelper().createPdf(context = context, data = data)
+                    println(data)
+
+
+
+                },
+                modifier = Modifier.fillMaxWidth().padding(16.dp)
+            ) {
+                Text("Pdf Oluştur")
+            }
+
+
         }
         CustomModalBottomSheet(show = showBottomSheet, viewModel = viewModel)
         DialogHandler(viewModel = viewModel, surveyItem = surveyItem)
@@ -160,7 +202,11 @@ fun CustomModalBottomSheet(
 }
 
 @Composable
-fun SimpleQuestionDialog(modifier: Modifier = Modifier, onDismissRequest: () -> Unit,surveyItem: MutableList<SurveyItem>) {
+fun SimpleQuestionDialog(
+    modifier: Modifier = Modifier,
+    onDismissRequest: () -> Unit,
+    surveyItem: MutableList<SurveyItem>
+) {
     var text by remember { mutableStateOf("") }
     Dialog(
         onDismissRequest = onDismissRequest,
@@ -198,7 +244,16 @@ fun SimpleQuestionDialog(modifier: Modifier = Modifier, onDismissRequest: () -> 
 
                 Spacer(modifier = Modifier.height(16.dp))
                 Button(onClick = {
-                    val survey = SurveyItem(type = "1", questions = listOf(Question.SimpleQuestion(text = text)), title = "Başlık")
+                    val survey = SurveyItem(
+                        type = "0",
+                        title = "Başlık",
+                        questions = listOf(
+                            Question.SimpleQuestion(
+                                question = text
+                            )
+                        ),
+
+                    )
                     surveyItem.add(survey)
                     onDismissRequest()
                 }) {
@@ -270,7 +325,12 @@ fun MultipleChoiceQuestionDialog(
                     val survey = SurveyItem(
                         type = "2",
                         title = "Başlık",
-                        questions = listOf(Question.MultipleChoiceQuestion(question = questionText, options = options))
+                        questions = listOf(
+                            Question.MultipleChoiceQuestion(
+                                question = questionText,
+                                options = options
+                            )
+                        )
                     )
                     surveyItem.add(survey)
                     onDismissRequest()
@@ -284,7 +344,11 @@ fun MultipleChoiceQuestionDialog(
 
 
 @Composable
-fun DialogHandler(modifier: Modifier = Modifier, viewModel: CreateSurveyViewModel, surveyItem: MutableList<SurveyItem>) {
+fun DialogHandler(
+    modifier: Modifier = Modifier,
+    viewModel: CreateSurveyViewModel,
+    surveyItem: MutableList<SurveyItem>
+) {
     val dialogType by viewModel.dialogType.collectAsState()
     dialogType?.let {
         when (it) {
@@ -298,7 +362,11 @@ fun DialogHandler(modifier: Modifier = Modifier, viewModel: CreateSurveyViewMode
             }
 
             is DialogType.Type2 -> {
-                MultipleChoiceQuestionDialog(modifier = modifier, onDismissRequest = { viewModel.hideDialog() },surveyItem = surveyItem)
+                MultipleChoiceQuestionDialog(
+                    modifier = modifier,
+                    onDismissRequest = { viewModel.hideDialog() },
+                    surveyItem = surveyItem
+                )
             }
         }
     }
