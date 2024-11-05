@@ -14,16 +14,13 @@ import androidx.compose.ui.unit.dp
 import com.example.ancat.R
 
 @Composable
-fun FloatingMenuScreen() {
+fun FloatingMenuScreen(modifier: Modifier) {
     var isMenuExpanded by remember { mutableStateOf(false) }
 
     Box(
-        modifier = Modifier
-            .fillMaxSize(),
-        contentAlignment = Alignment.BottomEnd,
-        // Sağ alta yerleştiriyoruz
+
     ) {
-        // Menü butonu
+
         Button(
             onClick = { isMenuExpanded = !isMenuExpanded },
             modifier = Modifier
@@ -37,18 +34,18 @@ fun FloatingMenuScreen() {
             )
         }
 
-        // Menü elemanları
+
         AnimatedVisibility(
             visible = isMenuExpanded,
-            enter = expandVertically(),  // Yukarı doğru genişleyecek
-            exit = shrinkVertically()    // Kapanırken aşağı doğru küçülecek
+            enter = expandVertically(),
+            exit = shrinkVertically()
         ) {
             Column(
                 modifier = Modifier.padding(top = 0.dp, end = 16.dp, bottom = 96.dp, start = 0.dp),
                 verticalArrangement = Arrangement.spacedBy(8.dp),  // Elemanlar arasındaki boşluk
                 horizontalAlignment = Alignment.End  // Sağ tarafa hizalama
             ) {
-                // Menü elemanlarını oluşturuyoruz
+
                 Button(onClick = { /* Action for element 1 */ }) {
                     Text("Element 1")
                 }

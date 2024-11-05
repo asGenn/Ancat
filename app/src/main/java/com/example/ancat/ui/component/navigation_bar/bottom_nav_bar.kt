@@ -1,4 +1,4 @@
-package com.example.ancat.ui.navigation_bar
+package com.example.ancat.ui.component.navigation_bar
 
 
 import androidx.compose.material3.Icon
@@ -29,6 +29,9 @@ fun BottomNavigationBar(navController: NavController ) {
         TopLevelRoute(route = Create, icon = ImageVector.vectorResource(R.drawable.ic_add), label = "Create"),
         TopLevelRoute(route = Survey, icon = ImageVector.vectorResource(R.drawable.ic_questionnaire_24_24), label = "Survey"),
     )
+
+
+
     NavigationBar {
         val navBackStackEntry by navController.currentBackStackEntryAsState()
         val currentDestination = navBackStackEntry?.destination

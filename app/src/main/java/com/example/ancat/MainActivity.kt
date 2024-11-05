@@ -11,9 +11,11 @@ import androidx.compose.ui.Modifier
 import androidx.navigation.compose.rememberNavController
 import com.example.ancat.core.navigation.MainNavGraph
 
-import com.example.ancat.ui.navigation_bar.BottomNavigationBar
+import com.example.ancat.ui.component.navigation_bar.BottomNavigationBar
 import com.example.ancat.ui.theme.AncatTheme
 import dagger.hilt.android.AndroidEntryPoint
+
+
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {

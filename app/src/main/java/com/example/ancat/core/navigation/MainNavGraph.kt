@@ -1,5 +1,6 @@
 package com.example.ancat.core.navigation
 
+import DynamicTextFieldExample
 import androidx.compose.foundation.layout.Box
 
 import androidx.compose.foundation.layout.fillMaxSize
@@ -10,18 +11,30 @@ import androidx.compose.ui.Modifier
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
-import com.example.ancat.ui.component.FloatingMenuScreen
-import com.example.ancat.ui.views.CreateScreen
+import androidx.navigation.compose.navigation
+import androidx.navigation.toRoute
+import com.example.ancat.ui.views.create_screen.CreateScreen
+import com.example.ancat.ui.views.create_survey_screen.CreateSurveyScreen
 import kotlinx.serialization.Serializable
 
 @Serializable
 object Home
 
+// nested graph for create screen
+@Serializable
+object CreateNested
+
+// nested gragh start
 @Serializable
 object Create
+@Serializable
+data class CreateSurvey(val title: String)
 
 @Serializable
 object Survey
+
+
+
 
 @Composable
 fun MainNavGraph(modifier: Modifier = Modifier,navController: NavHostController) {
@@ -31,22 +44,19 @@ fun MainNavGraph(modifier: Modifier = Modifier,navController: NavHostController)
     startDestination = Home,
     ){
         composable<Home> {
-            Box(
-                modifier = modifier.fillMaxSize()
-            ){
-                Text("Home Screen")
-            }
-        }
-        composable<Create> {
-            Box(
-                modifier = modifier.fillMaxSize()
-            ){
-                Text("Create Screen")
-                CreateScreen()
-                FloatingMenuScreen()
+            DynamicTextFieldExample()
 
+        }
+        navigation<CreateNested>( startDestination = Create) {
+            composable<Create> {
+                CreateScreen(navController)
+            }
+            composable<CreateSurvey> { backStackEntry ->
+                val createSurvey : CreateSurvey = backStackEntry.toRoute()
+                CreateSurveyScreen(title = createSurvey.title)
             }
         }
+
         composable<Survey> {
             Box(
                 modifier = modifier.fillMaxSize()
@@ -54,6 +64,7 @@ fun MainNavGraph(modifier: Modifier = Modifier,navController: NavHostController)
                 Text("Surveys Screen")
             }
         }
+
 
     }
 
