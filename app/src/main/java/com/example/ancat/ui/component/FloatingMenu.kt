@@ -24,7 +24,7 @@ fun FloatingMenuScreen(modifier: Modifier) {
         Button(
             onClick = { isMenuExpanded = !isMenuExpanded },
             modifier = Modifier
-                .padding(16.dp)
+
                 .width(64.dp)
                 .height(64.dp),
         ) {

@@ -9,10 +9,14 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
+import androidx.compose.material3.FabPosition
+import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -25,28 +29,31 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.DialogProperties
 import androidx.navigation.NavController
-import androidx.navigation.compose.currentBackStackEntryAsState
-import androidx.navigation.compose.rememberNavController
 import com.example.ancat.R
 import com.example.ancat.core.navigation.CreateSurvey
+import com.example.ancat.ui.component.FloatingMenuScreen
 
 @Composable
 fun CreateScreen(navController: NavController) {
 
-    EmptyScreen(navController =  navController)
+    Scaffold(
+
+
+    ) { innerPadding ->
+        EmptyScreen(modifier = Modifier.padding(innerPadding), navController = navController)
+    }
 
 
 }
 
 @Composable
-fun EmptyScreen(modifier: Modifier = Modifier,navController: NavController) {
+fun EmptyScreen(modifier: Modifier = Modifier, navController: NavController) {
 
     val openDialog = remember { mutableStateOf(false) }
 
     Column(
         modifier = Modifier
-            .fillMaxSize()
-            .padding(16.dp),
+            .fillMaxSize(),
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
@@ -76,10 +83,10 @@ fun EmptyScreen(modifier: Modifier = Modifier,navController: NavController) {
             Text(
                 text = "Anket Oluştur",
                 fontSize = 16.sp,
-                )
+            )
         }
     }
-    SurveyTitleDialog(openDialog = openDialog, navController =  navController)
+    SurveyTitleDialog(openDialog = openDialog, navController = navController)
 
 }
 
@@ -120,3 +127,4 @@ fun SurveyTitleDialog(openDialog: MutableState<Boolean>, navController: NavContr
         )
     }
 }
+

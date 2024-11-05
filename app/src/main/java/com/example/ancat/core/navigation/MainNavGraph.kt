@@ -4,6 +4,8 @@ import DynamicTextFieldExample
 import androidx.compose.foundation.layout.Box
 
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.Scaffold
 
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -39,33 +41,36 @@ object Survey
 @Composable
 fun MainNavGraph(modifier: Modifier = Modifier,navController: NavHostController) {
 
-    NavHost(
-    navController = navController,
-    startDestination = Home,
-    ){
-        composable<Home> {
-            DynamicTextFieldExample()
+    Scaffold  { innerPadding ->
+        NavHost(
+            navController = navController,
+            startDestination = Home,
+            modifier = modifier.padding(innerPadding)
+        ) {
+            composable<Home> {
+                DynamicTextFieldExample()
+
+            }
+            navigation<CreateNested>(startDestination = Create) {
+                composable<Create> {
+                    CreateScreen(navController)
+                }
+                composable<CreateSurvey> { backStackEntry ->
+                    val createSurvey: CreateSurvey = backStackEntry.toRoute()
+                    CreateSurveyScreen(title = createSurvey.title)
+                }
+            }
+
+            composable<Survey> {
+                Box(
+                    modifier = modifier.fillMaxSize()
+                ) {
+                    Text("Surveys Screen")
+                }
+            }
+
 
         }
-        navigation<CreateNested>( startDestination = Create) {
-            composable<Create> {
-                CreateScreen(navController)
-            }
-            composable<CreateSurvey> { backStackEntry ->
-                val createSurvey : CreateSurvey = backStackEntry.toRoute()
-                CreateSurveyScreen(title = createSurvey.title)
-            }
-        }
-
-        composable<Survey> {
-            Box(
-                modifier = modifier.fillMaxSize()
-            ){
-                Text("Surveys Screen")
-            }
-        }
-
-
     }
 
 }
