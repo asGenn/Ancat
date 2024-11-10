@@ -4,14 +4,15 @@ plugins {
     alias(libs.plugins.compose.compiler)
     id ("org.jetbrains.kotlin.plugin.serialization")
 
-    id("kotlin-kapt")
+
     id("com.google.dagger.hilt.android")
+    id("com.google.devtools.ksp")
 
 }
 
 android {
     namespace = "com.example.ancat"
-    compileSdk = 34
+    compileSdk = 35
 
     defaultConfig {
         applicationId = "com.example.ancat"
@@ -23,6 +24,9 @@ android {
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
             useSupportLibrary = true
+        }
+        ksp {
+            arg("room.schemaLocation", "$projectDir/schemas")
         }
     }
 
@@ -82,12 +86,20 @@ dependencies {
     debugImplementation(libs.androidx.ui.test.manifest)
 
     implementation(libs.hilt.android)
-    kapt(libs.hilt.android.compiler)
+    ksp ("com.google.dagger:dagger-compiler:2.48")
+    ksp ("com.google.dagger:hilt-compiler:2.48")
 
     implementation(libs.androidx.datastore.preferences)
 
     // json serialization
     implementation(libs.kotlinx.serialization.json)
+
+    // room database
+   
+    implementation(libs.androidx.room.runtime)
+    ksp(libs.androidx.room.compiler)
+    implementation(libs.androidx.room.ktx)
+
 
 
 }
@@ -97,6 +109,3 @@ java {
     }
 }
 
-kapt {
-    correctErrorTypes = true
-}

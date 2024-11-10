@@ -1,7 +1,9 @@
 package com.example.ancat.ui.views.create_survey_screen
 
 import android.content.Context
+import android.widget.ListView
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -11,8 +13,11 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
@@ -41,12 +46,12 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
-import com.example.ancat.domain.model.Question
-import com.example.ancat.domain.model.SurveyItem
+import com.example.ancat.data.model.Question
+import com.example.ancat.data.model.SurveyItem
 import com.example.ancat.survey.SurveyHelper
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
-import kotlin.coroutines.coroutineContext
+
 
 @Composable
 fun CreateSurveyScreen(modifier: Modifier = Modifier, title: String) {
@@ -60,6 +65,7 @@ fun CreateSurveyScreen(modifier: Modifier = Modifier, title: String) {
 fun SurveyCreator(title: String, viewModel: CreateSurveyViewModel) {
     val showBottomSheet = remember { mutableStateOf(false) }
     val surveyItem = remember { mutableStateListOf<SurveyItem>() }
+    val selectedItem = remember { mutableStateOf<SurveyItem?>(null) }
     val context = LocalContext.current
 
     Scaffold(
@@ -75,82 +81,72 @@ fun SurveyCreator(title: String, viewModel: CreateSurveyViewModel) {
             )
         },
     ) { innerPadding ->
-        Column(
-            modifier = Modifier
-                .padding(innerPadding)
-                .fillMaxSize(),
-            horizontalAlignment = Alignment.CenterHorizontally
+        LazyColumn(
+            modifier = Modifier.padding(innerPadding).fillMaxSize(),
         ) {
-            Text(title, fontSize = 24.sp, fontWeight = FontWeight.Bold)
-            Spacer(modifier = Modifier.height(16.dp))
-
-            surveyItem.forEachIndexed { index, item ->
-                Row (
-                    modifier = Modifier.fillMaxWidth().padding(16.dp),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.SpaceBetween
-                ) {
-                    Column {
-
-                        item.questions.forEach { question ->
-                            when (question) {
-                                is Question.SimpleQuestion -> {
-                                    Text(question.question)
-
-                                }
-
-                                is Question.MultipleChoiceQuestion -> {
-                                    Text("Soru: ${question.question}")
-                                    question.options.forEachIndexed { index, option ->
-                                        Row (
-                                            verticalAlignment = Alignment.CenterVertically,
-
-                                        ){
-                                            RadioButton(
-                                                selected = false,
-                                                onClick = { },
-
-                                            )
-                                            Text(option)
-                                        }
-
-                                    }
-                                }
-                            }
-                        }
-
-
+            itemsIndexed(surveyItem) { index, item ->
+                when (item.type) {
+                    "0" -> {
+                        Type0(
+                            item = item,
+                            selectedItem = selectedItem,
+                            show = showBottomSheet,
+                            viewModel = viewModel
+                        )
                     }
-                    Button(
-                        onClick = {
-                            surveyItem.removeAt(index)
-                        },
+                    "2" -> {
 
-                    ) {
-                        Text("Sil")
                     }
                 }
-                Spacer(modifier = Modifier.height(16.dp))
             }
-            Button(
-                onClick = {
-                    val data = Json.encodeToString(surveyItem.toList())
-                    SurveyHelper().createPdf(context = context, data = data)
-                    println(data)
-
-
-
-                },
-                modifier = Modifier.fillMaxWidth().padding(16.dp)
-            ) {
-                Text("Pdf Oluştur")
-            }
-
-
         }
+
         CustomModalBottomSheet(show = showBottomSheet, viewModel = viewModel)
         DialogHandler(viewModel = viewModel, surveyItem = surveyItem)
+
+        selectedItem.value?.let { item ->
+            AlertDialog(
+                onDismissRequest = { selectedItem.value = null },
+                title = { Text(text = "Seçilen Öğe") },
+                text = { Text("Öğe Başlığı: ${item.title}") },
+                confirmButton = {
+                    Button(onClick = { selectedItem.value = null }) {
+                        Text("Kapat")
+                    }
+                }
+            )
+        }
     }
+}
+
+
+@Composable
+private fun Type0(item: SurveyItem, modifier: Modifier = Modifier, selectedItem: MutableState<SurveyItem?>, show: MutableState<Boolean>, viewModel: CreateSurveyViewModel) {
+    Column(
+        modifier = modifier
+            .padding(16.dp)
+            .background(color = Color.White)
+            .fillMaxWidth()
+            .clickable(onClick = { show.value = true
+                viewModel.showDialog(DialogType.Type1)
+                println("dfsafdsfdsafdsa")
+
+            }) // Show dialog
+    ){
+
+    }
+    item.questions.forEachIndexed { index, question ->
+        when (question) {
+            is Question.SimpleQuestion -> {
+                Text("Question: ${question.question}", fontSize = 20.sp, fontWeight = FontWeight.Bold)
+            }
+            is Question.MultipleChoiceQuestion -> {
+
+            }
+        }
+    }
+
+
 }
 
 

@@ -1,5 +1,6 @@
 package com.example.ancat.ui.views.create_screen
 
+import android.content.Context
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -9,20 +10,21 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
-import androidx.compose.material3.FabPosition
-import androidx.compose.material3.FloatingActionButton
+
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
-import androidx.compose.runtime.collectAsState
+
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -30,24 +32,35 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.DialogProperties
 import androidx.navigation.NavController
 import com.example.ancat.R
+import com.example.ancat.core.helper.JsonHelper
 import com.example.ancat.core.navigation.CreateSurvey
-import com.example.ancat.ui.component.FloatingMenuScreen
+
 
 @Composable
 fun CreateScreen(navController: NavController) {
+    val context = LocalContext.current
+
+
+    LaunchedEffect(Unit) {
+        val directory = context.getExternalFilesDir("JSONFiles")
+        directory?.listFiles()?.forEach {
+            println(it.name)
+        }
+
+    }
 
     Scaffold(
 
 
     ) { innerPadding ->
-        EmptyScreen(modifier = Modifier.padding(innerPadding), navController = navController)
+        EmptyScreen(modifier = Modifier.padding(innerPadding), navController = navController, context = context)
     }
 
 
 }
 
 @Composable
-fun EmptyScreen(modifier: Modifier = Modifier, navController: NavController) {
+fun EmptyScreen(modifier: Modifier = Modifier, navController: NavController, context: Context) {
 
     val openDialog = remember { mutableStateOf(false) }
 
@@ -86,12 +99,12 @@ fun EmptyScreen(modifier: Modifier = Modifier, navController: NavController) {
             )
         }
     }
-    SurveyTitleDialog(openDialog = openDialog, navController = navController)
+    SurveyTitleDialog(openDialog = openDialog, navController = navController, context = context)
 
 }
 
 @Composable
-fun SurveyTitleDialog(openDialog: MutableState<Boolean>, navController: NavController) {
+fun SurveyTitleDialog(openDialog: MutableState<Boolean>, navController: NavController, context: Context) {
     var title by remember { mutableStateOf("") }
 
 
@@ -112,6 +125,11 @@ fun SurveyTitleDialog(openDialog: MutableState<Boolean>, navController: NavContr
 
                         openDialog.value = false
                         navController.navigate(CreateSurvey(title = title))
+                        JsonHelper().saveJsonToFile(
+                            context = context,
+                            fileName = title,
+                            jsonData = "{\"type\":\"survey\",\"title\":\"$title\",\"questions\":[]}"
+                        )
 
                     }
                 ) {

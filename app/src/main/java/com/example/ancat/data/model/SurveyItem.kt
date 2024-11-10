@@ -1,4 +1,4 @@
-package com.example.ancat.domain.model
+package com.example.ancat.data.model
 
 import kotlinx.serialization.Serializable
 
