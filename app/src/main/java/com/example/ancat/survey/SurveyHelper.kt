@@ -2,44 +2,88 @@ package com.example.ancat.survey
 
 import android.content.Context
 import android.graphics.Canvas
+import android.graphics.Color
 import android.graphics.Paint
 import android.graphics.Typeface
 import android.graphics.pdf.PdfDocument
-import android.graphics.pdf.PdfDocument.Page
-import android.os.Environment
-import android.widget.Toast
 import com.example.ancat.data.MultipleChoiceQuest
-import com.example.ancat.data.jsonData
 import org.json.JSONArray
-import java.io.File
-import java.io.FileOutputStream
 
 class SurveyHelper {
 
+    private val documentHelper = DocumentHelper()
+    private val questionsHelper = QuestionsHelper()
+    private val pdfDocument = PdfDocument()
+
+    private var pageNum = 1
+    private var page = documentHelper.createPage(pdfDocument, pageNum)
+    private var canvas: Canvas = page.canvas
+    private var cursorPos = 30f
+
+    private val paint = Paint().apply {
+        textSize = 12f
+        color = Color.BLACK
+    }
+
+    private val paintTitle = Paint().apply {
+        textSize = 16f
+        color = Color.BLACK
+        typeface = Typeface.create(Typeface.DEFAULT, Typeface.BOLD)
+    }
+
     private fun callQuestSize(size: Int): Float = size * 20f
 
-    private fun createPage(pdfDocument: PdfDocument, pageNum: Int): Page {
-        val pageInfo = PdfDocument.PageInfo.Builder(595, 842, pageNum).create()
-        return pdfDocument.startPage(pageInfo)
+    private fun handlePageBreakIfNeeded(size: Int) {
+        if (callQuestSize(size) + cursorPos > 792f) {
+            pdfDocument.finishPage(page)
+            page = documentHelper.createPage(pdfDocument, ++pageNum)
+            canvas = page.canvas
+            cursorPos = questionsHelper.surveyFrame(canvas, paint, 30f)
+        }
+    }
+
+    private fun processTitleCommitFrame(title: String, commits: JSONArray): Float {
+        val commitList = List(commits.length()) {
+            val questionObj = commits.getJSONObject(it)
+            questionObj.getString("question")
+        }
+        val cursorPosition =
+            questionsHelper.surveyTitleCommit(canvas, paint, paintTitle, title, commitList)
+        return questionsHelper.surveyFrame(canvas, paint, cursorPosition)
+    }
+
+    private fun processCommitFrame(title: String, commits: JSONArray): Float {
+        val commitList = List(commits.length()) {
+            val questionObj = commits.getJSONObject(it)
+            questionObj.getString("question")
+        }
+        return questionsHelper.questionCommits(canvas, paint, paintTitle, title, commitList, cursorPos)
+    }
+
+    private fun processRatingQuestions(title: String, questions: JSONArray): Float {
+        val questionList = List(questions.length()) { questions.getString(it) }
+        handlePageBreakIfNeeded(questionList.size)
+        return questionsHelper.ratingQuestion(canvas, paint, title, questionList, cursorPos)
+    }
+
+    private fun processMultipleChoiceQuestions(title: String, questions: JSONArray): Float {
+        var optSize = 0
+        val questionList = List(questions.length()) {
+            val questionObj = questions.getJSONObject(it)
+            val question = questionObj.getString("question")
+            val options = List(questionObj.getJSONArray("options").length()) { index ->
+                optSize++
+                questionObj.getJSONArray("options").getString(index)
+            }
+            MultipleChoiceQuest(question, options)
+        }
+        handlePageBreakIfNeeded(optSize)
+        return questionsHelper.multipleChoiceQuestion(canvas, paint, title, questionList, cursorPos)
     }
 
     fun createPdf(context: Context, data: String) {
-        val pdfDocument = PdfDocument()
-        var pageNum = 1
-        var page = createPage(pdfDocument, pageNum)
-        var canvas: Canvas = page.canvas
-
-        val paint = Paint().apply {
-            textSize = 12f
-        }
-        val paintTitle = Paint().apply {
-            textSize = 16f
-            typeface = Typeface.create(Typeface.DEFAULT, Typeface.BOLD)
-        }
 
         val jsonArray = JSONArray(data)
-        val questionsHelper = QuestionsHelper()
-        var cursorPos = 30f
 
         for (i in 0 until jsonArray.length()) {
             val questionObject = jsonArray.getJSONObject(i)
@@ -48,68 +92,16 @@ class SurveyHelper {
             val questions = questionObject.getJSONArray("questions")
 
             cursorPos = when (type) {
-                "0" -> {
-                    val commitList = List(questions.length()) {val questionObj = questions.getJSONObject(it)
-                        questionObj.getString("question")}
-                    val cursorPosition = questionsHelper.surveyTitleCommit(canvas, paint, paintTitle, title, commitList)
-                    questionsHelper.surveyFrame(canvas, paint, cursorPosition)
-                }
-
-                "1" -> {
-                    val questionList = List(questions.length()) { questions.getString(it) }
-                    if (callQuestSize(questionList.size) + cursorPos > 792f) {
-                        pdfDocument.finishPage(page)
-                        page = createPage(pdfDocument, ++pageNum)
-                        canvas = page.canvas
-                        cursorPos = questionsHelper.surveyFrame(canvas, paint, 30f)
-                    }
-                    questionsHelper.ratingQuestion(canvas, paint, title, questionList, cursorPos)
-                }
-
-                "2" -> {
-                    var optSize = 0
-                    val questionList = List(questions.length()) {
-                        val questionObj = questions.getJSONObject(it)
-                        val question = questionObj.getString("question")
-                        val options = List(questionObj.getJSONArray("options").length()) { index ->
-                            optSize++
-                            questionObj.getJSONArray("options").getString(index)
-                        }
-                        MultipleChoiceQuest(question, options)
-                    }
-                    if (callQuestSize(optSize) + cursorPos > 812f) {
-                        pdfDocument.finishPage(page)
-                        page = createPage(pdfDocument, ++pageNum)
-                        canvas = page.canvas
-                        cursorPos = 30f
-                    }
-                    questionsHelper.multipleChoiceQuestion(canvas, paint, title, questionList, cursorPos)
-                }
-
+                "_" -> processTitleCommitFrame(title, questions)
+                "0" -> processCommitFrame(title, questions)
+                "1" -> processRatingQuestions(title, questions)
+                "2" -> processMultipleChoiceQuestions(title, questions)
                 else -> cursorPos
             }
         }
 
         pdfDocument.finishPage(page)
-        savePdf(context, pdfDocument, "anket")
+        documentHelper.savePdf(context, pdfDocument, "anket")
     }
 
-    private fun savePdf(context: Context, pdfDocument: PdfDocument, pdfName: String) {
-        val filePath = File(
-            Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS),
-            "$pdfName.pdf"
-        )
-
-        try {
-            FileOutputStream(filePath).use { outputStream ->
-                pdfDocument.writeTo(outputStream)
-            }
-            Toast.makeText(context, "PDF oluşturuldu: ${filePath.absolutePath}", Toast.LENGTH_SHORT).show()
-        } catch (e: Exception) {
-            e.printStackTrace()
-            Toast.makeText(context, "Hata: ${e.message}", Toast.LENGTH_SHORT).show()
-        } finally {
-            pdfDocument.close()
-        }
-    }
 }
