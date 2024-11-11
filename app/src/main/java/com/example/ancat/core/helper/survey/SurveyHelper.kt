@@ -7,13 +7,21 @@ import android.graphics.Paint
 import android.graphics.Typeface
 import android.graphics.pdf.PdfDocument
 import com.example.ancat.data.MultipleChoiceQuest
+import com.example.ancat.data.jsonData
 import org.json.JSONArray
+import javax.inject.Inject
+import javax.inject.Singleton
 
-class SurveyHelper {
+@Singleton
+class SurveyHelper @Inject constructor(
+    private val documentHelper: DocumentHelper,
+    private val questionsHelper: QuestionsHelper,
+    private val pdfDocument: PdfDocument
+) {
 
-    private val documentHelper = DocumentHelper()
-    private val questionsHelper = QuestionsHelper()
-    private val pdfDocument = PdfDocument()
+//    private val documentHelper = DocumentHelper()
+//    private val questionsHelper = QuestionsHelper()
+//    private val pdfDocument = PdfDocument()
 
     private var pageNum = 1
     private var page = documentHelper.createPage(pdfDocument, pageNum)
@@ -43,9 +51,8 @@ class SurveyHelper {
     }
 
     private fun processTitleCommitFrame(title: String, commits: JSONArray): Float {
-        val commitList = List(commits.length()) {
-            val questionObj = commits.getJSONObject(it)
-            questionObj.getString("question")
+        val commitList = List<String>(commits.length()) {
+            commits.getString(it)
         }
         val cursorPosition =
             questionsHelper.surveyTitleCommit(canvas, paint, paintTitle, title, commitList)
@@ -53,9 +60,8 @@ class SurveyHelper {
     }
 
     private fun processCommitFrame(title: String, commits: JSONArray): Float {
-        val commitList = List(commits.length()) {
-            val questionObj = commits.getJSONObject(it)
-            questionObj.getString("question")
+        val commitList = List<String>(commits.length()) {
+            commits.getString(it)
         }
         return questionsHelper.questionCommits(canvas, paint, paintTitle, title, commitList, cursorPos)
     }
@@ -81,8 +87,9 @@ class SurveyHelper {
         return questionsHelper.multipleChoiceQuestion(canvas, paint, title, questionList, cursorPos)
     }
 
-    fun createPdf(context: Context, data: String) {
+    fun createPdf(context: Context) {
 
+        val data = jsonData
         val jsonArray = JSONArray(data)
 
         for (i in 0 until jsonArray.length()) {
