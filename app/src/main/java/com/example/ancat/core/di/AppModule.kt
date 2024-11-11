@@ -23,7 +23,7 @@ object AppModule {
         return Room.databaseBuilder(
             appContext,
             AppDatabase::class.java,
-            "app_database"
+            "json_files"
         ).build()
 
     }

@@ -8,6 +8,7 @@ plugins {
     id("com.google.dagger.hilt.android")
     id("com.google.devtools.ksp")
 
+
 }
 
 android {
@@ -86,10 +87,11 @@ dependencies {
     debugImplementation(libs.androidx.ui.test.manifest)
 
     implementation(libs.hilt.android)
-    ksp ("com.google.dagger:dagger-compiler:2.48")
-    ksp ("com.google.dagger:hilt-compiler:2.48")
+    ksp(libs.hilt.android.compiler)
+    implementation(libs.androidx.lifecycle.viewmodel.compose)
+    implementation(libs.androidx.hilt.navigation.compose)
 
-    implementation(libs.androidx.datastore.preferences)
+
 
     // json serialization
     implementation(libs.kotlinx.serialization.json)
