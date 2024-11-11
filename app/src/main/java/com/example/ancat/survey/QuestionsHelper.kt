@@ -46,6 +46,29 @@ class QuestionsHelper {
         return cursorPos + 15f
     }
 
+    fun questionCommits(
+        canvas: Canvas,
+        paint: Paint,
+        paintTitle: Paint,
+        title: String,
+        commits: List<String>,
+        cursorPosition: Float,
+    ): Float {
+
+        var cursorPos = cursorPosition
+
+        val textTitleX = (595f - paintTitle.measureText(title)) / 2
+        canvas.drawText(title, textTitleX, cursorPos, paintTitle)
+        cursorPos += 15f
+
+        commits.forEach { commit ->
+            val textCommitX = 30f //(595f - paint.measureText(commit)) / 2
+            canvas.drawText(commit, textCommitX, cursorPos, paint)
+            cursorPos += 20f
+        }
+        return cursorPos + 15f
+    }
+
     fun ratingQuestion(
         canvas: Canvas,
         paint: Paint,
