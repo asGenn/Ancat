@@ -2,6 +2,7 @@ package com.example.ancat.ui.views.create_screen
 
 import android.content.Context
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -140,7 +141,11 @@ fun JsonFileListScreen(
                 ListTile(
                     title = item.title,
                     subtitle = "Son Düzenleme: " + TimeConverter().convertTime(item.lastModified),
-                    modifier = Modifier.padding(8.dp),
+                    modifier = Modifier.padding(8.dp).clickable(
+                        onClick = {
+                            navController.navigate(CreateSurvey(item.title))
+                        }
+                    ),
                     trailingIcon = Icons.Default.Delete,
                     trailingIconButton = {
 

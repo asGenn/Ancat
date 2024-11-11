@@ -1,4 +1,4 @@
-package com.example.ancat.survey
+package com.example.ancat.core.helper.survey
 
 import android.graphics.Canvas
 import android.graphics.Paint

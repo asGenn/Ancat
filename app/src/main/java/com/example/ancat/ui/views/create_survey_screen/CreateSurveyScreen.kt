@@ -46,16 +46,17 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
+import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.ancat.data.model.Question
 import com.example.ancat.data.model.SurveyItem
-import com.example.ancat.survey.SurveyHelper
+import com.example.ancat.core.helper.survey.SurveyHelper
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 
 
 @Composable
 fun CreateSurveyScreen(modifier: Modifier = Modifier, title: String) {
-    val viewModel = CreateSurveyViewModel()
+    val viewModel : CreateSurveyViewModel = hiltViewModel()
     SurveyCreator(title = title, viewModel = viewModel)
 
 }
