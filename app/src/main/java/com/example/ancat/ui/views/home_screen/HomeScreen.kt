@@ -25,15 +25,5 @@ fun DynamicTextFieldExample() {
         modifier = Modifier.fillMaxSize(),
         verticalArrangement = Arrangement.Center
     ) {
-
-        Button(
-            onClick = {
-                viewModel.createSurvey(context)
-
-            }
-        ) {
-
-            Text("Create Survey")
-        }
     }
 }

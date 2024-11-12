@@ -29,6 +29,7 @@ import androidx.compose.ui.unit.dp
 import com.example.ancat.core.helper.JsonHelper
 import com.example.ancat.data.model.SurveyItem
 import com.example.ancat.domain.entity.JsonFilesInfoEntity
+import com.example.ancat.ui.views.create_survey_screen.CreateSurveyViewModel
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 
@@ -38,7 +39,8 @@ fun ExpandableFloatingActionButton(
     context: Context,
     jsonFilesInfoEntity: JsonFilesInfoEntity,
     surveyItem: List<SurveyItem>,
-    showBottomSheet: MutableState<Boolean>
+    showBottomSheet: MutableState<Boolean>,
+    viewModel: CreateSurveyViewModel
 ) {
     var expanded by remember { mutableStateOf(false) }
 
@@ -94,7 +96,7 @@ fun ExpandableFloatingActionButton(
                 // PDF Oluştur
                 ExtendedFloatingActionButton(
                     onClick = {
-                        /* TODO: Burada pdf oluşturulacak */
+                        viewModel.createSurvey(context, jsonFilesInfoEntity)
                     },
                     icon = { Icon(Icons.Default.Build, contentDescription = "Create") },
                     text = { Text("Pdf Oluştur") }
