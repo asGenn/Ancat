@@ -42,7 +42,7 @@ import com.example.ancat.core.helper.JsonHelper
 import com.example.ancat.core.helper.TimeConverter
 import com.example.ancat.core.navigation.CreateSurvey
 import com.example.ancat.domain.entity.JsonFilesInfoEntity
-import com.example.ancat.ui.component.ListTile
+import com.example.ancat.ui.component.list.ListTile
 import kotlinx.coroutines.launch
 import java.util.UUID
 
@@ -268,7 +268,7 @@ fun SurveyTitleDialog(
                                     val date = TimeConverter().convertTime(it.lastModified)
 
 
-                                    println(it.fileName + " " + date.toString())
+                                    println(it.fileName + " " + date)
                                     println(it.id)
                                     println(it.filePath)
 

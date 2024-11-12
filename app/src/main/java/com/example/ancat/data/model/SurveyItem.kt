@@ -18,6 +18,10 @@ data class SurveyItem(
 
 @Serializable
 sealed class Question {
+
+    @Serializable
+    data object SurveyTitle : Question()
+
     @Serializable
     data class SimpleQuestion(val question: String) : Question()
 

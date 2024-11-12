@@ -70,6 +70,7 @@ fun SurveyCreator(title: String, viewModel: CreateSurveyViewModel) {
     val context = LocalContext.current
 
     Scaffold(
+
         floatingActionButton = {
             FloatingActionButton(
                 onClick = { showBottomSheet.value = true },
@@ -144,6 +145,8 @@ private fun Type0(item: SurveyItem, modifier: Modifier = Modifier, selectedItem:
             is Question.MultipleChoiceQuestion -> {
 
             }
+
+            Question.SurveyTitle -> TODO()
         }
     }
 

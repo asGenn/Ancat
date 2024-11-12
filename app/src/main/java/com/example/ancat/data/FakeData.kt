@@ -7,6 +7,15 @@ package com.example.ancat.data
 
 val jsonData = """
             [
+            {
+                    "type": "_",
+                    "title": "Anket Başlığı",
+                    "questions": [
+                        "Açıklama 1",
+                        "Açıklama 2",
+                        "Açıklama 3"
+                    ]
+                },
                 {
                     "type": "0",
                     "title": "Anket Başlığı",

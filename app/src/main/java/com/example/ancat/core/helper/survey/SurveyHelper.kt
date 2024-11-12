@@ -19,9 +19,6 @@ class SurveyHelper @Inject constructor(
     private val pdfDocument: PdfDocument
 ) {
 
-//    private val documentHelper = DocumentHelper()
-//    private val questionsHelper = QuestionsHelper()
-//    private val pdfDocument = PdfDocument()
 
     private var pageNum = 1
     private var page = documentHelper.createPage(pdfDocument, pageNum)

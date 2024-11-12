@@ -1,4 +1,4 @@
-package com.example.ancat.ui.component
+package com.example.ancat.ui.component.list
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
@@ -25,6 +25,7 @@ fun ListTile(
     trailingIconButton: () -> Unit = {},
     modifier: Modifier = Modifier
 ) {
+
     Row(
         modifier = modifier
             .fillMaxWidth()
