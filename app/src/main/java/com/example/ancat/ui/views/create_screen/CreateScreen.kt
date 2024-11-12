@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Delete
@@ -136,10 +137,14 @@ fun JsonFileListScreen(
     Column {
         Text(
             text = "Mevcut Anketler",
-            fontSize = 18.sp,
-            fontWeight = FontWeight.Bold
+            modifier = modifier
+                .padding(vertical = 8.dp)
+                .fillMaxWidth()
+                .wrapContentWidth(Alignment.CenterHorizontally),
+            fontSize = 24.sp,
+            fontWeight = FontWeight.Black
         )
-        Spacer(modifier = Modifier.height(8.dp))
+
         LazyColumn {
             items(jsonFilesList.size) { index ->
                 val item = jsonFilesList[index]
@@ -303,13 +308,14 @@ fun SurveyTitleDialog(
                                 fileName = uuid,
                                 jsonData = Json.encodeToString(surveyItemList.toList())
                             )
-                            val id = viewModel.saveJsonFileToDB(fileName = uuid, filePath = path, title = title)
-                            navController.navigate(CreateSurvey(title = title, id =id.toInt() ))
+                            val id = viewModel.saveJsonFileToDB(
+                                fileName = uuid,
+                                filePath = path,
+                                title = title
+                            )
+                            navController.navigate(CreateSurvey(title = title, id = id.toInt()))
 
                         }
-
-
-
 
 
                     }

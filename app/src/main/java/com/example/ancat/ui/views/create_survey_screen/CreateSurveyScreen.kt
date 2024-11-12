@@ -1,5 +1,6 @@
 package com.example.ancat.ui.views.create_survey_screen
 
+import android.content.Context
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -17,6 +18,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Done
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
@@ -56,6 +58,7 @@ import com.example.ancat.core.helper.survey.SurveyHelper
 import com.example.ancat.data.model.Question
 import com.example.ancat.data.model.SurveyItem
 import com.example.ancat.domain.entity.JsonFilesInfoEntity
+import com.example.ancat.ui.component.ExpandableFloatingActionButton
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 
@@ -93,10 +96,7 @@ fun CreateSurveyScreen(modifier: Modifier = Modifier, title: String, id: Int?) {
             jsonFilesInfoEntity = jsonFilesInfoEntity.value!!
         )
     }
-
-
 }
-
 
 @Composable
 fun SurveyCreator(
@@ -116,29 +116,12 @@ fun SurveyCreator(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.Absolute.SpaceEvenly
             ) {
-                ExtendedFloatingActionButton(
-                    onClick = {
-                        JsonHelper().openFileAndWriteNewContent(
-                            fileName = jsonFilesInfoEntity.fileName,
-                            newContent = Json.encodeToString(surveyItem.toList()),
-                            context = context
-                        )
-                        viewModel.createSurvey(context = context)
-                    },
-                    content = {
-                        Text("Kaydet ve Pdf Oluştur")
-                        Icon(Icons.Default.Done, contentDescription = "Add")
-                    }
-                )
-                ExtendedFloatingActionButton(
-                    onClick = {
-                        showBottomSheet.value = true
-                    },
-                    content = {
-                        Text("Soru Ekle")
-                        Icon(Icons.Default.Add, contentDescription = "Add")
-
-                    }
+                ExpandableFloatingActionButton(
+                    modifier = Modifier,
+                    context,
+                    jsonFilesInfoEntity,
+                    surveyItem,
+                    showBottomSheet
                 )
             }
         },
@@ -286,7 +269,6 @@ private fun RatingType(modifier: Modifier = Modifier, surveyItem: MutableList<Su
         )
     }
 }
-
 
 
 @Composable
