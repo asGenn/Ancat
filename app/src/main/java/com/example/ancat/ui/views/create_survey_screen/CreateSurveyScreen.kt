@@ -11,6 +11,8 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material.icons.Icons
@@ -18,6 +20,7 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Done
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
+import androidx.compose.material3.Divider
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExtendedFloatingActionButton
 import androidx.compose.material3.FloatingActionButton
@@ -64,14 +67,18 @@ fun CreateSurveyScreen(modifier: Modifier = Modifier, title: String, id: Int?) {
 
     val jsonFilesInfoEntity = remember { mutableStateOf<JsonFilesInfoEntity?>(null) }
 
-
     LaunchedEffect(Unit) {
         if (id != null) {
             val jsonFilesInfo = viewModel.getJsonFilesInfoById(id)
 
             jsonFilesInfoEntity.value = jsonFilesInfo
 
-            Json.decodeFromString<List<SurveyItem>>(JsonHelper().readJsonFile(context = context, fileName = jsonFilesInfo.fileName)).forEach {
+            Json.decodeFromString<List<SurveyItem>>(
+                JsonHelper().readJsonFile(
+                    context = context,
+                    fileName = jsonFilesInfo.fileName
+                )
+            ).forEach {
                 surveyItem.add(it)
             }
 
@@ -79,29 +86,36 @@ fun CreateSurveyScreen(modifier: Modifier = Modifier, title: String, id: Int?) {
         }
     }
     if (jsonFilesInfoEntity.value != null) {
-        SurveyCreator(title = title, viewModel = viewModel,surveyItem, jsonFilesInfoEntity = jsonFilesInfoEntity.value!!)
+        SurveyCreator(
+            title = title,
+            viewModel = viewModel,
+            surveyItem,
+            jsonFilesInfoEntity = jsonFilesInfoEntity.value!!
+        )
     }
-
-
 
 
 }
 
 
 @Composable
-fun SurveyCreator(title: String, viewModel: CreateSurveyViewModel,surveyItem: MutableList<SurveyItem>,jsonFilesInfoEntity: JsonFilesInfoEntity) {
+fun SurveyCreator(
+    title: String,
+    viewModel: CreateSurveyViewModel,
+    surveyItem: MutableList<SurveyItem>,
+    jsonFilesInfoEntity: JsonFilesInfoEntity
+) {
     val showBottomSheet = remember { mutableStateOf(false) }
 
     val selectedItem = remember { mutableStateOf<SurveyItem?>(null) }
     val context = LocalContext.current
 
     Scaffold(
-
         floatingActionButton = {
-            Row (
+            Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.Absolute.SpaceEvenly
-            ){
+            ) {
                 ExtendedFloatingActionButton(
                     onClick = {
                         JsonHelper().openFileAndWriteNewContent(
@@ -114,13 +128,11 @@ fun SurveyCreator(title: String, viewModel: CreateSurveyViewModel,surveyItem: Mu
                     content = {
                         Text("Kaydet ve Pdf Oluştur")
                         Icon(Icons.Default.Done, contentDescription = "Add")
-
                     }
                 )
                 ExtendedFloatingActionButton(
                     onClick = {
                         showBottomSheet.value = true
-
                     },
                     content = {
                         Text("Soru Ekle")
@@ -142,22 +154,41 @@ fun SurveyCreator(title: String, viewModel: CreateSurveyViewModel,surveyItem: Mu
                         Box(
                             modifier = Modifier
                                 .padding(8.dp)
-                                .fillMaxWidth(),
-                            contentAlignment = Alignment.Center
-
-                        ){
+                                .fillMaxWidth()
+                        ) {
                             Column {
-                                Text(item.title, fontSize = 24.sp, fontWeight = FontWeight.Bold, modifier = Modifier.padding(16.dp))
+                                Text(
+                                    item.title,
+                                    fontSize = 24.sp,
+                                    fontWeight = FontWeight.Bold,
+                                    modifier = Modifier
+                                        .padding(top = 8.dp, bottom = 3.dp)
+                                        .fillMaxWidth()
+                                        .wrapContentWidth(Alignment.CenterHorizontally)
+                                )
                                 surveyItem.forEach { it ->
                                     it.questions.forEachIndexed { index, question ->
                                         if (question is Question.SurveyTitle) {
                                             question.description.forEach {
-                                                Text(it, fontSize = 20.sp, fontWeight = FontWeight.Bold, modifier = Modifier.padding(8.dp))
+                                                Text(
+                                                    it,
+                                                    fontSize = 16.sp,
+                                                    fontWeight = FontWeight.Normal,
+                                                    modifier = Modifier.padding(
+                                                        horizontal = 12.dp
+                                                    )
+                                                )
                                             }
-                                    }
+                                        }
                                     }
                                 }
-
+                                Divider(
+                                    color = Color.Gray,
+                                    thickness = 2.dp,
+                                    modifier = Modifier
+                                        .fillMaxWidth()  // Çizginin tüm genişliği kaplamasını sağlar
+                                        .padding(start = 5.dp, top = 8.dp, end = 5.dp)
+                                )
                             }
 
 
@@ -176,15 +207,12 @@ fun SurveyCreator(title: String, viewModel: CreateSurveyViewModel,surveyItem: Mu
 
                     "1" -> {
                         // RatingType,
-                        RatingType(surveyItem)
-
+                        RatingType(surveyItem = surveyItem)
                     }
 
                     "2" -> {
                         // MultipleChoiceType,
                         MultipleChoiceQuestion(surveyItem = surveyItem)
-
-
                     }
                 }
             }
@@ -209,47 +237,80 @@ fun SurveyCreator(title: String, viewModel: CreateSurveyViewModel,surveyItem: Mu
 }
 
 @Composable
-private fun RatingType(surveyItem: MutableList<SurveyItem>) {
-    Column {
+private fun RatingType(modifier: Modifier = Modifier, surveyItem: MutableList<SurveyItem>) {
+    Column(
+        modifier = modifier
+            .padding(horizontal = 16.dp, vertical = 8.dp)
+            .fillMaxWidth()
+    ) {
         surveyItem.forEach { it ->
             it.questions.forEachIndexed { index, question ->
                 if (question is Question.RatingQuestion) {
+                    // Soru Başlığı
                     Text(
-                        "Question: ${question.question}",
-                        fontSize = 20.sp,
-                        fontWeight = FontWeight.Bold
+                        text = question.question,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(top = 8.dp)
+                            .wrapContentWidth(Alignment.CenterHorizontally),
+                        fontSize = 16.sp,
+                        fontWeight = FontWeight.Black,
+                        color = Color.White
                     )
-                    Row {
-                        for (i in 1..5) {
-                            RadioButton(selected = false, onClick = { /*TODO*/ })
-                        }
 
+                    // Derecelendirme Seçenekleri
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth(),
+                        horizontalArrangement = Arrangement.Center
+                    ) {
+                        for (i in 1..5) {
+                            RadioButton(
+                                selected = false,
+                                onClick = { /*TODO*/ },
+                                modifier = Modifier.padding(horizontal = 4.dp)
+                            )
+                        }
                     }
                 }
             }
         }
+
+        // Ayırıcı Çizgi
+        Divider(
+            color = Color.Gray,
+            thickness = 2.dp,
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(vertical = 12.dp)
+        )
     }
 }
 
 
+
 @Composable
-fun MultipleChoiceQuestion(modifier: Modifier = Modifier,surveyItem: MutableList<SurveyItem>) {
+fun MultipleChoiceQuestion(modifier: Modifier = Modifier, surveyItem: MutableList<SurveyItem>) {
     Column(
         modifier = modifier
-            .padding(16.dp)
+            .padding(start = 12.dp, top = 8.dp, end = 12.dp, bottom = 0.dp)
             .fillMaxWidth()
     ) {
         surveyItem.forEach { item ->
-            item.questions.forEachIndexed { index, question ->
+            item.questions.forEachIndexed { _, question ->
                 if (question is Question.MultipleChoiceQuestion) {
                     Text(
-                        "Question: ${question.question}",
-                        fontSize = 20.sp,
-                        fontWeight = FontWeight.Bold
-                    )
-                    question.options.forEachIndexed { index2, option ->
+                        question.question,
+                        modifier = modifier
+                            .fillMaxWidth()
+                            .wrapContentWidth(Alignment.CenterHorizontally),
+                        fontSize = 16.sp,
+                        fontWeight = FontWeight.Black,
+
+                        )
+                    question.options.forEachIndexed { index, option ->
                         Text(
-                            "Option ${index2 + 1}: $option",
+                            "${index + 1}. (    ) $option",
                             fontSize = 16.sp,
                             fontWeight = FontWeight.Normal
                         )
@@ -257,9 +318,17 @@ fun MultipleChoiceQuestion(modifier: Modifier = Modifier,surveyItem: MutableList
                 }
             }
         }
+        Divider(
+            color = Color.Gray,
+            thickness = 2.dp,
+            modifier = Modifier
+                .fillMaxWidth()  // Çizginin tüm genişliği kaplamasını sağlar
+                .padding(start = 5.dp, top = 8.dp, end = 5.dp)
+        )
 
     }
 }
+
 @Composable
 private fun DescriptionType(
     item: SurveyItem,
@@ -276,18 +345,19 @@ private fun DescriptionType(
             .clickable(onClick = {
                 show.value = true
                 viewModel.showDialog(DialogType.DescriptionType)
-
-
             }) // Show dialog
     ) {
 
     }
-    item.questions.forEachIndexed { index, question ->
+    item.questions.forEachIndexed { _, question ->
         if (question is Question.SimpleQuestion) {
             Text(
-                "Question: ${question.question}",
-                fontSize = 20.sp,
-                fontWeight = FontWeight.Bold
+                question.question,
+                modifier = modifier
+                    .fillMaxWidth()
+                    .wrapContentWidth(Alignment.CenterHorizontally),
+                fontSize = 16.sp,
+                fontWeight = FontWeight.Black,
             )
         }
     }
@@ -410,6 +480,7 @@ fun SimpleQuestionDialog(
     }
 
 }
+
 @Composable
 fun RatingQuestionDialog(
     modifier: Modifier = Modifier,
@@ -459,9 +530,9 @@ fun RatingQuestionDialog(
                         questions = listOf(
                             Question.RatingQuestion(
                                 question = text
-                        ),
+                            ),
 
-                        )
+                            )
                     )
                     surveyItem.add(survey)
                     onDismissRequest()
@@ -564,6 +635,7 @@ fun DialogHandler(
 
 
             }
+
             is DialogType.SurveyTitle -> {
                 SimpleQuestionDialog(
                     modifier = modifier,
@@ -581,6 +653,7 @@ fun DialogHandler(
                     surveyItem = surveyItem
                 )
             }
+
             DialogType.RatingType -> {
                 RatingQuestionDialog(
                     modifier = modifier,
