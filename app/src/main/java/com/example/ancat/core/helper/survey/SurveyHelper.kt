@@ -8,6 +8,7 @@ import android.graphics.Typeface
 import android.graphics.pdf.PdfDocument
 import com.example.ancat.data.MultipleChoiceQuest
 import com.example.ancat.data.jsonData
+import com.example.ancat.domain.entity.JsonFilesInfoEntity
 import org.json.JSONArray
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -18,8 +19,6 @@ class SurveyHelper @Inject constructor(
     private val questionsHelper: QuestionsHelper,
     private val pdfDocument: PdfDocument
 ) {
-
-
     private var pageNum = 1
     private var page = documentHelper.createPage(pdfDocument, pageNum)
     private var canvas: Canvas = page.canvas
@@ -91,10 +90,10 @@ class SurveyHelper @Inject constructor(
         return questionsHelper.multipleChoiceQuestion(canvas, paint, title, questionList, cursorPos)
     }
 
-    fun createPdf(context: Context) {
-
-        val data = jsonData
-        val jsonArray = JSONArray(data)
+    fun createPdf(context: Context, jsonFilesInfoEntity: JsonFilesInfoEntity) {
+        val jsonData = documentHelper.readJsonFromFilePath(jsonFilesInfoEntity.filePath)
+        val jsonArray = JSONArray(jsonData)
+        jsonFilesInfoEntity.filePath
 
         for (i in 0 until jsonArray.length()) {
             val questionObject = jsonArray.getJSONObject(i)

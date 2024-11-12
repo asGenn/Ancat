@@ -105,10 +105,11 @@ fun SurveyCreator(
             ) {
                 ExpandableFloatingActionButton(
                     modifier = Modifier,
-                    context,
-                    jsonFilesInfoEntity,
-                    surveyItem,
-                    showBottomSheet
+                    context = context,
+                    jsonFilesInfoEntity = jsonFilesInfoEntity,
+                    surveyItem = surveyItem,
+                    showBottomSheet = showBottomSheet,
+                    viewModel = viewModel
                 )
             }
         },

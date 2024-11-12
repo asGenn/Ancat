@@ -36,7 +36,8 @@ class CreateSurveyViewModel @Inject constructor(private val jsonFilesRepository:
     suspend fun getJsonFilesInfoById(id: Int): JsonFilesInfoEntity {
         return jsonFilesRepository.findById(id)
     }
-    fun createSurvey(context: Context) {
-        surveyHelper.createPdf(context = context)
+
+    fun createSurvey(context: Context, jsonFilesInfoEntity: JsonFilesInfoEntity) {
+        surveyHelper.createPdf(context = context, jsonFilesInfoEntity)
     }
 }

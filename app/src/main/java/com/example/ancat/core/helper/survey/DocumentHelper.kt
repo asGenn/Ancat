@@ -10,6 +10,16 @@ import java.io.FileOutputStream
 
 class DocumentHelper {
 
+    fun readJsonFromFilePath(filePath: String): String? {
+        return try {
+            val file = File(filePath)
+            file.readText()
+        } catch (e: Exception) {
+            e.printStackTrace()
+            null
+        }
+    }
+
     fun createPage(pdfDocument: PdfDocument, pageNum: Int): Page {
         val pageInfo = PdfDocument.PageInfo.Builder(595, 842, pageNum).create()
         return pdfDocument.startPage(pageInfo)
