@@ -62,13 +62,10 @@ fun CreateScreen(navController: NavController) {
 
     val context = LocalContext.current
 
-
     LaunchedEffect(Unit) {
         val files = viewModel.getJsonFiles()
         jsonFilesList.addAll(files)
     }
-
-
 
     Scaffold(
         floatingActionButton = {
@@ -77,8 +74,7 @@ fun CreateScreen(navController: NavController) {
                     onClick = {
                         openDialog.value = true
                     },
-
-                    ) {
+                ) {
                     Text(
                         text = "Anket Oluştur",
                         fontSize = 22.sp,

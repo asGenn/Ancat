@@ -73,7 +73,6 @@ fun CreateSurveyScreen(modifier: Modifier = Modifier, title: String, id: Int?) {
     LaunchedEffect(Unit) {
         if (id != null) {
             val jsonFilesInfo = viewModel.getJsonFilesInfoById(id)
-
             jsonFilesInfoEntity.value = jsonFilesInfo
 
             Json.decodeFromString<List<SurveyItem>>(
@@ -131,7 +130,7 @@ fun SurveyCreator(
                 .padding(innerPadding)
                 .fillMaxSize(),
         ) {
-            itemsIndexed(surveyItem) { index, item ->
+            itemsIndexed(surveyItem) { _, item ->
                 when (item.type) {
                     "_" -> {
                         Box(
@@ -149,22 +148,21 @@ fun SurveyCreator(
                                         .fillMaxWidth()
                                         .wrapContentWidth(Alignment.CenterHorizontally)
                                 )
-                                surveyItem.forEach { it ->
-                                    it.questions.forEachIndexed { index, question ->
-                                        if (question is Question.SurveyTitle) {
-                                            question.description.forEach {
-                                                Text(
-                                                    it,
-                                                    fontSize = 16.sp,
-                                                    fontWeight = FontWeight.Normal,
-                                                    modifier = Modifier.padding(
-                                                        horizontal = 12.dp
-                                                    )
+                                item.questions.forEachIndexed { _, question ->
+                                    if (question is Question.SurveyTitle) {
+                                        question.description.forEach {
+                                            Text(
+                                                it,
+                                                fontSize = 16.sp,
+                                                fontWeight = FontWeight.Normal,
+                                                modifier = Modifier.padding(
+                                                    horizontal = 12.dp
                                                 )
-                                            }
+                                            )
                                         }
                                     }
                                 }
+
                                 Divider(
                                     color = Color.Gray,
                                     thickness = 2.dp,
@@ -173,10 +171,7 @@ fun SurveyCreator(
                                         .padding(start = 5.dp, top = 8.dp, end = 5.dp)
                                 )
                             }
-
-
                         }
-
                     }
 
                     "0" -> {
@@ -190,12 +185,12 @@ fun SurveyCreator(
 
                     "1" -> {
                         // RatingType,
-                        RatingType(surveyItem = surveyItem)
+                        RatingType(item = item)
                     }
 
                     "2" -> {
                         // MultipleChoiceType,
-                        MultipleChoiceQuestion(surveyItem = surveyItem)
+                        MultipleChoiceQuestion(item = item)
                     }
                 }
             }
@@ -220,43 +215,43 @@ fun SurveyCreator(
 }
 
 @Composable
-private fun RatingType(modifier: Modifier = Modifier, surveyItem: MutableList<SurveyItem>) {
+private fun RatingType(modifier: Modifier = Modifier, item: SurveyItem) {
     Column(
         modifier = modifier
             .padding(horizontal = 16.dp, vertical = 8.dp)
             .fillMaxWidth()
     ) {
-        surveyItem.forEach { it ->
-            it.questions.forEachIndexed { index, question ->
-                if (question is Question.RatingQuestion) {
-                    // Soru Başlığı
-                    Text(
-                        text = question.question,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(top = 8.dp)
-                            .wrapContentWidth(Alignment.CenterHorizontally),
-                        fontSize = 16.sp,
-                        fontWeight = FontWeight.Black,
-                        color = Color.White
-                    )
 
-                    // Derecelendirme Seçenekleri
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth(),
-                        horizontalArrangement = Arrangement.Center
-                    ) {
-                        for (i in 1..5) {
-                            RadioButton(
-                                selected = false,
-                                onClick = { /*TODO*/ },
-                                modifier = Modifier.padding(horizontal = 4.dp)
-                            )
-                        }
+        item.questions.forEachIndexed { index, question ->
+            if (question is Question.RatingQuestion) {
+                // Soru Başlığı
+                Text(
+                    text = question.question,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(top = 8.dp)
+                        .wrapContentWidth(Alignment.CenterHorizontally),
+                    fontSize = 16.sp,
+                    fontWeight = FontWeight.Black,
+                    color = Color.White
+                )
+
+                // Derecelendirme Seçenekleri
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth(),
+                    horizontalArrangement = Arrangement.Center
+                ) {
+                    for (i in 1..5) {
+                        RadioButton(
+                            selected = false,
+                            onClick = { /*TODO*/ },
+                            modifier = Modifier.padding(horizontal = 4.dp)
+                        )
                     }
                 }
             }
+
         }
 
         // Ayırıcı Çizgi
@@ -272,33 +267,32 @@ private fun RatingType(modifier: Modifier = Modifier, surveyItem: MutableList<Su
 
 
 @Composable
-fun MultipleChoiceQuestion(modifier: Modifier = Modifier, surveyItem: MutableList<SurveyItem>) {
+fun MultipleChoiceQuestion(modifier: Modifier = Modifier, item: SurveyItem) {
     Column(
         modifier = modifier
             .padding(start = 12.dp, top = 8.dp, end = 12.dp, bottom = 0.dp)
             .fillMaxWidth()
     ) {
-        surveyItem.forEach { item ->
-            item.questions.forEachIndexed { _, question ->
-                if (question is Question.MultipleChoiceQuestion) {
-                    Text(
-                        question.question,
-                        modifier = modifier
-                            .fillMaxWidth()
-                            .wrapContentWidth(Alignment.CenterHorizontally),
-                        fontSize = 16.sp,
-                        fontWeight = FontWeight.Black,
+        item.questions.forEachIndexed { _, question ->
+            if (question is Question.MultipleChoiceQuestion) {
+                Text(
+                    question.question,
+                    modifier = modifier
+                        .fillMaxWidth()
+                        .wrapContentWidth(Alignment.CenterHorizontally),
+                    fontSize = 16.sp,
+                    fontWeight = FontWeight.Black,
 
-                        )
-                    question.options.forEachIndexed { index, option ->
-                        Text(
-                            "${index + 1}. (    ) $option",
-                            fontSize = 16.sp,
-                            fontWeight = FontWeight.Normal
-                        )
-                    }
+                    )
+                question.options.forEachIndexed { index, option ->
+                    Text(
+                        "${index + 1}. (    ) $option",
+                        fontSize = 16.sp,
+                        fontWeight = FontWeight.Normal
+                    )
                 }
             }
+
         }
         Divider(
             color = Color.Gray,
