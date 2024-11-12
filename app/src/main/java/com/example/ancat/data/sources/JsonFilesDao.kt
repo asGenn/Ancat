@@ -13,8 +13,12 @@ interface JsonFilesDao {
     @Query("SELECT * FROM JsonFilesInfoEntity")
     suspend fun getAll(): List<JsonFilesInfoEntity>
 
+    // get a specific row from the table
+    @Query("SELECT * FROM JsonFilesInfoEntity WHERE id = :id")
+    suspend fun findById(id: Int): JsonFilesInfoEntity
+
     @Insert
-    suspend fun insertJson(jsonFilesInfoEntity: JsonFilesInfoEntity)
+    suspend fun insertJson(jsonFilesInfoEntity: JsonFilesInfoEntity): Long
 
     // delete all data from the table
     @Query("DELETE FROM JsonFilesInfoEntity")

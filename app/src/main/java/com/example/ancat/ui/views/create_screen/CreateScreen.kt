@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
@@ -41,9 +42,13 @@ import com.example.ancat.R
 import com.example.ancat.core.helper.JsonHelper
 import com.example.ancat.core.helper.TimeConverter
 import com.example.ancat.core.navigation.CreateSurvey
+import com.example.ancat.data.model.Question
+import com.example.ancat.data.model.SurveyItem
 import com.example.ancat.domain.entity.JsonFilesInfoEntity
 import com.example.ancat.ui.component.list.ListTile
 import kotlinx.coroutines.launch
+import kotlinx.serialization.encodeToString
+import kotlinx.serialization.json.Json
 import java.util.UUID
 
 
@@ -141,11 +146,13 @@ fun JsonFileListScreen(
                 ListTile(
                     title = item.title,
                     subtitle = "Son Düzenleme: " + TimeConverter().convertTime(item.lastModified),
-                    modifier = Modifier.padding(8.dp).clickable(
-                        onClick = {
-                            navController.navigate(CreateSurvey(item.title))
-                        }
-                    ),
+                    modifier = Modifier
+                        .padding(8.dp)
+                        .clickable(
+                            onClick = {
+                                navController.navigate(CreateSurvey(item.title, item.id))
+                            }
+                        ),
                     trailingIcon = Icons.Default.Delete,
                     trailingIconButton = {
 
@@ -234,51 +241,75 @@ fun SurveyTitleDialog(
     viewModel: CreateScreenViewModel
 ) {
     var title by remember { mutableStateOf("") }
+    val descriptions = remember { mutableStateListOf("") }
+    val surveyItemList = remember { mutableStateListOf<SurveyItem>() }
 
 
     if (openDialog.value) {
         AlertDialog(
-            onDismissRequest = { openDialog.value = false },
+            onDismissRequest = {
+                openDialog.value = false
+                title = ""
+                descriptions.clear()
+                descriptions.add("")
+
+            },
             title = { Text("Anket Başlığı") },
             text = {
-                TextField(
-                    value = title,
-                    onValueChange = { title = it },
-                    label = { Text("Başlık Girin") }
-                )
+                Column {
+                    TextField(
+                        value = title,
+                        onValueChange = { title = it },
+                        label = { Text("Başlık Girin") }
+                    )
+                    descriptions.forEachIndexed { index, description ->
+                        TextField(
+                            value = description,
+                            onValueChange = {
+                                descriptions[index] = it
+
+                                if (index == descriptions.lastIndex && it.isNotBlank() && index < 4) {
+                                    descriptions.add("")
+                                }
+                            },
+                            label = { Text("Seçenek ${index + 1}") },
+                            modifier = Modifier.fillMaxWidth()
+                        )
+                    }
+                }
             },
+
             confirmButton = {
                 Button(
                     onClick = {
 
+
+                        descriptions.removeAt(descriptions.lastIndex)
+
                         openDialog.value = false
                         viewModel.viewModelScope.launch {
+                            val surveyItem = SurveyItem(
+                                type = "_",
+                                title = title,
+                                questions = listOf(
+                                    Question.SurveyTitle(description = descriptions)
+                                )
+                            )
+                            surveyItemList.add(surveyItem)
 
                             val uuid = UUID.randomUUID().toString()
                             val path = JsonHelper().saveJsonToFile(
                                 context = context,
                                 fileName = uuid,
-                                jsonData = ""
+                                jsonData = Json.encodeToString(surveyItemList.toList())
                             )
-                            viewModel.saveJsonFile(fileName = uuid, filePath = path, title = title)
-
-                            viewModel.getJsonFiles().forEach(
-                                {
-                                    //epcoh time to date
-                                    val date = TimeConverter().convertTime(it.lastModified)
-
-
-                                    println(it.fileName + " " + date)
-                                    println(it.id)
-                                    println(it.filePath)
-
-                                }
-                            )
+                            val id = viewModel.saveJsonFileToDB(fileName = uuid, filePath = path, title = title)
+                            navController.navigate(CreateSurvey(title = title, id =id.toInt() ))
 
                         }
 
 
-                        navController.navigate(CreateSurvey(title = title))
+
 
 
                     }
@@ -291,6 +322,7 @@ fun SurveyTitleDialog(
                     Text("İptal")
                 }
             },
+
             properties = DialogProperties(usePlatformDefaultWidth = false)
         )
     }

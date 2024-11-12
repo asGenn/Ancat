@@ -30,7 +30,7 @@ object CreateNested
 @Serializable
 object Create
 @Serializable
-data class CreateSurvey(val title: String)
+data class CreateSurvey(val title: String,val id : Int? = null)
 
 @Serializable
 object Survey
@@ -57,7 +57,7 @@ fun MainNavGraph(modifier: Modifier = Modifier,navController: NavHostController)
                 }
                 composable<CreateSurvey> { backStackEntry ->
                     val createSurvey: CreateSurvey = backStackEntry.toRoute()
-                    CreateSurveyScreen(title = createSurvey.title)
+                    CreateSurveyScreen(title = createSurvey.title, id = createSurvey.id)
                 }
             }
 

@@ -60,7 +60,14 @@ class SurveyHelper @Inject constructor(
         val commitList = List<String>(commits.length()) {
             commits.getString(it)
         }
-        return questionsHelper.questionCommits(canvas, paint, paintTitle, title, commitList, cursorPos)
+        return questionsHelper.questionCommits(
+            canvas,
+            paint,
+            paintTitle,
+            title,
+            commitList,
+            cursorPos
+        )
     }
 
     private fun processRatingQuestions(title: String, questions: JSONArray): Float {
@@ -96,9 +103,16 @@ class SurveyHelper @Inject constructor(
             val questions = questionObject.getJSONArray("questions")
 
             cursorPos = when (type) {
+                // başlık ve açıklama
                 "_" -> processTitleCommitFrame(title, questions)
+
+                // açıklama
                 "0" -> processCommitFrame(title, questions)
+
+                // rating
                 "1" -> processRatingQuestions(title, questions)
+
+                // multiple choice
                 "2" -> processMultipleChoiceQuestions(title, questions)
                 else -> cursorPos
             }

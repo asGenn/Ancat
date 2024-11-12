@@ -37,4 +37,25 @@ class JsonHelper {
         }
     }
 
+    // read json file from the app's internal storage
+    // return the json file content as a string
+    fun readJsonFile(fileName: String, context: Context): String {
+        val file = File(context.filesDir, "JsonFiles/$fileName.json")
+        return file.readText()
+    }
+
+    // open file from and write new content to it
+    // before writing clear the file content
+
+    fun openFileAndWriteNewContent(fileName: String, newContent: String, context: Context): Boolean {
+        try {
+            val file = File(context.filesDir, "JsonFiles/$fileName.json")
+            file.writeText(newContent)
+            return true
+        } catch (e: Exception) {
+            println("Error: ${e.message}")
+            return false
+        }
+    }
+
 }

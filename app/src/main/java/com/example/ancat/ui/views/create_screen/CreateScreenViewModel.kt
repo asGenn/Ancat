@@ -12,8 +12,8 @@ class  CreateScreenViewModel @Inject constructor(
     private val jsonFilesRepository: JsonFilesRepository
 ) : ViewModel() {
 
-    suspend fun saveJsonFile(fileName: String,filePath: String, title: String) {
-        jsonFilesRepository.insertJsonFile(
+    suspend fun saveJsonFileToDB(fileName: String,filePath: String, title: String):Long {
+        return jsonFilesRepository.insertJsonFile(
             jsonFilesInfoEntity = JsonFilesInfoEntity(
                 fileName = fileName,
                 filePath = filePath,

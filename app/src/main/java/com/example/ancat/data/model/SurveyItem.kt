@@ -20,11 +20,15 @@ data class SurveyItem(
 sealed class Question {
 
     @Serializable
-    data object SurveyTitle : Question()
+    data class SurveyTitle(val description : List<String>) : Question()
 
     @Serializable
     data class SimpleQuestion(val question: String) : Question()
 
     @Serializable
     data class MultipleChoiceQuestion(val question: String, val options: List<String>) : Question()
+
+
+    @Serializable
+    data class RatingQuestion(val question: String) : Question()
 }
