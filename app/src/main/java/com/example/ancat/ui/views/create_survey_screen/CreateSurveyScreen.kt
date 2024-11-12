@@ -1,8 +1,6 @@
 package com.example.ancat.ui.views.create_survey_screen
 
-import android.content.Context
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -12,21 +10,13 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.Close
-import androidx.compose.material.icons.filled.Done
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Divider
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.ExtendedFloatingActionButton
-import androidx.compose.material3.FloatingActionButton
-import androidx.compose.material3.Icon
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Scaffold
@@ -54,12 +44,10 @@ import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.ancat.core.helper.JsonHelper
-import com.example.ancat.core.helper.survey.SurveyHelper
 import com.example.ancat.data.model.Question
 import com.example.ancat.data.model.SurveyItem
 import com.example.ancat.domain.entity.JsonFilesInfoEntity
 import com.example.ancat.ui.component.ExpandableFloatingActionButton
-import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 
 @Composable
@@ -132,66 +120,10 @@ fun SurveyCreator(
         ) {
             itemsIndexed(surveyItem) { _, item ->
                 when (item.type) {
-                    "_" -> {
-                        Box(
-                            modifier = Modifier
-                                .padding(8.dp)
-                                .fillMaxWidth()
-                        ) {
-                            Column {
-                                Text(
-                                    item.title,
-                                    fontSize = 24.sp,
-                                    fontWeight = FontWeight.Bold,
-                                    modifier = Modifier
-                                        .padding(top = 8.dp, bottom = 3.dp)
-                                        .fillMaxWidth()
-                                        .wrapContentWidth(Alignment.CenterHorizontally)
-                                )
-                                item.questions.forEachIndexed { _, question ->
-                                    if (question is Question.SurveyTitle) {
-                                        question.description.forEach {
-                                            Text(
-                                                it,
-                                                fontSize = 16.sp,
-                                                fontWeight = FontWeight.Normal,
-                                                modifier = Modifier.padding(
-                                                    horizontal = 12.dp
-                                                )
-                                            )
-                                        }
-                                    }
-                                }
-
-                                Divider(
-                                    color = Color.Gray,
-                                    thickness = 2.dp,
-                                    modifier = Modifier
-                                        .fillMaxWidth()  // Çizginin tüm genişliği kaplamasını sağlar
-                                        .padding(start = 5.dp, top = 8.dp, end = 5.dp)
-                                )
-                            }
-                        }
-                    }
-
-                    "0" -> {
-                        DescriptionType(
-                            item = item,
-                            selectedItem = selectedItem,
-                            show = showBottomSheet,
-                            viewModel = viewModel
-                        )
-                    }
-
-                    "1" -> {
-                        // RatingType,
-                        RatingType(item = item)
-                    }
-
-                    "2" -> {
-                        // MultipleChoiceType,
-                        MultipleChoiceQuestion(item = item)
-                    }
+                    "_" -> SurveyTitleType(item = item)
+                    "0" -> DescriptionType(item = item)
+                    "1" -> RatingType(item = item)
+                    "2" -> MultipleChoiceType(item = item)
                 }
             }
         }
@@ -213,6 +145,82 @@ fun SurveyCreator(
         }
     }
 }
+
+@Composable
+fun SurveyTitleType(item: SurveyItem) {
+    Box(
+        modifier = Modifier
+            .padding(8.dp)
+            .fillMaxWidth()
+    ) {
+        Column {
+            Text(
+                item.title,
+                fontSize = 24.sp,
+                fontWeight = FontWeight.Bold,
+                modifier = Modifier
+                    .padding(top = 8.dp, bottom = 3.dp)
+                    .fillMaxWidth()
+                    .wrapContentWidth(Alignment.CenterHorizontally)
+            )
+            item.questions.forEachIndexed { _, question ->
+                if (question is Question.SurveyTitle) {
+                    question.description.forEach {
+                        Text(
+                            it,
+                            fontSize = 16.sp,
+                            fontWeight = FontWeight.Normal,
+                            modifier = Modifier.padding(
+                                horizontal = 12.dp
+                            )
+                        )
+                    }
+                }
+            }
+            Divider(
+                color = Color.Gray,
+                thickness = 2.dp,
+                modifier = Modifier
+                    .fillMaxWidth()  // Çizginin tüm genişliği kaplamasını sağlar
+                    .padding(start = 5.dp, top = 8.dp, end = 5.dp)
+            )
+        }
+    }
+}
+
+@Composable
+private fun DescriptionType(
+    item: SurveyItem,
+    modifier: Modifier = Modifier,
+) {
+    Column(
+        modifier = modifier
+            .padding(start = 12.dp, top = 8.dp, end = 12.dp, bottom = 0.dp)
+            .fillMaxWidth()
+    ) {
+        item.questions.forEachIndexed { _, question ->
+            if (question is Question.SimpleQuestion) {
+                Text(
+                    question.question,
+                    modifier = modifier
+                        .fillMaxWidth()
+                        .wrapContentWidth(Alignment.Start),
+                    fontSize = 16.sp,
+                    fontWeight = FontWeight.Normal,
+                )
+            }
+        }
+
+        Divider(
+            color = Color.Gray,
+            thickness = 2.dp,
+            modifier = Modifier
+                .fillMaxWidth()  // Çizginin tüm genişliği kaplamasını sağlar
+                .padding(start = 5.dp, top = 8.dp, end = 5.dp)
+        )
+    }
+}
+
 
 @Composable
 private fun RatingType(modifier: Modifier = Modifier, item: SurveyItem) {
@@ -265,9 +273,8 @@ private fun RatingType(modifier: Modifier = Modifier, item: SurveyItem) {
     }
 }
 
-
 @Composable
-fun MultipleChoiceQuestion(modifier: Modifier = Modifier, item: SurveyItem) {
+fun MultipleChoiceType(modifier: Modifier = Modifier, item: SurveyItem) {
     Column(
         modifier = modifier
             .padding(start = 12.dp, top = 8.dp, end = 12.dp, bottom = 0.dp)
@@ -304,43 +311,6 @@ fun MultipleChoiceQuestion(modifier: Modifier = Modifier, item: SurveyItem) {
 
     }
 }
-
-@Composable
-private fun DescriptionType(
-    item: SurveyItem,
-    modifier: Modifier = Modifier,
-    selectedItem: MutableState<SurveyItem?>,
-    show: MutableState<Boolean>,
-    viewModel: CreateSurveyViewModel
-) {
-    Column(
-        modifier = modifier
-            .padding(16.dp)
-            .background(color = Color.White)
-            .fillMaxWidth()
-            .clickable(onClick = {
-                show.value = true
-                viewModel.showDialog(DialogType.DescriptionType)
-            }) // Show dialog
-    ) {
-
-    }
-    item.questions.forEachIndexed { _, question ->
-        if (question is Question.SimpleQuestion) {
-            Text(
-                question.question,
-                modifier = modifier
-                    .fillMaxWidth()
-                    .wrapContentWidth(Alignment.CenterHorizontally),
-                fontSize = 16.sp,
-                fontWeight = FontWeight.Black,
-            )
-        }
-    }
-
-
-}
-
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -608,16 +578,15 @@ fun DialogHandler(
     dialogType?.let {
         when (it) {
             DialogType.DescriptionType -> {
-
-
-            }
-
-            is DialogType.SurveyTitle -> {
                 SimpleQuestionDialog(
                     modifier = modifier,
                     onDismissRequest = { viewModel.hideDialog() },
                     surveyItem = surveyItem
                 )
+
+            }
+
+            is DialogType.SurveyTitle -> {
 
             }
 
