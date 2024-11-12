@@ -17,6 +17,7 @@ import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExtendedFloatingActionButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
@@ -30,6 +31,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
@@ -245,7 +247,6 @@ fun SurveyTitleDialog(
     val descriptions = remember { mutableStateListOf("") }
     val surveyItemList = remember { mutableStateListOf<SurveyItem>() }
 
-
     if (openDialog.value) {
         AlertDialog(
             onDismissRequest = {
@@ -253,22 +254,29 @@ fun SurveyTitleDialog(
                 title = ""
                 descriptions.clear()
                 descriptions.add("")
-
             },
-            title = { Text("Anket Başlığı") },
+            title = { Text("Anket Başlığı", style = MaterialTheme.typography.headlineLarge) },
             text = {
-                Column {
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(16.dp),
+                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
                     TextField(
                         value = title,
                         onValueChange = { title = it },
-                        label = { Text("Başlık Girin") }
+                        label = { Text("Başlık Girin") },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(bottom = 8.dp)
                     )
+
                     descriptions.forEachIndexed { index, description ->
                         TextField(
                             value = description,
                             onValueChange = {
                                 descriptions[index] = it
-
                                 if (index == descriptions.lastIndex && it.isNotBlank() && index < 4) {
                                     descriptions.add("")
                                 }
@@ -279,14 +287,10 @@ fun SurveyTitleDialog(
                     }
                 }
             },
-
             confirmButton = {
                 Button(
                     onClick = {
-
-
                         descriptions.removeAt(descriptions.lastIndex)
-
                         openDialog.value = false
                         viewModel.viewModelScope.launch {
                             val surveyItem = SurveyItem(
@@ -310,23 +314,21 @@ fun SurveyTitleDialog(
                                 title = title
                             )
                             navController.navigate(CreateSurvey(title = title, id = id.toInt()))
-
                         }
-
-
-                    }
+                    },
+                    modifier = Modifier.padding(end = 8.dp)
                 ) {
                     Text("Onayla")
                 }
             },
             dismissButton = {
-                Button(onClick = { openDialog.value = false }) {
-                    Text("İptal")
+                Button(
+                    onClick = { openDialog.value = false },
+                ) {
+                    Text("İptal", color = Color.Black)
                 }
             },
-
             properties = DialogProperties(usePlatformDefaultWidth = false)
         )
     }
 }
-
