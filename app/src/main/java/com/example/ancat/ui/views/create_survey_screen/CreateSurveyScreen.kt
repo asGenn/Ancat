@@ -408,7 +408,7 @@ fun SimpleQuestionDialog(
                 Button(onClick = {
                     val survey = SurveyItem(
                         type = "0",
-                        title = "Başlık",
+                        title = "",
                         questions = listOf(
                             Question.SimpleQuestion(
                                 question = text
@@ -473,7 +473,7 @@ fun RatingQuestionDialog(
                 Button(onClick = {
                     val survey = SurveyItem(
                         type = "1",
-                        title = "Başlık",
+                        title = "",
                         questions = listOf(
                             Question.RatingQuestion(
                                 question = text
@@ -550,7 +550,7 @@ fun MultipleChoiceQuestionDialog(
 
                     val survey = SurveyItem(
                         type = "2",
-                        title = "Başlık",
+                        title = "",
                         questions = listOf(
                             Question.MultipleChoiceQuestion(
                                 question = questionText,

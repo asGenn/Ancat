@@ -6,6 +6,7 @@ import android.graphics.Color
 import android.graphics.Paint
 import android.graphics.Typeface
 import android.graphics.pdf.PdfDocument
+import android.util.Log
 import com.example.ancat.data.MultipleChoiceQuest
 import com.example.ancat.data.jsonData
 import com.example.ancat.domain.entity.JsonFilesInfoEntity
@@ -47,18 +48,26 @@ class SurveyHelper @Inject constructor(
     }
 
     private fun processTitleCommitFrame(title: String, commits: JSONArray): Float {
-        val commitList = List<String>(commits.length()) {
-            commits.getString(it)
+        val commitList = mutableListOf<String>()
+        for (i in 0 until commits.length()) {
+            val questionObj = commits.getJSONObject(i)
+            val descriptionArray = questionObj.getJSONArray("description")
+            for (j in 0 until descriptionArray.length()) {
+                commitList.add(descriptionArray.getString(j))
+            }
         }
         val cursorPosition =
             questionsHelper.surveyTitleCommit(canvas, paint, paintTitle, title, commitList)
         return questionsHelper.surveyFrame(canvas, paint, cursorPosition)
     }
 
+
     private fun processCommitFrame(title: String, commits: JSONArray): Float {
-        val commitList = List<String>(commits.length()) {
-            commits.getString(it)
+        val commitList = List(commits.length()) {
+            val questionObj = commits.getJSONObject(it)
+            questionObj.getString("question")
         }
+
         return questionsHelper.questionCommits(
             canvas,
             paint,
@@ -69,8 +78,12 @@ class SurveyHelper @Inject constructor(
         )
     }
 
+
     private fun processRatingQuestions(title: String, questions: JSONArray): Float {
-        val questionList = List(questions.length()) { questions.getString(it) }
+        val questionList = List(questions.length()) {
+            val questionObj = questions.getJSONObject(it)
+            questionObj.getString("question")
+        }
         handlePageBreakIfNeeded(questionList.size)
         return questionsHelper.ratingQuestion(canvas, paint, title, questionList, cursorPos)
     }
@@ -93,7 +106,7 @@ class SurveyHelper @Inject constructor(
     fun createPdf(context: Context, jsonFilesInfoEntity: JsonFilesInfoEntity) {
         val jsonData = documentHelper.readJsonFromFilePath(jsonFilesInfoEntity.filePath)
         val jsonArray = JSONArray(jsonData)
-        jsonFilesInfoEntity.filePath
+        Log.d("JSON", jsonArray.toString())
 
         for (i in 0 until jsonArray.length()) {
             val questionObject = jsonArray.getJSONObject(i)
