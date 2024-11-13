@@ -96,6 +96,12 @@ fun ExpandableFloatingActionButton(
                 // PDF Oluştur
                 ExtendedFloatingActionButton(
                     onClick = {
+                        expanded = false
+                        JsonHelper().openFileAndWriteNewContent(
+                            fileName = jsonFilesInfoEntity.fileName,
+                            newContent = Json.encodeToString(surveyItem),
+                            context = context
+                        )
                         viewModel.createSurvey(context, jsonFilesInfoEntity)
                     },
                     icon = { Icon(Icons.Default.Build, contentDescription = "Create") },
