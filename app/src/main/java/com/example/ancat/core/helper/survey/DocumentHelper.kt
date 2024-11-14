@@ -26,8 +26,9 @@ class DocumentHelper {
     }
 
     fun savePdf(context: Context, pdfDocument: PdfDocument, pdfName: String) {
+
         val filePath = File(
-            Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS),
+            context.getExternalFilesDir(Environment.DIRECTORY_DOCUMENTS),
             "$pdfName.pdf"
         )
 
