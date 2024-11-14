@@ -3,8 +3,6 @@ package com.example.ancat.domain.entity
 import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.PrimaryKey
-import androidx.room.TypeConverter
-import java.util.Date
 
 
 @Entity
@@ -18,5 +16,5 @@ data class JsonFilesInfoEntity(
     @ColumnInfo(name = "file_path")
     val filePath: String,
     @ColumnInfo(name = "last_modified")
-    val lastModified : Long = System.currentTimeMillis()
+    val lastModified: Long = System.currentTimeMillis()
 )

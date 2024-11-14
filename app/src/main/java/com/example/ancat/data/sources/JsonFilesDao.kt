@@ -7,7 +7,6 @@ import androidx.room.Query
 import com.example.ancat.domain.entity.JsonFilesInfoEntity
 
 
-
 @Dao
 interface JsonFilesDao {
     @Query("SELECT * FROM JsonFilesInfoEntity")

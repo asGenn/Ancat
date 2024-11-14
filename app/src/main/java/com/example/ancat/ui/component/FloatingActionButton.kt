@@ -54,7 +54,9 @@ fun ExpandableFloatingActionButton(
         FloatingActionButton(
             onClick = { expanded = !expanded },
             modifier = modifier
-                .padding(8.dp).width(48.dp).height(48.dp),
+                .padding(8.dp)
+                .width(48.dp)
+                .height(48.dp),
         ) {
             Icon(
                 imageVector = if (expanded) Icons.Default.Close else Icons.Default.Add,
