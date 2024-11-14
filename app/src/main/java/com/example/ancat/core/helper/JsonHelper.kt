@@ -6,7 +6,6 @@ import java.io.File
 
 class JsonHelper {
 
-
     // read json file from the app's internal storage
     // return the json file content as a string
     fun saveJsonToFile(jsonData: String, fileName: String, context: Context): String {
@@ -16,7 +15,6 @@ class JsonHelper {
         file.writeText(jsonData)
         return file.absolutePath
     }
-
 
     // list all json files in the app's internal storage
     // return a list of json file names
@@ -46,8 +44,11 @@ class JsonHelper {
 
     // open file from and write new content to it
     // before writing clear the file content
-
-    fun openFileAndWriteNewContent(fileName: String, newContent: String, context: Context): Boolean {
+    fun openFileAndWriteNewContent(
+        fileName: String,
+        newContent: String,
+        context: Context
+    ): Boolean {
         try {
             val file = File(context.filesDir, "JsonFiles/$fileName.json")
             file.writeText(newContent)

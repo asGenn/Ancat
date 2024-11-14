@@ -20,21 +20,32 @@ import com.example.ancat.core.navigation.Home
 import com.example.ancat.core.navigation.Survey
 
 
-data class TopLevelRoute<T : Any>(val route: T, val icon: ImageVector,val label:String)
+data class TopLevelRoute<T : Any>(val route: T, val icon: ImageVector, val label: String)
 
 @Composable
-fun BottomNavigationBar(navController: NavController ) {
+fun BottomNavigationBar(navController: NavController) {
     val bottomRoutes = listOf(
-        TopLevelRoute(route = Home, icon = ImageVector.vectorResource(R.drawable.ic_analyse), label = "Analyze"),
-        TopLevelRoute(route = Create, icon = ImageVector.vectorResource(R.drawable.ic_add), label = "Create"),
-        TopLevelRoute(route = Survey, icon = ImageVector.vectorResource(R.drawable.ic_questionnaire_24_24), label = "Survey"),
+        TopLevelRoute(
+            route = Home,
+            icon = ImageVector.vectorResource(R.drawable.ic_analyse),
+            label = "Analyze"
+        ),
+        TopLevelRoute(
+            route = Create,
+            icon = ImageVector.vectorResource(R.drawable.ic_add),
+            label = "Create"
+        ),
+        TopLevelRoute(
+            route = Survey,
+            icon = ImageVector.vectorResource(R.drawable.ic_questionnaire_24_24),
+            label = "Survey"
+        ),
     )
-
-
 
     NavigationBar {
         val navBackStackEntry by navController.currentBackStackEntryAsState()
         val currentDestination = navBackStackEntry?.destination
+
         bottomRoutes.forEach { bottomRoute ->
             NavigationBarItem(
                 icon = { Icon(imageVector = bottomRoute.icon, contentDescription = null) },
@@ -45,9 +56,7 @@ fun BottomNavigationBar(navController: NavController ) {
                         // Pop up to the start destination of the graph to
                         // avoid building up a large stack of destinations
                         // on the back stack as users select items
-                        popUpTo(navController.graph.findStartDestination().id) {
-                            saveState = true
-                        }
+                        popUpTo(navController.graph.findStartDestination().id) { saveState = true }
                         // Avoid multiple copies of the same destination when
                         // reselecting the same item
                         launchSingleTop = true
@@ -57,8 +66,6 @@ fun BottomNavigationBar(navController: NavController ) {
                 }
             )
         }
+
     }
-
-
-    
 }

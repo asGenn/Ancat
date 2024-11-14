@@ -2,7 +2,6 @@ package com.example.ancat.core.di
 
 import android.content.Context
 import androidx.room.Room
-import androidx.room.RoomDatabase
 import com.example.ancat.data.repository.JsonFilesRepository
 import com.example.ancat.data.sources.AppDatabase
 import com.example.ancat.data.sources.JsonFilesDao

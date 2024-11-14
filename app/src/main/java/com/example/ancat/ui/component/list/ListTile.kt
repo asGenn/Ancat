@@ -37,7 +37,9 @@ fun ListTile(
             Icon(
                 imageVector = it,
                 contentDescription = null,
-                modifier = Modifier.size(40.dp).padding(end = 16.dp)
+                modifier = Modifier
+                    .size(40.dp)
+                    .padding(end = 16.dp)
             )
         }
 
@@ -54,8 +56,11 @@ fun ListTile(
             Icon(
                 imageVector = it,
                 contentDescription = null,
-                modifier = Modifier.size(24.dp).clickable(onClick = trailingIconButton)
+                modifier = Modifier
+                    .size(24.dp)
+                    .clickable(onClick = trailingIconButton)
             )
         }
+
     }
 }

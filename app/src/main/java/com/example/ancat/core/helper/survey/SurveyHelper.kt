@@ -8,7 +8,6 @@ import android.graphics.Typeface
 import android.graphics.pdf.PdfDocument
 import android.util.Log
 import com.example.ancat.data.MultipleChoiceQuest
-import com.example.ancat.data.jsonData
 import com.example.ancat.domain.entity.JsonFilesInfoEntity
 import org.json.JSONArray
 import javax.inject.Inject

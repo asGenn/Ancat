@@ -29,35 +29,35 @@ object CreateNested
 // nested gragh start
 @Serializable
 object Create
+
 @Serializable
-data class CreateSurvey(val title: String,val id : Int? = null)
+data class CreateSurvey(val title: String, val id: Int? = null)
 
 @Serializable
 object Survey
 
 
-
-
 @Composable
-fun MainNavGraph(modifier: Modifier = Modifier,navController: NavHostController) {
+fun MainNavGraph(modifier: Modifier = Modifier, navController: NavHostController) {
 
-    Scaffold  { innerPadding ->
+    Scaffold { innerPadding ->
         NavHost(
             navController = navController,
             startDestination = Home,
             modifier = modifier.padding(innerPadding)
         ) {
+
             composable<Home> {
                 DynamicTextFieldExample()
-
             }
+
             navigation<CreateNested>(startDestination = Create) {
                 composable<Create> {
                     CreateScreen(navController)
                 }
                 composable<CreateSurvey> { backStackEntry ->
                     val createSurvey: CreateSurvey = backStackEntry.toRoute()
-                    CreateSurveyScreen(title = createSurvey.title, id = createSurvey.id)
+                    CreateSurveyScreen(id = createSurvey.id)
                 }
             }
 
@@ -68,7 +68,6 @@ fun MainNavGraph(modifier: Modifier = Modifier,navController: NavHostController)
                     Text("Surveys Screen")
                 }
             }
-
 
         }
     }
