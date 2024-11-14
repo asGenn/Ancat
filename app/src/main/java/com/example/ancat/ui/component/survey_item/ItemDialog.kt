@@ -77,8 +77,8 @@ fun SimpleQuestionDialog(
                         type = "0",
                         title = "",
                         questions = listOf(
-                            Question.SimpleQuestion(
-                                question = text
+                            Question.SurveyDescription(
+                                description = text
                             )
                         ),
                     )

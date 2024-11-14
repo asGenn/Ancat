@@ -74,8 +74,8 @@ fun DescriptionType(
             .fillMaxWidth()
     ) {
         item.questions.forEachIndexed { _, question ->
-            if (question is Question.SimpleQuestion) {
-                question.question.forEachIndexed { index, option ->
+            if (question is Question.SurveyDescription) {
+                question.description.forEachIndexed { index, option ->
                     Text(
                         "${index + 1}. $option",
                         fontSize = 16.sp,
