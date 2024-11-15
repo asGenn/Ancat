@@ -2,7 +2,7 @@ package com.example.ancat.core.helper.survey
 
 import android.graphics.Canvas
 import android.graphics.Paint
-import com.example.ancat.data.MultipleChoiceQuest
+import com.example.ancat.data.model.Question
 
 class QuestionsHelper {
 
@@ -29,7 +29,7 @@ class QuestionsHelper {
         paint: Paint,
         paintTitle: Paint,
         title: String,
-        commits: List<String>
+        commits: Question.SurveyTitle
     ): Float {
 
         var cursorPos = 30f
@@ -38,7 +38,7 @@ class QuestionsHelper {
         canvas.drawText(title, textTitleX, cursorPos, paintTitle)
         cursorPos += 15f
 
-        commits.forEach { commit ->
+        commits.description.forEach { commit ->
             val textCommitX = 30f //(595f - paint.measureText(commit)) / 2
             canvas.drawText(commit, textCommitX, cursorPos, paint)
             cursorPos += 20f
@@ -51,7 +51,7 @@ class QuestionsHelper {
         paint: Paint,
         paintTitle: Paint,
         title: String,
-        commits: List<String>,
+        commits: List<Question.SurveyDescription>,
         cursorPosition: Float,
     ): Float {
 
@@ -63,8 +63,10 @@ class QuestionsHelper {
 
         commits.forEach { commit ->
             val textCommitX = 30f //(595f - paint.measureText(commit)) / 2
-            canvas.drawText(commit, textCommitX, cursorPos, paint)
-            cursorPos += 20f
+            commit.description.forEach { desc ->
+                canvas.drawText(desc, textCommitX, cursorPos, paint)
+                cursorPos += 20f
+            }
         }
         return cursorPos + 15f
     }
@@ -73,7 +75,7 @@ class QuestionsHelper {
         canvas: Canvas,
         paint: Paint,
         title: String,
-        questions: List<String>,
+        questions: List<Question.RatingQuestion>,
         cursorPosition: Float,
     ): Float {
 
@@ -91,9 +93,9 @@ class QuestionsHelper {
         canvas.drawText(title, textTitleX, cursorPos, paint)
         cursorPos += 10f
 
-        questions.forEach { question ->
+        questions.forEach { data ->
             val textY = cursorPos + (cellHeight + paint.textSize) / 2
-            canvas.drawText(question, textX, textY, paint)
+            canvas.drawText(data.question, textX, textY, paint)
             for (i in 1..5)
                 canvas.drawText(i.toString(), questionWidth + i * optionWidth, textY, paint)
             canvas.drawLine(start, cursorPos, end, cursorPos, paint)
@@ -109,7 +111,7 @@ class QuestionsHelper {
         canvas: Canvas,
         paint: Paint,
         title: String,
-        questions: List<MultipleChoiceQuest>,
+        questions: List<Question.MultipleChoiceQuestion>,
         cursorPosition: Float,
     ): Float {
 
@@ -130,12 +132,14 @@ class QuestionsHelper {
         questions.forEach { arr ->
             var textY = cursorPos + (cellHeight + paint.textSize) / 2
             canvas.drawText(arr.question, textX, textY, paint)
-            cursorPos += (arr.options.size - 1) * 30f
+            cursorPos += (arr.options.size - 1) * cellHeight
 
             arr.options.forEachIndexed { index, option ->
                 canvas.drawText("${index + 1}. (     )   $option", questionWidth, textY, paint)
-                textY += 20f
+                textY += cellHeight
             }
+
+            cursorPos += 5f
 
             canvas.drawLine(start, cursorP, end, cursorP, paint) // üst
             canvas.drawLine(end, cursorP, end, cursorPos + cellHeight, paint) // Sağ

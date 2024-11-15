@@ -6,22 +6,24 @@ import android.graphics.Color
 import android.graphics.Paint
 import android.graphics.Typeface
 import android.graphics.pdf.PdfDocument
-import android.util.Log
-import com.example.ancat.data.MultipleChoiceQuest
-import com.example.ancat.domain.entity.JsonFilesInfoEntity
-import org.json.JSONArray
+import android.graphics.pdf.PdfDocument.Page
+import com.example.ancat.data.model.Question
+import com.example.ancat.data.model.SurveyItem
 import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
 class SurveyHelper @Inject constructor(
     private val documentHelper: DocumentHelper,
-    private val questionsHelper: QuestionsHelper,
-    private val pdfDocument: PdfDocument
+    private val questionsHelper: QuestionsHelper
 ) {
+
+    private lateinit var pdfDocument: PdfDocument
+    private lateinit var page: Page
+    private lateinit var canvas: Canvas
+
     private var pageNum = 1
-    private var page = documentHelper.createPage(pdfDocument, pageNum)
-    private var canvas: Canvas = page.canvas
+
     private var cursorPos = 30f
 
     private val paint = Paint().apply {
@@ -46,85 +48,55 @@ class SurveyHelper @Inject constructor(
         }
     }
 
-    private fun processTitleCommitFrame(title: String, commits: JSONArray): Float {
-        val commitList = mutableListOf<String>()
-        for (i in 0 until commits.length()) {
-            val questionObj = commits.getJSONObject(i)
-            val descriptionArray = questionObj.getJSONArray("description")
-            for (j in 0 until descriptionArray.length()) {
-                commitList.add(descriptionArray.getString(j))
-            }
-        }
+    private fun processTitleCommitFrame(title: String, commits: Question.SurveyTitle): Float {
         val cursorPosition =
-            questionsHelper.surveyTitleCommit(canvas, paint, paintTitle, title, commitList)
+            questionsHelper.surveyTitleCommit(canvas, paint, paintTitle, title, commits)
         return questionsHelper.surveyFrame(canvas, paint, cursorPosition)
     }
 
 
-    private fun processCommitFrame(title: String, commits: JSONArray): Float {
-        val commitList = List(commits.length()) {
-            val questionObj = commits.getJSONObject(it)
-            questionObj.getString("question")
-        }
+    private fun processDescriptions(
+        title: String,
+        commits: List<Question.SurveyDescription>
+    ): Float {
 
         return questionsHelper.questionCommits(
-            canvas,
-            paint,
-            paintTitle,
-            title,
-            commitList,
-            cursorPos
+            canvas, paint, paintTitle, title, commits, cursorPos
         )
     }
 
 
-    private fun processRatingQuestions(title: String, questions: JSONArray): Float {
-        val questionList = List(questions.length()) {
-            val questionObj = questions.getJSONObject(it)
-            questionObj.getString("question")
-        }
-        handlePageBreakIfNeeded(questionList.size)
-        return questionsHelper.ratingQuestion(canvas, paint, title, questionList, cursorPos)
+    private fun processRatingQuestions(title: String, questions: List<Question.RatingQuestion>): Float {
+        handlePageBreakIfNeeded(questions.size)
+        return questionsHelper.ratingQuestion(canvas, paint, title, questions, cursorPos)
     }
 
-    private fun processMultipleChoiceQuestions(title: String, questions: JSONArray): Float {
+    private fun processMultipleChoiceQuestions(title: String, questions: List<Question.MultipleChoiceQuestion>): Float {
         var optSize = 0
-        val questionList = List(questions.length()) {
-            val questionObj = questions.getJSONObject(it)
-            val question = questionObj.getString("question")
-            val options = List(questionObj.getJSONArray("options").length()) { index ->
-                optSize++
-                questionObj.getJSONArray("options").getString(index)
-            }
-            MultipleChoiceQuest(question, options)
+        questions.forEach {
+            optSize += it.options.size
         }
         handlePageBreakIfNeeded(optSize)
-        return questionsHelper.multipleChoiceQuestion(canvas, paint, title, questionList, cursorPos)
+        return questionsHelper.multipleChoiceQuestion(canvas, paint, title, questions, cursorPos)
     }
 
-    fun createPdf(context: Context, jsonFilesInfoEntity: JsonFilesInfoEntity) {
-        val jsonData = documentHelper.readJsonFromFilePath(jsonFilesInfoEntity.filePath)
-        val jsonArray = JSONArray(jsonData)
-        Log.d("JSON", jsonArray.toString())
+    fun createPdf(context: Context, surveyItem: List<SurveyItem>) {
 
-        for (i in 0 until jsonArray.length()) {
-            val questionObject = jsonArray.getJSONObject(i)
-            val type = questionObject.getString("type")
-            val title = questionObject.getString("title")
-            val questions = questionObject.getJSONArray("questions")
+        pdfDocument = PdfDocument()
+        page = documentHelper.createPage(pdfDocument, pageNum)
+        canvas = page.canvas
+
+        for (data in surveyItem) {
+            val type = data.type
+            val title = data.title
+            val questions = data.questions
 
             cursorPos = when (type) {
-                // başlık ve açıklama
-                "_" -> processTitleCommitFrame(title, questions)
 
-                // açıklama
-                "0" -> processCommitFrame(title, questions)
-
-                // rating
-                "1" -> processRatingQuestions(title, questions)
-
-                // multiple choice
-                "2" -> processMultipleChoiceQuestions(title, questions)
+                "_" -> processTitleCommitFrame(title, questions[0] as Question.SurveyTitle)
+                "0" -> processDescriptions(title, questions as List<Question.SurveyDescription>)
+                "1" -> processRatingQuestions(title, questions as List<Question.RatingQuestion>)
+                "2" -> processMultipleChoiceQuestions(title, questions  as List<Question.MultipleChoiceQuestion>)
                 else -> cursorPos
             }
         }

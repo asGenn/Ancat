@@ -23,7 +23,7 @@ sealed class Question {
     data class SurveyTitle(val description: List<String>) : Question()
 
     @Serializable
-    data class SimpleQuestion(val question: List<String>) : Question()
+    data class SurveyDescription(val description: List<String>) : Question()
 
     @Serializable
     data class MultipleChoiceQuestion(val question: String, val options: List<String>) : Question()

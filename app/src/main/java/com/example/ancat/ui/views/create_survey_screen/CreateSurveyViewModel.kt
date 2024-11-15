@@ -1,10 +1,12 @@
 package com.example.ancat.ui.views.create_survey_screen
 
 import android.content.Context
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import com.example.ancat.core.helper.JsonHelper
 import com.example.ancat.core.helper.survey.SurveyHelper
 import com.example.ancat.data.model.SurveyItem
+import com.example.ancat.data.model.mergeSurveyItemsByType
 import com.example.ancat.data.repository.JsonFilesRepository
 import com.example.ancat.domain.entity.JsonFilesInfoEntity
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -50,6 +52,11 @@ class CreateSurveyViewModel @Inject constructor(
 
     fun addSurveyItem(surveyItem: SurveyItem) {
         _surveyItems.value += surveyItem
+        _surveyItems.value = mergeSurveyItemsByType(_surveyItems)
+        surveyItems.value.forEach {
+            Log.d("SurveyItem", it.toString())
+        }
+
     }
 
     suspend fun getJsonFilesInfoById(id: Int): JsonFilesInfoEntity {
@@ -57,6 +64,6 @@ class CreateSurveyViewModel @Inject constructor(
     }
 
     fun createSurvey(context: Context, jsonFilesInfoEntity: JsonFilesInfoEntity) {
-        surveyHelper.createPdf(context = context, jsonFilesInfoEntity)
+        surveyHelper.createPdf(context = context, surveyItems.value)
     }
 }

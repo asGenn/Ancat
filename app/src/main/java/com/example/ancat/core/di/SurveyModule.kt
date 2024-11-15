@@ -23,14 +23,10 @@ object SurveyModule {
     fun provideQuestionsHelper(): QuestionsHelper = QuestionsHelper()
 
     @Provides
-    fun providePdfDocument(): PdfDocument = PdfDocument()
-
-    @Provides
     @Singleton
     fun provideSurveyHelper(
         documentHelper: DocumentHelper,
         questionsHelper: QuestionsHelper,
-        pdfDocument: PdfDocument
-    ): SurveyHelper = SurveyHelper(documentHelper, questionsHelper, pdfDocument)
+    ): SurveyHelper = SurveyHelper(documentHelper, questionsHelper)
 
 }
