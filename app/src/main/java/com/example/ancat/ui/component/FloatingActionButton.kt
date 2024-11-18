@@ -30,6 +30,9 @@ import com.example.ancat.core.helper.JsonHelper
 import com.example.ancat.data.model.SurveyItem
 import com.example.ancat.domain.entity.JsonFilesInfoEntity
 import com.example.ancat.ui.views.create_survey_screen.CreateSurveyViewModel
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 
@@ -45,9 +48,7 @@ fun ExpandableFloatingActionButton(
     var expanded by remember { mutableStateOf(false) }
 
     Box(
-        modifier = modifier
-            .fillMaxSize(),
-        contentAlignment = Alignment.BottomEnd
+        modifier = modifier.fillMaxSize(), contentAlignment = Alignment.BottomEnd
     ) {
 
         // Ana FloatingActionButton
@@ -72,43 +73,39 @@ fun ExpandableFloatingActionButton(
                 modifier = modifier.padding(end = 16.dp, bottom = 64.dp)
             ) {
                 // Kaydet
-                ExtendedFloatingActionButton(
-                    onClick = {
-                        expanded = false
-                        JsonHelper().openFileAndWriteNewContent(
-                            fileName = jsonFilesInfoEntity.fileName,
-                            newContent = Json.encodeToString(surveyItem),
-                            context = context
-                        )
-                    },
+                ExtendedFloatingActionButton(onClick = {
+                    expanded = false
+                    JsonHelper().openFileAndWriteNewContent(
+                        fileName = jsonFilesInfoEntity.fileName,
+                        newContent = Json.encodeToString(surveyItem),
+                        context = context
+                    )
+                },
                     icon = { Icon(Icons.Default.Done, contentDescription = "Save") },
-                    text = { Text("Kaydet") }
-                )
+                    text = { Text("Kaydet") })
 
                 // Soru Ekle
-                ExtendedFloatingActionButton(
-                    onClick = {
-                        expanded = false
-                        showBottomSheet.value = true
-                    },
+                ExtendedFloatingActionButton(onClick = {
+                    expanded = false
+                    showBottomSheet.value = true
+                },
                     icon = { Icon(Icons.Default.Add, contentDescription = "Add Question") },
-                    text = { Text("Soru Ekle") }
-                )
+                    text = { Text("Soru Ekle") })
 
                 // PDF Oluştur
-                ExtendedFloatingActionButton(
-                    onClick = {
-                        expanded = false
-                        JsonHelper().openFileAndWriteNewContent(
-                            fileName = jsonFilesInfoEntity.fileName,
-                            newContent = Json.encodeToString(surveyItem),
-                            context = context
-                        )
-                        viewModel.createSurvey(context, jsonFilesInfoEntity)
-                    },
+                ExtendedFloatingActionButton(onClick = {
+                    expanded = false
+                    JsonHelper().openFileAndWriteNewContent(
+                        fileName = jsonFilesInfoEntity.fileName,
+                        newContent = Json.encodeToString(surveyItem),
+                        context = context
+                    )
+                    CoroutineScope(Dispatchers.Main).launch {
+                        viewModel.createSurvey(context)
+                    }
+                },
                     icon = { Icon(Icons.Default.Build, contentDescription = "Create") },
-                    text = { Text("Pdf Oluştur") }
-                )
+                    text = { Text("Pdf Oluştur") })
             }
         }
     }
