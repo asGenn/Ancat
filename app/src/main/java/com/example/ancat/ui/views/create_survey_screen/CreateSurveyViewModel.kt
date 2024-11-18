@@ -4,7 +4,7 @@ import android.content.Context
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import com.example.ancat.core.helper.JsonHelper
-import com.example.ancat.core.helper.survey.SurveyHelper
+import com.example.ancat.core.helper.SurveyHelper
 import com.example.ancat.data.model.SurveyItem
 import com.example.ancat.data.model.mergeSurveyItemsByType
 import com.example.ancat.data.repository.JsonFilesRepository
@@ -63,7 +63,7 @@ class CreateSurveyViewModel @Inject constructor(
         return jsonFilesRepository.findById(id)
     }
 
-    fun createSurvey(context: Context, jsonFilesInfoEntity: JsonFilesInfoEntity) {
-        surveyHelper.createPdf(context = context, surveyItems.value)
+    suspend fun createSurvey(context: Context) {
+        surveyHelper.createSurvey(context = context, surveyItems.value)
     }
 }

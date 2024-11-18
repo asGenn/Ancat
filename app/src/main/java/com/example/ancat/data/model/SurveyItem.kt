@@ -3,12 +3,6 @@ package com.example.ancat.data.model
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class Option(
-    val question: String,
-    val options: List<String>
-)
-
-@Serializable
 data class SurveyItem(
     val type: String,
     val title: String,
