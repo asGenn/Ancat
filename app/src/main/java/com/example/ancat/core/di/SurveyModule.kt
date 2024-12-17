@@ -2,6 +2,7 @@ package com.example.ancat.core.di
 
 import com.example.ancat.utils.PaintFactory
 import com.example.ancat.core.helper.SurveyHelper
+import com.example.ancat.core.renderer.SurveyProcessor
 import com.example.ancat.core.renderer.SurveyRenderer
 import com.example.ancat.core.renderer.survey_drawings.other.CommonDrawings
 import com.example.ancat.core.renderer.survey_drawings.other.TitleAndCommits
@@ -46,7 +47,7 @@ object SurveyModule {
         titleAndCommits: TitleAndCommits,
         multipleChoiceQuestions: MultipleChoiceQuestions,
         ratingQuestion: RatingQuestion
-    ): SurveyRenderer =
+    ): SurveyProcessor =
         SurveyRenderer(
             commonDrawings = commonDrawings,
             titleAndCommits = titleAndCommits,
@@ -57,7 +58,7 @@ object SurveyModule {
     @Provides
     @Singleton
     fun provideSurveyHelper(
-        surveyRenderer: SurveyRenderer,
-    ): SurveyHelper = SurveyHelper(surveyRenderer)
+        surveyProcessor: SurveyProcessor,
+    ): SurveyHelper = SurveyHelper(surveyProcessor)
 
 }

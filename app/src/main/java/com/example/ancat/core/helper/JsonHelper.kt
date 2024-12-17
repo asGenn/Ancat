@@ -2,8 +2,9 @@ package com.example.ancat.core.helper
 
 import android.content.Context
 import java.io.File
+import javax.inject.Singleton
 
-
+@Singleton
 class JsonHelper {
 
     // read json file from the app's internal storage

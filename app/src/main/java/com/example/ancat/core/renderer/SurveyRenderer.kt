@@ -15,16 +15,16 @@ class SurveyRenderer @Inject constructor(
     private val titleAndCommits: TitleAndCommits,
     private val multipleChoiceQuestions: MultipleChoiceQuestions,
     private val ratingQuestion: RatingQuestion
-) {
+): SurveyProcessor {
 
-    fun processSurveyFrame(
+    override fun processSurveyFrame(
         canvas: Canvas,
         cursorPosition: Float
     ): Float {
         return commonDrawings.surveyFrame(canvas, cursorPosition)
     }
 
-    fun processTitleCommitFrame(
+    override fun processTitleCommitFrame(
         canvas: Canvas,
         title: String,
         commits: Question.SurveyTitle
@@ -33,7 +33,7 @@ class SurveyRenderer @Inject constructor(
         return commonDrawings.surveyFrame(canvas, cursorPosition)
     }
 
-    fun processDescriptions(
+    override fun processDescriptions(
         canvas: Canvas,
         commits: List<Question.SurveyDescription>,
         currentCursor: Float
@@ -41,7 +41,7 @@ class SurveyRenderer @Inject constructor(
         return titleAndCommits.questionCommits(canvas, commits, currentCursor)
     }
 
-    fun processRatingQuestions(
+    override fun processRatingQuestions(
         canvas: Canvas,
         questions: List<Question.RatingQuestion>,
         currentCursor: Float
@@ -49,7 +49,7 @@ class SurveyRenderer @Inject constructor(
         return ratingQuestion.drawRatingQuestion(canvas, questions, currentCursor)
     }
 
-    fun processMultipleChoiceQuestions(
+    override fun processMultipleChoiceQuestions(
         canvas: Canvas,
         questions: List<Question.MultipleChoiceQuestion>,
         currentCursor: Float

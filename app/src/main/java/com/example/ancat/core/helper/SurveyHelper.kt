@@ -7,7 +7,7 @@ import android.graphics.pdf.PdfDocument.Page
 import android.graphics.pdf.PdfDocument.PageInfo.Builder
 import android.os.Environment
 import android.widget.Toast
-import com.example.ancat.core.renderer.SurveyRenderer
+import com.example.ancat.core.renderer.SurveyProcessor
 import com.example.ancat.data.model.Question
 import com.example.ancat.data.model.SurveyItem
 import com.example.ancat.utils.Constants.CELL_HEIGHT
@@ -23,7 +23,7 @@ import javax.inject.Singleton
 
 @Singleton
 class SurveyHelper @Inject constructor(
-    private val surveyRenderer: SurveyRenderer
+    private val surveyRenderer: SurveyProcessor
 ) {
 
     private lateinit var pdfDocument: PdfDocument

@@ -35,6 +35,9 @@ import com.example.ancat.ui.component.survey_item.RatingQuestionDialog
 import com.example.ancat.ui.component.survey_item.RatingType
 import com.example.ancat.ui.component.survey_item.SimpleQuestionDialog
 import com.example.ancat.ui.component.survey_item.SurveyTitleType
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 
 @Composable
 fun CreateSurveyScreen(id: Int?) {
@@ -81,11 +84,16 @@ fun SurveyCreator(
             ) {
                 ExpandableFloatingActionButton(
                     modifier = modifier,
-                    context = context,
-                    jsonFilesInfoEntity = jsonFilesInfoEntity,
-                    surveyItem = surveyItem,
                     showBottomSheet = showBottomSheet,
-                    viewModel = viewModel
+                    onSaveButtonClicked = {
+                        viewModel.saveJson(context, jsonFilesInfoEntity, surveyItem)
+                    },
+                    onCreateButtonClicked = {
+                        viewModel.saveJson(context, jsonFilesInfoEntity, surveyItem)
+                        CoroutineScope(Dispatchers.Main).launch {
+                            viewModel.createSurvey(context)
+                        }
+                    }
                 )
             }
         },
@@ -106,7 +114,7 @@ fun SurveyCreator(
         }
 
         CustomModalBottomSheet(modifier = modifier, show = showBottomSheet, viewModel = viewModel)
-        DialogHandler(modifier = modifier, viewModel = viewModel, surveyItem = surveyItem)
+        DialogHandler(modifier = modifier, viewModel = viewModel)
 
         selectedItem.value?.let { item ->
             AlertDialog(
@@ -127,7 +135,6 @@ fun SurveyCreator(
 fun DialogHandler(
     modifier: Modifier,
     viewModel: CreateSurveyViewModel,
-    surveyItem: List<SurveyItem>
 ) {
     val dialogType by viewModel.dialogType.collectAsState()
 
@@ -137,7 +144,6 @@ fun DialogHandler(
                 SimpleQuestionDialog(
                     modifier = modifier,
                     onDismissRequest = { viewModel.hideDialog() },
-                    surveyItem = surveyItem,
                     viewModel = viewModel
                 )
 
@@ -147,7 +153,6 @@ fun DialogHandler(
                 MultipleChoiceQuestionDialog(
                     modifier = modifier,
                     onDismissRequest = { viewModel.hideDialog() },
-                    surveyItem = surveyItem,
                     viewModel = viewModel
                 )
             }
@@ -156,7 +161,6 @@ fun DialogHandler(
                 RatingQuestionDialog(
                     modifier = modifier,
                     onDismissRequest = { viewModel.hideDialog() },
-                    surveyItem = surveyItem,
                     viewModel = viewModel
                 )
             }
