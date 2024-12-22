@@ -2,6 +2,7 @@ package com.example.ancat.core.di
 
 import android.content.Context
 import androidx.room.Room
+import com.example.ancat.core.helper.JsonHelper
 import com.example.ancat.data.repository.JsonFilesRepository
 import com.example.ancat.data.sources.AppDatabase
 import com.example.ancat.data.sources.JsonFilesDao
@@ -35,5 +36,9 @@ object AppModule {
     fun provideJsonFilesRepository(jsonFilesRepository: JsonFilesDao): JsonFilesRepository {
         return JsonFilesRepository(jsonFilesRepository)
     }
+
+    @Provides
+    @Singleton
+    fun provideJsonHelper() = JsonHelper()
 
 }

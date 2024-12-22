@@ -32,7 +32,6 @@ import com.example.ancat.ui.views.create_survey_screen.CreateSurveyViewModel
 fun SimpleQuestionDialog(
     modifier: Modifier = Modifier,
     onDismissRequest: () -> Unit,
-    surveyItem: List<SurveyItem>,
     viewModel: CreateSurveyViewModel
 ) {
     val text = remember { mutableStateListOf("") }
@@ -98,7 +97,6 @@ fun SimpleQuestionDialog(
 fun RatingQuestionDialog(
     modifier: Modifier = Modifier,
     onDismissRequest: () -> Unit,
-    surveyItem: List<SurveyItem>,
     viewModel: CreateSurveyViewModel
 ) {
     var text by remember { mutableStateOf("") }
@@ -157,7 +155,6 @@ fun RatingQuestionDialog(
 fun MultipleChoiceQuestionDialog(
     modifier: Modifier = Modifier,
     onDismissRequest: () -> Unit,
-    surveyItem: List<SurveyItem>,
     viewModel: CreateSurveyViewModel
 ) {
     var questionText by remember { mutableStateOf("") }

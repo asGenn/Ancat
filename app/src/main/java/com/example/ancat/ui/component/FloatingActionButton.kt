@@ -1,6 +1,5 @@
 package com.example.ancat.ui.component
 
-import android.content.Context
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -26,24 +25,14 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import com.example.ancat.core.helper.JsonHelper
-import com.example.ancat.data.model.SurveyItem
-import com.example.ancat.domain.entity.JsonFilesInfoEntity
-import com.example.ancat.ui.views.create_survey_screen.CreateSurveyViewModel
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
-import kotlinx.serialization.encodeToString
-import kotlinx.serialization.json.Json
 
 @Composable
 fun ExpandableFloatingActionButton(
     modifier: Modifier,
-    context: Context,
-    jsonFilesInfoEntity: JsonFilesInfoEntity,
-    surveyItem: List<SurveyItem>,
     showBottomSheet: MutableState<Boolean>,
-    viewModel: CreateSurveyViewModel
+    onSaveButtonClicked: () -> Unit,
+    onCreateButtonClicked: () -> Unit
+
 ) {
     var expanded by remember { mutableStateOf(false) }
 
@@ -75,11 +64,7 @@ fun ExpandableFloatingActionButton(
                 // Kaydet
                 ExtendedFloatingActionButton(onClick = {
                     expanded = false
-                    JsonHelper().openFileAndWriteNewContent(
-                        fileName = jsonFilesInfoEntity.fileName,
-                        newContent = Json.encodeToString(surveyItem),
-                        context = context
-                    )
+                    onSaveButtonClicked()
                 },
                     icon = { Icon(Icons.Default.Done, contentDescription = "Save") },
                     text = { Text("Kaydet") })
@@ -95,14 +80,7 @@ fun ExpandableFloatingActionButton(
                 // PDF Oluştur
                 ExtendedFloatingActionButton(onClick = {
                     expanded = false
-                    JsonHelper().openFileAndWriteNewContent(
-                        fileName = jsonFilesInfoEntity.fileName,
-                        newContent = Json.encodeToString(surveyItem),
-                        context = context
-                    )
-                    CoroutineScope(Dispatchers.Main).launch {
-                        viewModel.createSurvey(context)
-                    }
+                    onCreateButtonClicked()
                 },
                     icon = { Icon(Icons.Default.Build, contentDescription = "Create") },
                     text = { Text("Pdf Oluştur") })
