@@ -9,7 +9,7 @@ class JsonFilesRepository @Inject constructor(private val jsonFilesDao: JsonFile
 
     suspend fun getJsonFiles() = jsonFilesDao.getAll()
     suspend fun findById(id: Int) = jsonFilesDao.findById(id = id)
-    suspend fun deleteAll() = jsonFilesDao.deleteAll()
+//    suspend fun deleteAll() = jsonFilesDao.deleteAll()
 
     suspend fun insertJsonFile(jsonFilesInfoEntity: JsonFilesInfoEntity): Long =
         jsonFilesDao.insertJson(jsonFilesInfoEntity = jsonFilesInfoEntity)

@@ -92,10 +92,10 @@ fun CreateScreen(navController: NavController) {
     ) { innerPadding ->
         if (jsonFilesList.isEmpty()) {
             EmptyScreen(
-                modifier = Modifier.padding(innerPadding),
-                navController = navController,
-                context = context,
-                viewModel = viewModel,
+//                modifier = Modifier.padding(innerPadding),
+//                navController = navController,
+//                context = context,
+//                viewModel = viewModel,
                 openDialog = openDialog
             )
 
