@@ -2,12 +2,9 @@ plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.compose.compiler)
-    id ("org.jetbrains.kotlin.plugin.serialization")
-
-
+    id("org.jetbrains.kotlin.plugin.serialization")
     id("com.google.dagger.hilt.android")
     id("com.google.devtools.ksp")
-
 
 }
 
@@ -60,51 +57,54 @@ android {
     }
 }
 
-
 dependencies {
 
-    implementation(libs.androidx.core.ktx)
-    implementation(libs.androidx.lifecycle.runtime.ktx)
-    implementation(libs.androidx.activity.compose)
-    implementation(platform(libs.androidx.compose.bom))
-    implementation(libs.androidx.ui)
-    implementation(libs.androidx.ui.graphics)
-    implementation(libs.androidx.ui.tooling.preview)
-    implementation(libs.androidx.material3)
+    // Android core libraries
+    implementation(libs.androidx.core.ktx) // Core KTX extensions for Android
+    implementation(libs.androidx.lifecycle.runtime.ktx) // Lifecycle-aware components
+    implementation(libs.androidx.activity.compose) // Compose support for Activities
 
-    /// nav
-    implementation(libs.androidx.navigation.compose)
-    implementation(libs.kotlinx.serialization.core)
+    // Jetpack Compose libraries
+    implementation(platform(libs.androidx.compose.bom)) // Compose BOM for version alignment
+    implementation(libs.androidx.ui) // Basic UI components for Jetpack Compose
+    implementation(libs.androidx.ui.graphics) // Compose graphics library
+    implementation(libs.androidx.ui.tooling.preview) // Tooling for Compose UI preview
+    implementation(libs.androidx.material3) // Material Design 3 components for Compose
 
+    // Navigation
+    implementation(libs.androidx.navigation.compose) // Navigation for Jetpack Compose
 
-    /// test library
-    testImplementation(libs.junit)
-    androidTestImplementation(libs.androidx.junit)
-    androidTestImplementation(libs.androidx.espresso.core)
-    androidTestImplementation(platform(libs.androidx.compose.bom))
-    androidTestImplementation(libs.androidx.ui.test.junit4)
-    debugImplementation(libs.androidx.ui.tooling)
-    debugImplementation(libs.androidx.ui.test.manifest)
+    // Serialization
+    implementation(libs.kotlinx.serialization.core) // Core library for Kotlin Serialization
 
-    implementation(libs.hilt.android)
-    ksp(libs.hilt.android.compiler)
-    implementation(libs.androidx.lifecycle.viewmodel.compose)
-    implementation(libs.androidx.hilt.navigation.compose)
+    // Testing libraries
+    testImplementation(libs.junit) // JUnit for unit testing
+    androidTestImplementation(libs.androidx.junit) // AndroidX JUnit extensions
+    androidTestImplementation(libs.androidx.espresso.core) // Espresso for UI testing
+    androidTestImplementation(platform(libs.androidx.compose.bom)) // Compose BOM for testing
+    androidTestImplementation(libs.androidx.ui.test.junit4) // Compose testing with JUnit 4
+    debugImplementation(libs.androidx.ui.tooling) // Debug tools for Compose
+    debugImplementation(libs.androidx.ui.test.manifest) // Manifest testing for Compose
 
+    // Hilt for Dependency Injection
+    implementation(libs.hilt.android) // Hilt DI library
+    ksp(libs.hilt.android.compiler) // Hilt annotation processor
+    implementation(libs.androidx.lifecycle.viewmodel.compose) // ViewModel support in Compose
+    implementation(libs.androidx.hilt.navigation.compose) // Hilt navigation for Compose
 
+    // Scanner dependencies
+    implementation(libs.mlkit.document.scanner) // ML Kit Document Scanner
+    implementation(libs.coil.compose) // Coil image loading for Compose
 
-    // json serialization
-    implementation(libs.kotlinx.serialization.json)
+    // JSON serialization
+    implementation(libs.kotlinx.serialization.json) // JSON serialization with Kotlin
 
-    // room database
-   
-    implementation(libs.androidx.room.runtime)
-    ksp(libs.androidx.room.compiler)
-    implementation(libs.androidx.room.ktx)
-
-
-
+    // Room Database
+    implementation(libs.androidx.room.runtime) // Room database runtime
+    ksp(libs.androidx.room.compiler) // Room annotation processor
+    implementation(libs.androidx.room.ktx) // Room KTX extensions
 }
+
 java {
     toolchain {
         languageVersion = JavaLanguageVersion.of(17)

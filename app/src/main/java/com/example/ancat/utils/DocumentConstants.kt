@@ -1,6 +1,6 @@
 package com.example.ancat.utils
 
-object Constants {
+object DocumentConstants {
     const val PAGE_WIDTH = 595
     const val PAGE_HEIGHT = 842
     const val QUESTION_HEIGHT = 792f

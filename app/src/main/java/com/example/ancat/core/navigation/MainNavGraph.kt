@@ -1,6 +1,6 @@
 package com.example.ancat.core.navigation
 
-import DynamicTextFieldExample
+import AnalyzeScreen
 import androidx.compose.foundation.layout.Box
 
 import androidx.compose.foundation.layout.fillMaxSize
@@ -26,7 +26,7 @@ object Home
 @Serializable
 object CreateNested
 
-// nested gragh start
+// nested graph start
 @Serializable
 object Create
 
@@ -48,7 +48,7 @@ fun MainNavGraph(modifier: Modifier = Modifier, navController: NavHostController
         ) {
 
             composable<Home> {
-                DynamicTextFieldExample()
+                AnalyzeScreen()
             }
 
             navigation<CreateNested>(startDestination = Create) {
