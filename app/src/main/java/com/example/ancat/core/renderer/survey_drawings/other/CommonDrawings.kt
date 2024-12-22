@@ -1,10 +1,10 @@
 package com.example.ancat.core.renderer.survey_drawings.other
 
 import android.graphics.Canvas
-import com.example.ancat.utils.Constants.MARGIN
+import com.example.ancat.utils.DocumentConstants.MARGIN
 import com.example.ancat.utils.PaintFactory
-import com.example.ancat.utils.Constants.PAGE_WIDTH
-import com.example.ancat.utils.Constants.QUESTION_HEIGHT
+import com.example.ancat.utils.DocumentConstants.PAGE_WIDTH
+import com.example.ancat.utils.DocumentConstants.QUESTION_HEIGHT
 import javax.inject.Inject
 import javax.inject.Singleton
 

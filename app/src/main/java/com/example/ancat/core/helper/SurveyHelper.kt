@@ -10,10 +10,10 @@ import android.widget.Toast
 import com.example.ancat.core.renderer.SurveyProcessor
 import com.example.ancat.data.model.Question
 import com.example.ancat.data.model.SurveyItem
-import com.example.ancat.utils.Constants.CELL_HEIGHT
-import com.example.ancat.utils.Constants.PAGE_HEIGHT
-import com.example.ancat.utils.Constants.PAGE_WIDTH
-import com.example.ancat.utils.Constants.QUESTION_HEIGHT
+import com.example.ancat.utils.DocumentConstants.CELL_HEIGHT
+import com.example.ancat.utils.DocumentConstants.PAGE_HEIGHT
+import com.example.ancat.utils.DocumentConstants.PAGE_WIDTH
+import com.example.ancat.utils.DocumentConstants.QUESTION_HEIGHT
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.io.File
