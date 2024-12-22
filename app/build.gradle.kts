@@ -9,13 +9,13 @@ plugins {
 }
 
 android {
-    namespace = "com.example.ancat"
+    namespace = "edu.aibu.ancat"
     compileSdk = 35
 
     defaultConfig {
-        applicationId = "com.example.ancat"
+        applicationId = "edu.aibu.ancat"
         minSdk = 24
-        targetSdk = 34
+        targetSdk = 35
         versionCode = 1
         versionName = "1.0"
 
