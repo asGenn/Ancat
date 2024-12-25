@@ -1,15 +1,14 @@
 package edu.aibu.ancat.ui.views.create_survey_screen
 
 import android.content.Context
-import android.util.Log
 import androidx.lifecycle.ViewModel
 import edu.aibu.ancat.core.helper.JsonHelper
-import edu.aibu.ancat.core.helper.SurveyHelper
 import edu.aibu.ancat.data.model.SurveyItem
 import edu.aibu.ancat.data.model.mergeSurveyItemsByType
 import edu.aibu.ancat.data.repository.JsonFilesRepository
 import edu.aibu.ancat.domain.entity.JsonFilesInfoEntity
 import dagger.hilt.android.lifecycle.HiltViewModel
+import edu.aibu.ancat.core.helper.DocumentHelper
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.serialization.encodeToString
@@ -25,7 +24,7 @@ sealed class DialogType {
 @HiltViewModel
 class CreateSurveyViewModel @Inject constructor(
     private val jsonFilesRepository: JsonFilesRepository,
-    private val surveyHelper: SurveyHelper,
+    private val documentHelper: DocumentHelper,
     private val jsonHelper: JsonHelper
 ) : ViewModel() {
 
@@ -44,15 +43,12 @@ class CreateSurveyViewModel @Inject constructor(
     val surveyItems: StateFlow<List<SurveyItem>> get() = _surveyItems
 
     suspend fun createSurvey(context: Context) {
-        surveyHelper.createSurvey(context = context, surveyItems.value)
+        documentHelper.createDocument(surveyItems.value)
     }
 
     fun addSurveyItem(surveyItem: SurveyItem) {
         _surveyItems.value += surveyItem
         _surveyItems.value = mergeSurveyItemsByType(_surveyItems)
-        surveyItems.value.forEach {
-            Log.d("SurveyItem", it.toString())
-        }
 
     }
 

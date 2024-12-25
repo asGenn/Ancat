@@ -6,6 +6,11 @@ import android.graphics.Typeface
 
 object PaintFactory {
 
+    fun line(): Paint = Paint().apply {
+        textSize = 8f
+        color = Color.BLACK
+    }
+
     fun text(): Paint = Paint().apply {
         textSize = 12f
         color = Color.BLACK
