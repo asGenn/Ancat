@@ -1,12 +1,12 @@
-package edu.aibu.ancat.core.renderer.survey_drawings.other
+package edu.aibu.ancat.core.renderer.survey_drawings.drawer
 
 import android.graphics.Canvas
 import edu.aibu.ancat.utils.DocumentConstants.MARGIN
-import edu.aibu.ancat.utils.DocumentConstants.OPTION_SPACING
 import edu.aibu.ancat.utils.DocumentConstants.PAGE_WIDTH
 import edu.aibu.ancat.utils.DocumentConstants.TITLE_PADDING
 import edu.aibu.ancat.utils.PaintFactory
 import edu.aibu.ancat.data.model.Question
+import edu.aibu.ancat.utils.DocumentConstants.START_CURSOR
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -21,7 +21,7 @@ class TitleAndCommits @Inject constructor(
         commits: Question.SurveyTitle
     ): Float {
 
-        var cursorPos = MARGIN * 3
+        var cursorPos = START_CURSOR
 
         val titleCenter = (PAGE_WIDTH - paintFactory.title().measureText(title)) / 2
         canvas.drawText(title, titleCenter, cursorPos, paintFactory.title())
@@ -29,25 +29,22 @@ class TitleAndCommits @Inject constructor(
 
         commits.description.forEach { commit ->
             canvas.drawText(commit, MARGIN * 3, cursorPos, paintFactory.text())
-            cursorPos += OPTION_SPACING
+            cursorPos += MARGIN * 2
         }
         return cursorPos
     }
 
     fun questionCommits(
         canvas: Canvas,
-        commits: List<Question.SurveyDescription>,
+        descriptions: Question.SurveyDescription,
         cursorPosition: Float,
     ): Float {
 
         var cursorPos = cursorPosition
-
-        commits.forEach { commit ->
-            commit.description.forEach { desc ->
-                canvas.drawText(desc, MARGIN * 3, cursorPos, paintFactory.text())
-                cursorPos += TITLE_PADDING
-            }
+        descriptions.description.forEach {
+            canvas.drawText(it, MARGIN * 3, cursorPos, paintFactory.text())
+            cursorPos += TITLE_PADDING
         }
-        return cursorPos + MARGIN
+        return cursorPos
     }
 }

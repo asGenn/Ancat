@@ -1,17 +1,18 @@
 package edu.aibu.ancat.core.di
 
 import edu.aibu.ancat.utils.PaintFactory
-import edu.aibu.ancat.core.helper.SurveyHelper
-import edu.aibu.ancat.core.renderer.SurveyProcessor
-import edu.aibu.ancat.core.renderer.SurveyRenderer
-import edu.aibu.ancat.core.renderer.survey_drawings.other.CommonDrawings
-import edu.aibu.ancat.core.renderer.survey_drawings.other.TitleAndCommits
-import edu.aibu.ancat.core.renderer.survey_drawings.questions.MultipleChoiceQuestions
-import edu.aibu.ancat.core.renderer.survey_drawings.questions.RatingQuestion
+import edu.aibu.ancat.core.renderer.survey_drawings.drawer.CanvasContentDrawer
+import edu.aibu.ancat.core.renderer.survey_drawings.drawer.TitleAndCommits
+import edu.aibu.ancat.core.renderer.survey_drawings.drawer.MultipleChoiceQuestions
+import edu.aibu.ancat.core.renderer.survey_drawings.drawer.RatingQuestion
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
+import edu.aibu.ancat.core.helper.DocumentHelper
+import edu.aibu.ancat.core.renderer.DocumentRenderer
+import edu.aibu.ancat.core.renderer.survey_drawings.utils.DrawingMeasurer
+import edu.aibu.ancat.core.renderer.survey_drawings.utils.TextHandler
 import javax.inject.Singleton
 
 @Module
@@ -20,7 +21,18 @@ object SurveyModule {
 
     @Provides
     @Singleton
-    fun provideCommonDrawings(): CommonDrawings = CommonDrawings(PaintFactory)
+    fun provideCanvasContentDrawer(): CanvasContentDrawer = CanvasContentDrawer(PaintFactory)
+
+    @Provides
+    @Singleton
+    fun provideDrawingMeasurer(
+        textHandler: TextHandler
+
+    ): DrawingMeasurer = DrawingMeasurer(textHandler, PaintFactory)
+
+    @Provides
+    @Singleton
+    fun provideTextHandler(): TextHandler = TextHandler()
 
     @Provides
     @Singleton
@@ -29,36 +41,72 @@ object SurveyModule {
     @Provides
     @Singleton
     fun provideMultipleChoiceQuestions(
-        commonDrawings: CommonDrawings
-    ): MultipleChoiceQuestions = MultipleChoiceQuestions(commonDrawings, PaintFactory)
+        canvasContentDrawer: CanvasContentDrawer,
+        textHandler: TextHandler
+    ): MultipleChoiceQuestions =
+        MultipleChoiceQuestions(
+            canvasContentDrawer = canvasContentDrawer,
+            textHandler = textHandler,
+            paintFactory = PaintFactory
+        )
 
 
     @Provides
     @Singleton
     fun provideRatingQuestion(
-        commonDrawings: CommonDrawings
-    ): RatingQuestion = RatingQuestion(commonDrawings, PaintFactory)
-
+        canvasContentDrawer: CanvasContentDrawer,
+        textHandler: TextHandler
+    ): RatingQuestion = RatingQuestion(
+        canvasContentDrawer = canvasContentDrawer,
+        textHandler = textHandler,
+        paintFactory = PaintFactory
+    )
 
     @Provides
     @Singleton
-    fun provideSurveyRenderer(
-        commonDrawings: CommonDrawings,
+    fun provideDocumentRenderer(
         titleAndCommits: TitleAndCommits,
-        multipleChoiceQuestions: MultipleChoiceQuestions,
-        ratingQuestion: RatingQuestion
-    ): SurveyProcessor =
-        SurveyRenderer(
-            commonDrawings = commonDrawings,
-            titleAndCommits = titleAndCommits,
-            multipleChoiceQuestions = multipleChoiceQuestions,
-            ratingQuestion = ratingQuestion
-        )
+        ratingQuestion: RatingQuestion,
+        multipleChoiceQuestions: MultipleChoiceQuestions
+    ): DocumentRenderer = DocumentRenderer(
+        titleAndCommits = titleAndCommits,
+        ratingQuestion = ratingQuestion,
+        multipleChoiceQuestions = multipleChoiceQuestions
+    )
 
     @Provides
     @Singleton
-    fun provideSurveyHelper(
-        surveyProcessor: SurveyProcessor,
-    ): SurveyHelper = SurveyHelper(surveyProcessor)
+    fun provideDocumentHelper(
+        documentRenderer: DocumentRenderer,
+        drawingMeasurer: DrawingMeasurer
+    ): DocumentHelper = DocumentHelper(
+        documentRenderer = documentRenderer,
+        drawingMeasurer = drawingMeasurer
+    )
+
+
+//    @Provides
+//    @Singleton
+//    fun provideSurveyRenderer(
+//        canvasContentDrawer: CanvasContentDrawer,
+//        titleAndCommits: TitleAndCommits,
+//        multipleChoiceQuestions: MultipleChoiceQuestions,
+//        ratingQuestion: RatingQuestion
+//    ): SurveyProcessor =
+//        SurveyRenderer(
+//            canvasContentDrawer = canvasContentDrawer,
+//            titleAndCommits = titleAndCommits,
+//            multipleChoiceQuestions = multipleChoiceQuestions,
+//            ratingQuestion = ratingQuestion
+//        )
+//
+//    @Provides
+//    @Singleton
+//    fun provideSurveyHelper(
+//        surveyProcessor: SurveyProcessor,
+//        drawingMeasurer: DrawingMeasurer
+//    ): SurveyHelper =
+//        SurveyHelper(
+//            surveyRenderer = surveyProcessor, drawingMeasurer = drawingMeasurer)
 
 }
