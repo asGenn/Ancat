@@ -53,7 +53,7 @@ class MultipleChoiceQuestions @Inject constructor(
         if (tempCursor > currentCursor)
             currentCursor = tempCursor
 
-        currentCursor += MARGIN
+        currentCursor += CELL_HEIGHT
 
         canvasContentDrawer.drawFrame(
             canvas = canvas,

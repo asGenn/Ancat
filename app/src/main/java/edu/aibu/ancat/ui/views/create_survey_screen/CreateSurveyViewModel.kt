@@ -43,7 +43,7 @@ class CreateSurveyViewModel @Inject constructor(
     val surveyItems: StateFlow<List<SurveyItem>> get() = _surveyItems
 
     suspend fun createSurvey(context: Context) {
-        documentHelper.createDocument(surveyItems.value)
+        documentHelper.createDocument(context, surveyItems.value)
     }
 
     fun addSurveyItem(surveyItem: SurveyItem) {

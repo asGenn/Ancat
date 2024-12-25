@@ -1,5 +1,6 @@
 package edu.aibu.ancat.core.renderer.survey_drawings.utils
 
+import android.util.Log
 import edu.aibu.ancat.data.model.Question
 import edu.aibu.ancat.data.model.SurveyItem
 import edu.aibu.ancat.utils.DocumentConstants.CELL_HEIGHT
@@ -7,6 +8,9 @@ import edu.aibu.ancat.utils.DocumentConstants.MARGIN
 import edu.aibu.ancat.utils.DocumentConstants.PAGE_WIDTH
 import edu.aibu.ancat.utils.DocumentConstants.QUESTION_HEIGHT
 import edu.aibu.ancat.utils.DocumentConstants.START_CURSOR
+import edu.aibu.ancat.utils.DocumentConstants.TEXT
+import edu.aibu.ancat.utils.DocumentConstants.TITLE_PADDING
+import edu.aibu.ancat.utils.DocumentConstants.ZERO
 import edu.aibu.ancat.utils.PaintFactory
 import javax.inject.Inject
 
@@ -17,7 +21,7 @@ class DrawingMeasurer @Inject constructor(
     private val paintFactory: PaintFactory
 ) {
     private fun descLength(drawings: List<Question.SurveyDescription>): Float {
-        var cursorLength = START_CURSOR
+        var cursorLength = ZERO
         drawings.forEach { data ->
             data.description.forEach {
                 cursorLength += textHandler.getWrappedText(
@@ -25,35 +29,37 @@ class DrawingMeasurer @Inject constructor(
                     paint = paintFactory.text(),
                     xCursor = MARGIN * 3,
                     maxWidth = PAGE_WIDTH - MARGIN * 20
-                ).size * ((CELL_HEIGHT + paintFactory.text().textSize) / 2)
+                ).size * TITLE_PADDING
             }
         }
         return cursorLength
     }
 
     private fun ratingQuestLength(drawings: List<Question.RatingQuestion>): Float {
-        var cursorLength = START_CURSOR
+        var cursorLength = ZERO
         drawings.forEach { data ->
             cursorLength += textHandler.getWrappedText(
                 data.question,
                 paint = paintFactory.text(),
                 xCursor = MARGIN * 3,
                 maxWidth = PAGE_WIDTH - MARGIN * 20
-            ).size * ((CELL_HEIGHT + paintFactory.text().textSize) / 2 + MARGIN)
+            ).size * ((CELL_HEIGHT + paintFactory.text().textSize) / 2 + TEXT)
+            cursorLength += CELL_HEIGHT
         }
         return cursorLength
     }
 
     private fun multiChoQuestLength(drawings: List<Question.MultipleChoiceQuestion>): Float {
-        var cursorLength = START_CURSOR
-        var tempCursor = START_CURSOR
+        var cursorLength = ZERO
+        var tempCursor = ZERO
         drawings.forEachIndexed { index, data ->
             cursorLength += textHandler.getWrappedText(
                 data.question,
                 paint = paintFactory.text(),
                 xCursor = MARGIN * 3,
                 maxWidth = PAGE_WIDTH - MARGIN * 20
-            ).size * ((CELL_HEIGHT + paintFactory.text().textSize) / 2 + MARGIN)
+            ).size * ((CELL_HEIGHT + paintFactory.text().textSize) / 2 + TEXT)
+            cursorLength += CELL_HEIGHT
 
             data.options.forEach { option ->
                 tempCursor += textHandler.getWrappedText(
@@ -61,8 +67,10 @@ class DrawingMeasurer @Inject constructor(
                     paint = paintFactory.text(),
                     xCursor = PAGE_WIDTH - MARGIN * 17,
                     maxWidth = PAGE_WIDTH - MARGIN * 3
-                ).size * ((CELL_HEIGHT + paintFactory.text().textSize) / 2 + MARGIN)
+                ).size * ((CELL_HEIGHT + paintFactory.text().textSize) / 2 + TEXT)
+                tempCursor += MARGIN
             }
+            tempCursor += CELL_HEIGHT
         }
         return if (tempCursor > cursorLength) tempCursor
         else cursorLength
@@ -79,15 +87,15 @@ class DrawingMeasurer @Inject constructor(
             hasMultipleChoiceQuestions -> multiChoQuestLength(drawings as List<Question.MultipleChoiceQuestion>)
             else -> cursorPosition
         }
-
+        Log.d("Hesaplanan cursor ->", "${cursorLength + cursorPosition}")
         return QUESTION_HEIGHT < cursorLength + cursorPosition
     }
 
-    private fun splitDesc(drawings: SurveyItem): List<SurveyItem> {
+    private fun splitDesc(drawings: SurveyItem, cursor: Float): List<SurveyItem> {
         val questionDescriptions = drawings.questions as List<Question.SurveyDescription>
         val splitSurveyItems = mutableListOf<SurveyItem>()
 
-        var currentHeight = START_CURSOR
+        var currentHeight = cursor
         val currentPageQuestions = mutableListOf<Question.SurveyDescription>()
         questionDescriptions.forEach { question ->
             val questionHeight = descLength(listOf(question))
@@ -114,12 +122,11 @@ class DrawingMeasurer @Inject constructor(
         return splitSurveyItems
     }
 
-
-    private fun splitRatingQuest(drawings: SurveyItem): List<SurveyItem> {
+    private fun splitRatingQuest(drawings: SurveyItem, cursor: Float): List<SurveyItem> {
         val questionRating = drawings.questions as List<Question.RatingQuestion>
         val splitSurveyItems = mutableListOf<SurveyItem>()
 
-        var currentHeight = START_CURSOR
+        var currentHeight = cursor
         val currentPageQuestions = mutableListOf<Question.RatingQuestion>()
         questionRating.forEach { question ->
             val questionHeight = ratingQuestLength(listOf(question))
@@ -146,11 +153,11 @@ class DrawingMeasurer @Inject constructor(
         return splitSurveyItems
     }
 
-    private fun splitMultiChoQuest(drawings: SurveyItem): List<SurveyItem> {
+    private fun splitMultiChoQuest(drawings: SurveyItem, cursor: Float): List<SurveyItem> {
         val questionMultiChoQuest = drawings.questions as List<Question.MultipleChoiceQuestion>
         val splitSurveyItems = mutableListOf<SurveyItem>()
 
-        var currentHeight = START_CURSOR
+        var currentHeight = cursor
         val currentPageQuestions = mutableListOf<Question.MultipleChoiceQuestion>()
 
         questionMultiChoQuest.forEach { question ->
@@ -184,15 +191,15 @@ class DrawingMeasurer @Inject constructor(
     }
 
 
-    fun splitQuestion(drawings: SurveyItem): List<SurveyItem> {
+    fun splitQuestion(drawings: SurveyItem, cursor: Float): List<SurveyItem> {
         val hasSurveyDescription = drawings.type == "0"
         val hasRatingQuestions = drawings.type == "1"
         val hasMultipleChoiceQuestions = drawings.type == "2"
 
         return when {
-            hasSurveyDescription -> splitDesc(drawings)
-            hasRatingQuestions -> splitRatingQuest(drawings)
-            hasMultipleChoiceQuestions -> splitMultiChoQuest(drawings)
+            hasSurveyDescription -> splitDesc(drawings, cursor)
+            hasRatingQuestions -> splitRatingQuest(drawings, cursor)
+            hasMultipleChoiceQuestions -> splitMultiChoQuest(drawings, cursor)
             else -> emptyList()
         }
     }
