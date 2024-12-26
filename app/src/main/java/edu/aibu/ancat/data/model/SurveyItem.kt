@@ -5,7 +5,6 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class SurveyItem(
     val type: String,
-    val title: String,
     val questions: List<Question>
 )
 
@@ -14,7 +13,7 @@ data class SurveyItem(
 sealed class Question {
 
     @Serializable
-    data class SurveyTitle(val description: List<String>) : Question()
+    data class SurveyTitle(val title: String, val description: List<String>) : Question()
 
     @Serializable
     data class SurveyDescription(val description: List<String>) : Question()

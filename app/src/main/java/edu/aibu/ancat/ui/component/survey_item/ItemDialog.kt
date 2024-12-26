@@ -1,5 +1,6 @@
 package edu.aibu.ancat.ui.component.survey_item
 
+import android.provider.CalendarContract.Colors
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -9,9 +10,14 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material3.Button
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
+import androidx.compose.material3.TextFieldColors
+import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
@@ -40,21 +46,28 @@ fun SimpleQuestionDialog(
         onDismissRequest = onDismissRequest,
         properties = DialogProperties(usePlatformDefaultWidth = false),
     ) {
-
         Box(
             modifier = modifier
-                .background(color = Color.White)
+                .background(color = MaterialTheme.colorScheme.background)
                 .fillMaxSize(),
         ) {
 
-            Column(
+            LazyColumn(
                 modifier = modifier
                     .padding(16.dp),
                 verticalArrangement = Arrangement.Center,
                 horizontalAlignment = Alignment.CenterHorizontally,
             ) {
-                text.forEachIndexed { index, optionText ->
+                itemsIndexed(text) { index, optionText ->
                     TextField(
+                        colors = TextFieldDefaults.colors(
+                            focusedContainerColor = MaterialTheme.colorScheme.surfaceVariant,
+                            unfocusedContainerColor = MaterialTheme.colorScheme.surfaceContainer, // Hafif belirgin bir renk önerisi
+                            focusedIndicatorColor = Color.Transparent, // Alt çizgiyi gizler
+                            unfocusedIndicatorColor = MaterialTheme.colorScheme.secondary,
+                            cursorColor = MaterialTheme.colorScheme.primary, // Gözle görülür bir imleç
+                            disabledContainerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.12f) // Devre dışı durum
+                        ),
                         value = optionText,
                         onValueChange = {
                             text[index] = it
@@ -68,23 +81,24 @@ fun SimpleQuestionDialog(
                     Spacer(modifier = Modifier.height(8.dp))
                 }
 
-                Spacer(modifier = Modifier.height(16.dp))
+                item {
+                    Spacer(modifier = Modifier.height(16.dp))
 
-                Button(onClick = {
-                    text.removeAt(text.lastIndex)
-                    val survey = SurveyItem(
-                        type = "0",
-                        title = "",
-                        questions = listOf(
-                            Question.SurveyDescription(
-                                description = text
-                            )
-                        ),
-                    )
-                    viewModel.addSurveyItem(survey)
-                    onDismissRequest()
-                }) {
-                    Text("Ekle")
+                    Button(onClick = {
+                        text.removeAt(text.lastIndex)
+                        val survey = SurveyItem(
+                            type = "0",
+                            questions = listOf(
+                                Question.SurveyDescription(
+                                    description = text
+                                )
+                            ),
+                        )
+                        viewModel.addSurveyItem(survey)
+                        onDismissRequest()
+                    }) {
+                        Text("Ekle")
+                    }
                 }
             }
         }
@@ -108,7 +122,7 @@ fun RatingQuestionDialog(
 
         Box(
             modifier = modifier
-                .background(color = Color.White)
+                .background(color = MaterialTheme.colorScheme.background)
                 .fillMaxSize(),
         ) {
 
@@ -119,6 +133,14 @@ fun RatingQuestionDialog(
                 horizontalAlignment = Alignment.CenterHorizontally,
             ) {
                 TextField(
+                    colors = TextFieldDefaults.colors(
+                        focusedContainerColor = MaterialTheme.colorScheme.surfaceVariant,
+                        unfocusedContainerColor = MaterialTheme.colorScheme.surfaceContainer, // Hafif belirgin bir renk önerisi
+                        focusedIndicatorColor = Color.Transparent, // Alt çizgiyi gizler
+                        unfocusedIndicatorColor = MaterialTheme.colorScheme.secondary,
+                        cursorColor = MaterialTheme.colorScheme.primary, // Gözle görülür bir imleç
+                        disabledContainerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.12f) // Devre dışı durum
+                    ),
                     value = text,
                     onValueChange = {
                         text = it
@@ -133,7 +155,6 @@ fun RatingQuestionDialog(
                 Button(onClick = {
                     val survey = SurveyItem(
                         type = "1",
-                        title = "",
                         questions = listOf(
                             Question.RatingQuestion(
                                 question = text
@@ -166,27 +187,44 @@ fun MultipleChoiceQuestionDialog(
     ) {
         Box(
             modifier = modifier
-                .background(color = Color.White)
+                .background(color = MaterialTheme.colorScheme.background)
                 .fillMaxSize(),
         ) {
 
-            Column(
+            LazyColumn(
                 modifier = modifier.padding(16.dp),
                 verticalArrangement = Arrangement.Center,
                 horizontalAlignment = Alignment.CenterHorizontally,
             ) {
-
-                TextField(
-                    value = questionText,
-                    onValueChange = { questionText = it },
-                    label = { Text("Soru") },
-                    modifier = Modifier.fillMaxWidth()
-                )
-
-                Spacer(modifier = Modifier.height(16.dp))
-
-                options.forEachIndexed { index, optionText ->
+                item {
                     TextField(
+                        colors = TextFieldDefaults.colors(
+                            focusedContainerColor = MaterialTheme.colorScheme.surfaceVariant,
+                            unfocusedContainerColor = MaterialTheme.colorScheme.surfaceContainer, // Hafif belirgin bir renk önerisi
+                            focusedIndicatorColor = Color.Transparent, // Alt çizgiyi gizler
+                            unfocusedIndicatorColor = MaterialTheme.colorScheme.secondary,
+                            cursorColor = MaterialTheme.colorScheme.primary, // Gözle görülür bir imleç
+                            disabledContainerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.12f) // Devre dışı durum
+                        ),
+                        value = questionText,
+                        onValueChange = { questionText = it },
+                        label = { Text("Soru") },
+                        modifier = Modifier.fillMaxWidth()
+                    )
+
+                    Spacer(modifier = Modifier.height(16.dp))
+                }
+
+                itemsIndexed(options) { index, optionText ->
+                    TextField(
+                        colors = TextFieldDefaults.colors(
+                            focusedContainerColor = MaterialTheme.colorScheme.surfaceVariant,
+                            unfocusedContainerColor = MaterialTheme.colorScheme.surfaceContainer, // Hafif belirgin bir renk önerisi
+                            focusedIndicatorColor = Color.Transparent, // Alt çizgiyi gizler
+                            unfocusedIndicatorColor = MaterialTheme.colorScheme.secondary,
+                            cursorColor = MaterialTheme.colorScheme.primary, // Gözle görülür bir imleç
+                            disabledContainerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.12f) // Devre dışı durum
+                        ),
                         value = optionText,
                         onValueChange = {
                             options[index] = it
@@ -201,25 +239,24 @@ fun MultipleChoiceQuestionDialog(
                     Spacer(modifier = Modifier.height(8.dp))
                 }
 
-                Spacer(modifier = Modifier.height(16.dp))
-
-                Button(onClick = {
-                    options.removeAt(options.lastIndex)
-
-                    val survey = SurveyItem(
-                        type = "2",
-                        title = "",
-                        questions = listOf(
-                            Question.MultipleChoiceQuestion(
-                                question = questionText,
-                                options = options
+                item {
+                    Spacer(modifier = Modifier.height(16.dp))
+                    Button(onClick = {
+                        options.removeAt(options.lastIndex)
+                        val survey = SurveyItem(
+                            type = "2",
+                            questions = listOf(
+                                Question.MultipleChoiceQuestion(
+                                    question = questionText,
+                                    options = options
+                                )
                             )
                         )
-                    )
-                    viewModel.addSurveyItem(survey)
-                    onDismissRequest()
-                }) {
-                    Text("Ekle")
+                        viewModel.addSurveyItem(survey)
+                        onDismissRequest()
+                    }) {
+                        Text("Ekle")
+                    }
                 }
             }
         }

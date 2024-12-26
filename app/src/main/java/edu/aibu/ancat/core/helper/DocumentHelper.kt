@@ -10,6 +10,7 @@ import android.util.Log
 import android.widget.Toast
 import edu.aibu.ancat.core.renderer.DocumentRenderer
 import edu.aibu.ancat.core.renderer.survey_drawings.utils.DrawingMeasurer
+import edu.aibu.ancat.data.model.Question
 import edu.aibu.ancat.data.model.SurveyItem
 import edu.aibu.ancat.utils.DocumentConstants.MARGIN
 import edu.aibu.ancat.utils.DocumentConstants.PAGE_HEIGHT
@@ -21,6 +22,7 @@ import java.io.File
 import java.io.FileOutputStream
 import javax.inject.Inject
 
+@Suppress("CAST_NEVER_SUCCEEDS")
 class DocumentHelper @Inject constructor(
     private val documentRenderer: DocumentRenderer,
     private val drawingMeasurer: DrawingMeasurer
@@ -101,7 +103,10 @@ class DocumentHelper @Inject constructor(
             Log.d("Cursor ->", "$cursor")
         }
         savePage(page)
-        saveDocument(context, data[0].title)
+        val survey = data[0].questions[0] as Question.SurveyTitle
+        val title = survey.title
+
+        saveDocument(context, title)
     }
 
 }

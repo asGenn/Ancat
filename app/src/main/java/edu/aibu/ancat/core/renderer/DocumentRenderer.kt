@@ -28,10 +28,9 @@ class DocumentRenderer @Inject constructor(
         }
     }
 
-    private fun renderTitleCommitFrame(canvas: Canvas, title: String, question: Question): Float {
+    private fun renderTitleCommitFrame(canvas: Canvas, question: Question): Float {
         return titleAndCommits.surveyTitleCommit(
             canvas = canvas,
-            title = title,
             commits = question as Question.SurveyTitle
         )
     }
@@ -65,7 +64,7 @@ class DocumentRenderer @Inject constructor(
         val type = questionTypeCheck(data.type)
         data.questions.forEach {
             cursorPosition = when (type) {
-                Type.TITLE -> renderTitleCommitFrame(canvas, data.title, it)
+                Type.TITLE -> renderTitleCommitFrame(canvas, it)
                 Type.DESC -> renderDescriptions(canvas, it, cursorPosition)
                 Type.RATING -> renderRatingQuestions(canvas, it, cursorPosition)
                 Type.MULTI -> renderMultiChoQuest(canvas, it, cursorPosition)
