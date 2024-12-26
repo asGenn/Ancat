@@ -9,5 +9,5 @@ object DocumentConstants {
     const val CELL_HEIGHT = 25f
     const val MARGIN = 10f
     const val TEXT = 1f
-
+    const val ZERO = 0f
 }

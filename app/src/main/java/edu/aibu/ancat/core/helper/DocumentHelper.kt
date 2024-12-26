@@ -1,13 +1,17 @@
 package edu.aibu.ancat.core.helper
 
+import android.content.Context
 import android.graphics.Canvas
 import android.graphics.pdf.PdfDocument
 import android.graphics.pdf.PdfDocument.Page
 import android.graphics.pdf.PdfDocument.PageInfo.Builder
 import android.os.Environment
+import android.util.Log
+import android.widget.Toast
 import edu.aibu.ancat.core.renderer.DocumentRenderer
 import edu.aibu.ancat.core.renderer.survey_drawings.utils.DrawingMeasurer
 import edu.aibu.ancat.data.model.SurveyItem
+import edu.aibu.ancat.utils.DocumentConstants.MARGIN
 import edu.aibu.ancat.utils.DocumentConstants.PAGE_HEIGHT
 import edu.aibu.ancat.utils.DocumentConstants.PAGE_WIDTH
 import edu.aibu.ancat.utils.DocumentConstants.START_CURSOR
@@ -40,6 +44,7 @@ class DocumentHelper @Inject constructor(
     }
 
     private suspend fun saveDocument(
+        context: Context,
         documentName: String
     ) {
         val path = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS)!!
@@ -51,14 +56,16 @@ class DocumentHelper @Inject constructor(
                 }
             }
         } catch (e: Exception) {
+            Toast.makeText(context, "PDF oluşturulamadı!", Toast.LENGTH_LONG).show()
             e.printStackTrace()
         } finally {
+            Toast.makeText(context, "PDF Oluşturuldu :)", Toast.LENGTH_LONG).show()
             pdfDocument.close()
         }
 
     }
 
-    suspend fun createDocument(data: List<SurveyItem>) {
+    suspend fun createDocument(context: Context, data: List<SurveyItem>) {
         pdfDocument = PdfDocument()
         page = createPage()
         canvas = page.canvas
@@ -68,31 +75,33 @@ class DocumentHelper @Inject constructor(
             var splitList = emptyList<SurveyItem>()
 
             if (sum) {
-                savePage(page)
-                page = createPage()
-                canvas = page.canvas
-                cursor = START_CURSOR
-
-                if (drawingMeasurer.handlePageBreakIfNeeded(it.questions, cursor)) {
-                    splitQuest = true
-                    splitList = drawingMeasurer.splitQuestion(it)
-                }
-            }
-            cursor = if (splitQuest) {
-                splitList.forEach {spl ->
-                    cursor = START_CURSOR
-                    cursor = documentRenderer.renderDocument(canvas, cursor + 20, spl)
+                splitList = drawingMeasurer.splitQuestion(it, cursor)
+                splitQuest = true
+                if (drawingMeasurer.handlePageBreakIfNeeded(splitList[0].questions, cursor)) {
                     savePage(page)
                     page = createPage()
                     canvas = page.canvas
+                    cursor = START_CURSOR
+                }
+            }
+            cursor = if (splitQuest) {
+                splitList.forEachIndexed {index, spl ->
+                    if (index != 0) {
+                        savePage(page)
+                        page = createPage()
+                        canvas = page.canvas
+                        cursor = START_CURSOR
+                    }
+                    cursor = documentRenderer.renderDocument(canvas, cursor + MARGIN*2, spl)
                 }
                 cursor
             } else {
-                documentRenderer.renderDocument(canvas, cursor + 20, it)
+                documentRenderer.renderDocument(canvas, cursor + MARGIN*2, it)
             }
+            Log.d("Cursor ->", "$cursor")
         }
         savePage(page)
-        saveDocument(data[0].title)
+        saveDocument(context, data[0].title)
     }
 
 }
