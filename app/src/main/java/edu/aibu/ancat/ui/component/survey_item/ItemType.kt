@@ -27,9 +27,10 @@ fun SurveyTitleType(item: SurveyItem) {
             .padding(8.dp)
             .fillMaxWidth()
     ) {
+        val title = item.questions[0] as Question.SurveyTitle
         Column {
             Text(
-                item.title,
+                title.title,
                 fontSize = 24.sp,
                 fontWeight = FontWeight.Bold,
                 modifier = Modifier
@@ -37,19 +38,15 @@ fun SurveyTitleType(item: SurveyItem) {
                     .fillMaxWidth()
                     .wrapContentWidth(Alignment.CenterHorizontally)
             )
-            item.questions.forEachIndexed { _, question ->
-                if (question is Question.SurveyTitle) {
-                    question.description.forEach {
-                        Text(
-                            it,
-                            fontSize = 16.sp,
-                            fontWeight = FontWeight.Normal,
-                            modifier = Modifier.padding(
-                                horizontal = 12.dp
-                            )
-                        )
-                    }
-                }
+            title.description.forEach {
+                Text(
+                    it,
+                    fontSize = 16.sp,
+                    fontWeight = FontWeight.Normal,
+                    modifier = Modifier.padding(
+                        horizontal = 12.dp
+                    )
+                )
             }
             HorizontalDivider(
                 color = Color.Gray,

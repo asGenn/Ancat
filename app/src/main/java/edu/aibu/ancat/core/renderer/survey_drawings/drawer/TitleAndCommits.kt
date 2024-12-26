@@ -17,14 +17,13 @@ class TitleAndCommits @Inject constructor(
 
     fun surveyTitleCommit(
         canvas: Canvas,
-        title: String,
         commits: Question.SurveyTitle
     ): Float {
 
         var cursorPos = START_CURSOR
 
-        val titleCenter = (PAGE_WIDTH - paintFactory.title().measureText(title)) / 2
-        canvas.drawText(title, titleCenter, cursorPos, paintFactory.title())
+        val titleCenter = (PAGE_WIDTH - paintFactory.title().measureText(commits.title)) / 2
+        canvas.drawText(commits.title, titleCenter, cursorPos, paintFactory.title())
         cursorPos += TITLE_PADDING
 
         commits.description.forEach { commit ->

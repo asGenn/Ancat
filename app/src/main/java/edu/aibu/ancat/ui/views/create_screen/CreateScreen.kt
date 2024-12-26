@@ -16,6 +16,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExtendedFloatingActionButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
@@ -73,13 +74,15 @@ fun CreateScreen(navController: NavController) {
         floatingActionButton = {
             if (jsonFilesList.isNotEmpty()) {
                 ExtendedFloatingActionButton(
+                    containerColor = MaterialTheme.colorScheme.primary,
+                    contentColor = MaterialTheme.colorScheme.onPrimary,
                     onClick = {
                         openDialog.value = true
                     },
                 ) {
                     Text(
                         text = "Anket Oluştur",
-                        fontSize = 22.sp,
+                        fontSize = 16.sp,
                         fontWeight = FontWeight.Normal
                     )
                 }
@@ -189,14 +192,8 @@ fun JsonFileListScreen(
 
 @Composable
 fun EmptyScreen(
-//    modifier: Modifier = Modifier,
-//    navController: NavController,
-//    context: Context,
-//    viewModel: CreateScreenViewModel,
     openDialog: MutableState<Boolean>
 ) {
-
-
     Column(
         modifier = Modifier
             .fillMaxSize(),
@@ -219,12 +216,14 @@ fun EmptyScreen(
             text = "Anket oluşturmak için aşağıdaki butona tıklayın.",
             fontSize = 14.sp
         )
-        Button(onClick = {
-//            navController.navigate(CreateSurvey)
-            openDialog.value = true
-
-
-        }
+        Button(
+            colors = ButtonDefaults.buttonColors(
+                containerColor = MaterialTheme.colorScheme.primary, // Arka plan rengi
+                contentColor = MaterialTheme.colorScheme.onPrimary // İçerik (metin) rengi
+            ),
+            onClick = {
+                openDialog.value = true
+            }
         ) {
             Text(
                 text = "Anket Oluştur",
@@ -295,9 +294,8 @@ fun SurveyTitleDialog(
                         viewModel.viewModelScope.launch {
                             val surveyItem = SurveyItem(
                                 type = "_",
-                                title = title,
                                 questions = listOf(
-                                    Question.SurveyTitle(description = descriptions)
+                                    Question.SurveyTitle(title = title,description = descriptions)
                                 )
                             )
                             surveyItemList.add(surveyItem)
@@ -318,14 +316,14 @@ fun SurveyTitleDialog(
                     },
                     modifier = Modifier.padding(end = 8.dp)
                 ) {
-                    Text("Onayla")
+                    Text("Onayla", color = MaterialTheme.colorScheme.onPrimary)
                 }
             },
             dismissButton = {
                 Button(
                     onClick = { openDialog.value = false },
                 ) {
-                    Text("İptal", color = Color.Black)
+                    Text("İptal", color = MaterialTheme.colorScheme.onPrimary)
                 }
             },
             properties = DialogProperties(usePlatformDefaultWidth = false)

@@ -166,7 +166,6 @@ class DrawingMeasurer @Inject constructor(
                 splitSurveyItems.add(
                     SurveyItem(
                         type = drawings.type,
-                        title = drawings.title,
                         questions = currentPageQuestions.toList()
                     )
                 )
@@ -181,7 +180,6 @@ class DrawingMeasurer @Inject constructor(
             splitSurveyItems.add(
                 SurveyItem(
                     type = drawings.type,
-                    title = drawings.title,
                     questions = currentPageQuestions.toList()
                 )
             )

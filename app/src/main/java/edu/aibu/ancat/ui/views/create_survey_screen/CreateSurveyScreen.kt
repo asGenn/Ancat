@@ -120,7 +120,7 @@ fun SurveyCreator(
             AlertDialog(
                 onDismissRequest = { selectedItem.value = null },
                 title = { Text(text = "Seçilen Öğe") },
-                text = { Text("Öğe Başlığı: ${item.title}") },
+//                text = { Text("Öğe Başlığı: ${item.type}") },
                 confirmButton = {
                     Button(onClick = { selectedItem.value = null }) {
                         Text("Kapat")
