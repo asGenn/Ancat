@@ -1,3 +1,5 @@
+package edu.aibu.ancat.ui.views.home_screen
+
 import android.app.Activity
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -27,7 +29,6 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import coil3.compose.AsyncImage
-import edu.aibu.ancat.ui.views.home_screen.AnalyzeScreenViewModel
 
 @Composable
 fun AnalyzeScreen() {

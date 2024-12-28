@@ -2,15 +2,11 @@ package edu.aibu.ancat.core.renderer.survey_drawings.drawer
 
 import android.graphics.Canvas
 import android.graphics.Paint
-import edu.aibu.ancat.utils.PaintFactory
 import edu.aibu.ancat.utils.DocumentConstants.TEXT
-import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
-class CanvasContentDrawer @Inject constructor(
-    private val paintFactory: PaintFactory
-) {
+class CanvasContentDrawer {
 
     fun writeText(
         canvas: Canvas,
