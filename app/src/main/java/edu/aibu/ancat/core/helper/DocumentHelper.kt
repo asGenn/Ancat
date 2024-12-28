@@ -9,7 +9,8 @@ import android.os.Environment
 import android.util.Log
 import android.widget.Toast
 import edu.aibu.ancat.core.renderer.DocumentRenderer
-import edu.aibu.ancat.core.renderer.survey_drawings.utils.DrawingMeasurer
+import edu.aibu.ancat.core.renderer.survey_drawings.utils.DrawingMeasurerHandler
+import edu.aibu.ancat.core.renderer.survey_drawings.utils.PagedQuestionHandler
 import edu.aibu.ancat.data.model.Question
 import edu.aibu.ancat.data.model.SurveyItem
 import edu.aibu.ancat.utils.DocumentConstants.MARGIN
@@ -22,10 +23,10 @@ import java.io.File
 import java.io.FileOutputStream
 import javax.inject.Inject
 
-@Suppress("CAST_NEVER_SUCCEEDS")
 class DocumentHelper @Inject constructor(
     private val documentRenderer: DocumentRenderer,
-    private val drawingMeasurer: DrawingMeasurer
+    private val drawingMeasurerHandler: DrawingMeasurerHandler,
+    private val pagedQuestionHandler: PagedQuestionHandler
 ) {
     private lateinit var pdfDocument: PdfDocument
     private lateinit var page: Page
@@ -72,14 +73,14 @@ class DocumentHelper @Inject constructor(
         page = createPage()
         canvas = page.canvas
         data.forEach {
-            val sum = drawingMeasurer.handlePageBreakIfNeeded(it.questions, cursor)
+            val sum = drawingMeasurerHandler.handlePageBreakIfNeeded(it.questions, cursor)
             var splitQuest = false
             var splitList = emptyList<SurveyItem>()
 
             if (sum) {
-                splitList = drawingMeasurer.splitQuestion(it, cursor)
+                splitList = pagedQuestionHandler.splitQuestion(it, cursor)
                 splitQuest = true
-                if (drawingMeasurer.handlePageBreakIfNeeded(splitList[0].questions, cursor)) {
+                if (drawingMeasurerHandler.handlePageBreakIfNeeded(splitList[0].questions, cursor)) {
                     savePage(page)
                     page = createPage()
                     canvas = page.canvas

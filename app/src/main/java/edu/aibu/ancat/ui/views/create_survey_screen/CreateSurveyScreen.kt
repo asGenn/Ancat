@@ -116,11 +116,10 @@ fun SurveyCreator(
         CustomModalBottomSheet(modifier = modifier, show = showBottomSheet, viewModel = viewModel)
         DialogHandler(modifier = modifier, viewModel = viewModel)
 
-        selectedItem.value?.let { item ->
+        selectedItem.value?.let { _ ->
             AlertDialog(
                 onDismissRequest = { selectedItem.value = null },
                 title = { Text(text = "Seçilen Öğe") },
-//                text = { Text("Öğe Başlığı: ${item.type}") },
                 confirmButton = {
                     Button(onClick = { selectedItem.value = null }) {
                         Text("Kapat")

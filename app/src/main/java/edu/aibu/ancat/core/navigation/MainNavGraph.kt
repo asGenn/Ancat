@@ -1,6 +1,6 @@
 package edu.aibu.ancat.core.navigation
 
-import AnalyzeScreen
+import edu.aibu.ancat.ui.views.home_screen.AnalyzeScreen
 import androidx.compose.foundation.layout.Box
 
 import androidx.compose.foundation.layout.fillMaxSize

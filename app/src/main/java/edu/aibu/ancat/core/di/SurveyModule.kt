@@ -11,7 +11,8 @@ import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
 import edu.aibu.ancat.core.helper.DocumentHelper
 import edu.aibu.ancat.core.renderer.DocumentRenderer
-import edu.aibu.ancat.core.renderer.survey_drawings.utils.DrawingMeasurer
+import edu.aibu.ancat.core.renderer.survey_drawings.utils.DrawingMeasurerHandler
+import edu.aibu.ancat.core.renderer.survey_drawings.utils.PagedQuestionHandler
 import edu.aibu.ancat.core.renderer.survey_drawings.utils.TextHandler
 import javax.inject.Singleton
 
@@ -21,14 +22,19 @@ object SurveyModule {
 
     @Provides
     @Singleton
-    fun provideCanvasContentDrawer(): CanvasContentDrawer = CanvasContentDrawer(PaintFactory)
+    fun provideCanvasContentDrawer(): CanvasContentDrawer = CanvasContentDrawer()
 
     @Provides
     @Singleton
     fun provideDrawingMeasurer(
         textHandler: TextHandler
+    ): DrawingMeasurerHandler = DrawingMeasurerHandler(textHandler, PaintFactory)
 
-    ): DrawingMeasurer = DrawingMeasurer(textHandler, PaintFactory)
+    @Provides
+    @Singleton
+    fun providePagedQuestionHandler(
+        drawingMeasurerHandler: DrawingMeasurerHandler
+    ): PagedQuestionHandler = PagedQuestionHandler(drawingMeasurerHandler)
 
     @Provides
     @Singleton
@@ -44,11 +50,7 @@ object SurveyModule {
         canvasContentDrawer: CanvasContentDrawer,
         textHandler: TextHandler
     ): MultipleChoiceQuestions =
-        MultipleChoiceQuestions(
-            canvasContentDrawer = canvasContentDrawer,
-            textHandler = textHandler,
-            paintFactory = PaintFactory
-        )
+        MultipleChoiceQuestions(canvasContentDrawer, textHandler, PaintFactory)
 
 
     @Provides
@@ -56,11 +58,7 @@ object SurveyModule {
     fun provideRatingQuestion(
         canvasContentDrawer: CanvasContentDrawer,
         textHandler: TextHandler
-    ): RatingQuestion = RatingQuestion(
-        canvasContentDrawer = canvasContentDrawer,
-        textHandler = textHandler,
-        paintFactory = PaintFactory
-    )
+    ): RatingQuestion = RatingQuestion(canvasContentDrawer, textHandler, PaintFactory)
 
     @Provides
     @Singleton
@@ -68,45 +66,15 @@ object SurveyModule {
         titleAndCommits: TitleAndCommits,
         ratingQuestion: RatingQuestion,
         multipleChoiceQuestions: MultipleChoiceQuestions
-    ): DocumentRenderer = DocumentRenderer(
-        titleAndCommits = titleAndCommits,
-        ratingQuestion = ratingQuestion,
-        multipleChoiceQuestions = multipleChoiceQuestions
-    )
+    ): DocumentRenderer = DocumentRenderer(titleAndCommits, ratingQuestion, multipleChoiceQuestions)
 
     @Provides
     @Singleton
     fun provideDocumentHelper(
         documentRenderer: DocumentRenderer,
-        drawingMeasurer: DrawingMeasurer
-    ): DocumentHelper = DocumentHelper(
-        documentRenderer = documentRenderer,
-        drawingMeasurer = drawingMeasurer
-    )
-
-
-//    @Provides
-//    @Singleton
-//    fun provideSurveyRenderer(
-//        canvasContentDrawer: CanvasContentDrawer,
-//        titleAndCommits: TitleAndCommits,
-//        multipleChoiceQuestions: MultipleChoiceQuestions,
-//        ratingQuestion: RatingQuestion
-//    ): SurveyProcessor =
-//        SurveyRenderer(
-//            canvasContentDrawer = canvasContentDrawer,
-//            titleAndCommits = titleAndCommits,
-//            multipleChoiceQuestions = multipleChoiceQuestions,
-//            ratingQuestion = ratingQuestion
-//        )
-//
-//    @Provides
-//    @Singleton
-//    fun provideSurveyHelper(
-//        surveyProcessor: SurveyProcessor,
-//        drawingMeasurer: DrawingMeasurer
-//    ): SurveyHelper =
-//        SurveyHelper(
-//            surveyRenderer = surveyProcessor, drawingMeasurer = drawingMeasurer)
+        drawingMeasurerHandler: DrawingMeasurerHandler,
+        pagedQuestionHandler: PagedQuestionHandler
+    ): DocumentHelper =
+        DocumentHelper(documentRenderer, drawingMeasurerHandler, pagedQuestionHandler)
 
 }
