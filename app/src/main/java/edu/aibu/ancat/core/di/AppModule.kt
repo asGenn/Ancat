@@ -11,6 +11,7 @@ import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
+import edu.aibu.ancat.core.helper.TimeConverter
 import javax.inject.Singleton
 
 @Module
@@ -40,5 +41,9 @@ object AppModule {
     @Provides
     @Singleton
     fun provideJsonHelper() = JsonHelper()
+
+    @Provides
+    @Singleton
+    fun provideTimeConverter() = TimeConverter()
 
 }

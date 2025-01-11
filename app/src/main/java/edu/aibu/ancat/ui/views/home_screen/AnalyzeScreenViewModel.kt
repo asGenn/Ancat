@@ -5,7 +5,6 @@ import android.net.Uri
 import androidx.activity.result.ActivityResult
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
-import com.google.mlkit.vision.documentscanner.GmsDocumentScanner
 import com.google.mlkit.vision.documentscanner.GmsDocumentScannerOptions
 import com.google.mlkit.vision.documentscanner.GmsDocumentScannerOptions.RESULT_FORMAT_JPEG
 import com.google.mlkit.vision.documentscanner.GmsDocumentScannerOptions.RESULT_FORMAT_PDF
@@ -18,21 +17,19 @@ import javax.inject.Inject
 @HiltViewModel
 class AnalyzeScreenViewModel @Inject constructor() : ViewModel() {
 
-    private val _option = GmsDocumentScannerOptions.Builder()
+    private val option = GmsDocumentScannerOptions.Builder()
             .setScannerMode(SCANNER_MODE_FULL)
             .setGalleryImportAllowed(true)
             .setResultFormats(RESULT_FORMAT_JPEG, RESULT_FORMAT_PDF)
             .build()
 
-    private val option: GmsDocumentScannerOptions get() = _option
+    val scanner = GmsDocumentScanning.getClient(option)
 
-    private val _scanner = GmsDocumentScanning.getClient(option)
-    val scanner: GmsDocumentScanner get() = _scanner
-
-    private var _imageUris  = mutableStateOf<List<Uri>>(emptyList())
+    private val _imageUris  = mutableStateOf<List<Uri>>(emptyList())
     val imageUris: List<Uri> get() = _imageUris.value
 
     fun handleScanResult(scanner: ActivityResult) {
+
         if (scanner.resultCode == RESULT_OK) {
             val result = GmsDocumentScanningResult.fromActivityResultIntent(scanner.data)
             if (result != null) {

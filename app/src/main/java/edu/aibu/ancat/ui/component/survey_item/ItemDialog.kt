@@ -69,9 +69,13 @@ fun SimpleQuestionDialog(
                         value = optionText,
                         onValueChange = {
                             text[index] = it
-                            if (index == text.lastIndex && it.isNotBlank()) {
+
+                            if (it.isEmpty())
+                                text.removeAt(text.lastIndex)
+
+                            if (index == text.lastIndex && it.isNotBlank())
                                 text.add("")
-                            }
+
                         },
                         label = { Text("Açıklama ${index + 1}") },
                         modifier = Modifier.fillMaxWidth()
@@ -142,7 +146,6 @@ fun RatingQuestionDialog(
                     value = text,
                     onValueChange = {
                         text = it
-
                     },
                     label = { Text("Soru") },
                     modifier = Modifier.fillMaxWidth()
@@ -227,9 +230,11 @@ fun MultipleChoiceQuestionDialog(
                         onValueChange = {
                             options[index] = it
 
-                            if (index == options.lastIndex && it.isNotBlank()) {
+                            if (it.isEmpty())
+                                options.removeAt(options.lastIndex)
+
+                            if (index == options.lastIndex && it.isNotBlank())
                                 options.add("")
-                            }
                         },
                         label = { Text("Seçenek ${index + 1}") },
                         modifier = Modifier.fillMaxWidth()

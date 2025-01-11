@@ -8,7 +8,9 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.RadioButton
+import androidx.compose.material3.RadioButtonColors
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -38,9 +40,9 @@ fun SurveyTitleType(item: SurveyItem) {
                     .fillMaxWidth()
                     .wrapContentWidth(Alignment.CenterHorizontally)
             )
-            title.description.forEach {
+            title.description.forEachIndexed { index, desc ->
                 Text(
-                    it,
+                    "${index + 1} $desc",
                     fontSize = 16.sp,
                     fontWeight = FontWeight.Normal,
                     modifier = Modifier.padding(
@@ -52,8 +54,8 @@ fun SurveyTitleType(item: SurveyItem) {
                 color = Color.Gray,
                 thickness = 2.dp,
                 modifier = Modifier
-                    .fillMaxWidth()
                     .padding(start = 5.dp, top = 8.dp, end = 5.dp)
+                    .fillMaxWidth()
             )
         }
 
@@ -67,26 +69,28 @@ fun DescriptionType(
 ) {
     Column(
         modifier = modifier
-            .padding(start = 12.dp, top = 8.dp, end = 12.dp, bottom = 0.dp)
+            .padding(horizontal = 16.dp, vertical = 8.dp)
             .fillMaxWidth()
     ) {
-        item.questions.forEachIndexed { _, question ->
+        var index = 0
+        item.questions.forEach { question ->
             if (question is Question.SurveyDescription) {
-                question.description.forEachIndexed { index, option ->
+                question.description.forEach { option ->
                     Text(
-                        "${index + 1}. $option",
+                        "${(++index)}. $option",
                         fontSize = 16.sp,
                         fontWeight = FontWeight.Normal
                     )
                 }
             }
+
         }
         HorizontalDivider(
             color = Color.Gray,
             thickness = 2.dp,
             modifier = Modifier
+                .padding(vertical = 12.dp)
                 .fillMaxWidth()
-                .padding(start = 5.dp, top = 8.dp, end = 5.dp)
         )
     }
 }
@@ -122,8 +126,16 @@ fun RatingType(modifier: Modifier = Modifier, item: SurveyItem) {
                     for (i in 1..5) {
                         RadioButton(
                             selected = false,
-                            onClick = { /*TODO*/ },
-                            modifier = Modifier.padding(horizontal = 4.dp)
+                            enabled = false,
+                            modifier = Modifier.padding(horizontal = 4.dp),
+                            onClick = {},
+                            colors = RadioButtonColors(
+                                selectedColor = Color.Transparent,
+                                unselectedColor = Color.Transparent,
+                                disabledSelectedColor = MaterialTheme.colorScheme.onBackground,
+                                disabledUnselectedColor = MaterialTheme.colorScheme.onBackground
+                            )
+
                         )
                     }
                 }
@@ -133,8 +145,8 @@ fun RatingType(modifier: Modifier = Modifier, item: SurveyItem) {
             color = Color.Gray,
             thickness = 2.dp,
             modifier = Modifier
-                .fillMaxWidth()
                 .padding(vertical = 12.dp)
+                .fillMaxWidth()
         )
     }
 }
@@ -143,7 +155,7 @@ fun RatingType(modifier: Modifier = Modifier, item: SurveyItem) {
 fun MultipleChoiceType(modifier: Modifier = Modifier, item: SurveyItem) {
     Column(
         modifier = modifier
-            .padding(start = 12.dp, top = 8.dp, end = 12.dp, bottom = 0.dp)
+            .padding(horizontal = 16.dp, vertical = 8.dp)
             .fillMaxWidth()
     ) {
         item.questions.forEachIndexed { _, question ->
@@ -171,8 +183,8 @@ fun MultipleChoiceType(modifier: Modifier = Modifier, item: SurveyItem) {
             color = Color.Gray,
             thickness = 2.dp,
             modifier = Modifier
-                .fillMaxWidth()
                 .padding(vertical = 12.dp)
+                .fillMaxWidth()
         )
     }
 }

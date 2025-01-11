@@ -4,15 +4,17 @@ import androidx.lifecycle.ViewModel
 import edu.aibu.ancat.data.repository.JsonFilesRepository
 import edu.aibu.ancat.domain.entity.JsonFilesInfoEntity
 import dagger.hilt.android.lifecycle.HiltViewModel
+import edu.aibu.ancat.core.helper.TimeConverter
 import javax.inject.Inject
 
 
 @HiltViewModel
-class  CreateScreenViewModel @Inject constructor(
-    private val jsonFilesRepository: JsonFilesRepository
+class CreateScreenViewModel @Inject constructor(
+    private val jsonFilesRepository: JsonFilesRepository,
+    private val timeConverter: TimeConverter
 ) : ViewModel() {
 
-    suspend fun saveJsonFileToDB(fileName: String,filePath: String, title: String):Long {
+    suspend fun saveJsonFileToDB(fileName: String, filePath: String, title: String): Long {
         return jsonFilesRepository.insertJsonFile(
             jsonFilesInfoEntity = JsonFilesInfoEntity(
                 fileName = fileName,
@@ -23,13 +25,15 @@ class  CreateScreenViewModel @Inject constructor(
             )
         )
     }
+
     suspend fun getJsonFiles() = jsonFilesRepository.getJsonFiles()
-//    suspend fun deleteAll() = jsonFilesRepository.deleteAll()
-    suspend fun deleteJsonFile(jsonFilesInfoEntity: JsonFilesInfoEntity) = jsonFilesRepository.deleteJsonFile(jsonFilesInfoEntity)
 
+    //    suspend fun deleteAll() = jsonFilesRepository.deleteAll()
 
+    suspend fun deleteJsonFile(jsonFilesInfoEntity: JsonFilesInfoEntity) =
+        jsonFilesRepository.deleteJsonFile(jsonFilesInfoEntity)
 
-
-
+    fun convertTime(lastModified: Long): String =
+        timeConverter.convertTime(lastModified)
 
 }
