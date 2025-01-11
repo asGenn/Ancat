@@ -9,9 +9,11 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material3.AlertDialog
@@ -43,7 +45,6 @@ import androidx.lifecycle.viewModelScope
 import androidx.navigation.NavController
 import edu.aibu.ancat.R
 import edu.aibu.ancat.core.helper.JsonHelper
-import edu.aibu.ancat.core.helper.TimeConverter
 import edu.aibu.ancat.core.navigation.CreateSurvey
 import edu.aibu.ancat.data.model.Question
 import edu.aibu.ancat.data.model.SurveyItem
@@ -94,10 +95,6 @@ fun CreateScreen(navController: NavController) {
     ) { innerPadding ->
         if (jsonFilesList.isEmpty()) {
             EmptyScreen(
-//                modifier = Modifier.padding(innerPadding),
-//                navController = navController,
-//                context = context,
-//                viewModel = viewModel,
                 openDialog = openDialog
             )
 
@@ -133,7 +130,6 @@ fun JsonFileListScreen(
     viewModel: CreateScreenViewModel
 ) {
 
-
     Column {
         Text(
             text = "Mevcut Anketler",
@@ -150,7 +146,7 @@ fun JsonFileListScreen(
                 val item = jsonFilesList[index]
                 ListTile(
                     title = item.title,
-                    subtitle = "Son Düzenleme: " + TimeConverter().convertTime(item.lastModified),
+                    subtitle = "Son Düzenleme:  " + viewModel.convertTime(item.lastModified),
                     modifier = Modifier
                         .padding(8.dp)
                         .clickable(
@@ -167,7 +163,6 @@ fun JsonFileListScreen(
                                 context = context
                             )
                         ) {
-
                             // delete from list
                             jsonFilesList.remove(item)
                             // delete from database
@@ -247,6 +242,7 @@ fun SurveyTitleDialog(
 
     if (openDialog.value) {
         AlertDialog(
+            modifier = Modifier.padding(16.dp).heightIn(min = 300.dp, max = 500.dp),
             onDismissRequest = {
                 openDialog.value = false
                 title = ""
@@ -258,7 +254,7 @@ fun SurveyTitleDialog(
                 Column(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(16.dp),
+                        .padding(8.dp),
                     verticalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
                     TextField(
@@ -267,21 +263,24 @@ fun SurveyTitleDialog(
                         label = { Text("Başlık Girin") },
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(bottom = 8.dp)
                     )
 
-                    descriptions.forEachIndexed { index, description ->
-                        TextField(
-                            value = description,
-                            onValueChange = {
-                                descriptions[index] = it
-                                if (index == descriptions.lastIndex && it.isNotBlank() && index < 4) {
-                                    descriptions.add("")
-                                }
-                            },
-                            label = { Text("Seçenek ${index + 1}") },
-                            modifier = Modifier.fillMaxWidth()
-                        )
+                    LazyColumn {
+                        itemsIndexed(descriptions) { index, desc ->
+                            TextField(
+                                value = desc,
+                                onValueChange = {
+                                    descriptions[index] = it
+                                    if (it.isEmpty())
+                                        descriptions.removeAt(descriptions.lastIndex)
+                                    if (index == descriptions.lastIndex && it.isNotBlank())
+                                        descriptions.add("")
+                                },
+                                label = { Text("Açıklama ${index + 1}") },
+                                modifier = Modifier.fillMaxWidth()
+                            )
+                            Spacer(modifier = Modifier.height(8.dp))
+                        }
                     }
                 }
             },
@@ -294,7 +293,7 @@ fun SurveyTitleDialog(
                             val surveyItem = SurveyItem(
                                 type = "_",
                                 questions = listOf(
-                                    Question.SurveyTitle(title = title,description = descriptions)
+                                    Question.SurveyTitle(title = title, description = descriptions)
                                 )
                             )
                             surveyItemList.add(surveyItem)

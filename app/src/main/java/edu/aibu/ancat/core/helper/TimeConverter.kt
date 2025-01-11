@@ -8,7 +8,7 @@ class TimeConverter {
 
     fun convertTime(time: Long): String {
         val date = Date(time)
-        val format = SimpleDateFormat("dd/MM/yyyy HH:mm:ss", Locale.getDefault())
+        val format = SimpleDateFormat("dd.MM.yyyy  HH.mm", Locale.getDefault())
         return format.format(date)
     }
 }
