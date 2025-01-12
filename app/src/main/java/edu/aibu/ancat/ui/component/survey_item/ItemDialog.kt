@@ -8,10 +8,14 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonColors
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
@@ -54,15 +58,16 @@ fun SimpleQuestionDialog(
                 modifier = modifier
                     .padding(16.dp),
                 verticalArrangement = Arrangement.Center,
-                horizontalAlignment = Alignment.CenterHorizontally,
+                horizontalAlignment = Alignment.End,
             ) {
                 itemsIndexed(text) { index, optionText ->
                     TextField(
+                        modifier = Modifier.fillMaxWidth().heightIn(min = 60.dp),
                         colors = TextFieldDefaults.colors(
                             focusedContainerColor = MaterialTheme.colorScheme.surfaceVariant,
                             unfocusedContainerColor = MaterialTheme.colorScheme.surfaceContainer, // Hafif belirgin bir renk önerisi
                             focusedIndicatorColor = Color.Transparent, // Alt çizgiyi gizler
-                            unfocusedIndicatorColor = MaterialTheme.colorScheme.secondary,
+                            unfocusedIndicatorColor = Color.Transparent,
                             cursorColor = MaterialTheme.colorScheme.primary, // Gözle görülür bir imleç
                             disabledContainerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.12f) // Devre dışı durum
                         ),
@@ -77,8 +82,7 @@ fun SimpleQuestionDialog(
                                 text.add("")
 
                         },
-                        label = { Text("Açıklama ${index + 1}") },
-                        modifier = Modifier.fillMaxWidth()
+                        label = { Text("Açıklama ${index + 1}") }
                     )
                     Spacer(modifier = Modifier.height(8.dp))
                 }
@@ -86,19 +90,30 @@ fun SimpleQuestionDialog(
                 item {
                     Spacer(modifier = Modifier.height(16.dp))
 
-                    Button(onClick = {
-                        text.removeAt(text.lastIndex)
-                        val survey = SurveyItem(
-                            type = "0",
-                            questions = listOf(
-                                Question.SurveyDescription(
-                                    description = text
-                                )
-                            ),
-                        )
-                        viewModel.addSurveyItem(survey)
-                        onDismissRequest()
-                    }) {
+                    Button(
+                        modifier = Modifier
+                            .height(48.dp)
+                            .width(90.dp),
+                        shape = RoundedCornerShape(3.dp),
+                        colors = ButtonColors(
+                            containerColor = MaterialTheme.colorScheme.primary,
+                            contentColor = MaterialTheme.colorScheme.onPrimary,
+                            disabledContainerColor = Color.Transparent,
+                            disabledContentColor = Color.Transparent
+                        ),
+                        onClick = {
+                            text.removeAt(text.lastIndex)
+                            val survey = SurveyItem(
+                                type = "0",
+                                questions = listOf(
+                                    Question.SurveyDescription(
+                                        description = text
+                                    )
+                                ),
+                            )
+                            viewModel.addSurveyItem(survey)
+                            onDismissRequest()
+                        }) {
                         Text("Ekle")
                     }
                 }
@@ -135,11 +150,12 @@ fun RatingQuestionDialog(
                 horizontalAlignment = Alignment.CenterHorizontally,
             ) {
                 TextField(
+                    modifier = Modifier.fillMaxWidth().heightIn(min = 60.dp),
                     colors = TextFieldDefaults.colors(
                         focusedContainerColor = MaterialTheme.colorScheme.surfaceVariant,
                         unfocusedContainerColor = MaterialTheme.colorScheme.surfaceContainer, // Hafif belirgin bir renk önerisi
                         focusedIndicatorColor = Color.Transparent, // Alt çizgiyi gizler
-                        unfocusedIndicatorColor = MaterialTheme.colorScheme.secondary,
+                        unfocusedIndicatorColor = Color.Transparent,
                         cursorColor = MaterialTheme.colorScheme.primary, // Gözle görülür bir imleç
                         disabledContainerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.12f) // Devre dışı durum
                     ),
@@ -148,7 +164,6 @@ fun RatingQuestionDialog(
                         text = it
                     },
                     label = { Text("Soru") },
-                    modifier = Modifier.fillMaxWidth()
                 )
 
                 Spacer(modifier = Modifier.height(16.dp))
@@ -199,18 +214,18 @@ fun MultipleChoiceQuestionDialog(
             ) {
                 item {
                     TextField(
+                        modifier = Modifier.fillMaxWidth().heightIn(min = 60.dp),
                         colors = TextFieldDefaults.colors(
                             focusedContainerColor = MaterialTheme.colorScheme.surfaceVariant,
                             unfocusedContainerColor = MaterialTheme.colorScheme.surfaceContainer, // Hafif belirgin bir renk önerisi
                             focusedIndicatorColor = Color.Transparent, // Alt çizgiyi gizler
-                            unfocusedIndicatorColor = MaterialTheme.colorScheme.secondary,
+                            unfocusedIndicatorColor = Color.Transparent,
                             cursorColor = MaterialTheme.colorScheme.primary, // Gözle görülür bir imleç
                             disabledContainerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.12f) // Devre dışı durum
                         ),
                         value = questionText,
                         onValueChange = { questionText = it },
                         label = { Text("Soru") },
-                        modifier = Modifier.fillMaxWidth()
                     )
 
                     Spacer(modifier = Modifier.height(16.dp))
@@ -222,7 +237,7 @@ fun MultipleChoiceQuestionDialog(
                             focusedContainerColor = MaterialTheme.colorScheme.surfaceVariant,
                             unfocusedContainerColor = MaterialTheme.colorScheme.surfaceContainer, // Hafif belirgin bir renk önerisi
                             focusedIndicatorColor = Color.Transparent, // Alt çizgiyi gizler
-                            unfocusedIndicatorColor = MaterialTheme.colorScheme.secondary,
+                            unfocusedIndicatorColor = Color.Transparent,
                             cursorColor = MaterialTheme.colorScheme.primary, // Gözle görülür bir imleç
                             disabledContainerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.12f) // Devre dışı durum
                         ),

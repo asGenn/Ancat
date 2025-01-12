@@ -11,9 +11,11 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material3.AlertDialog
@@ -24,6 +26,8 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
+import androidx.compose.material3.TextFieldColors
+import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
@@ -34,9 +38,11 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.DialogProperties
@@ -74,8 +80,12 @@ fun CreateScreen(navController: NavController) {
         floatingActionButton = {
             if (jsonFilesList.isNotEmpty()) {
                 ExtendedFloatingActionButton(
+                    modifier = Modifier
+                        .width(160.dp)
+                        .height(48.dp),
                     containerColor = MaterialTheme.colorScheme.primary,
                     contentColor = MaterialTheme.colorScheme.onPrimary,
+                    shape = RoundedCornerShape(3.dp),
                     onClick = {
                         openDialog.value = true
                     },
@@ -97,8 +107,6 @@ fun CreateScreen(navController: NavController) {
             EmptyScreen(
                 openDialog = openDialog
             )
-
-
         } else {
             JsonFileListScreen(
                 modifier = Modifier.padding(innerPadding),
@@ -117,8 +125,6 @@ fun CreateScreen(navController: NavController) {
         context = context,
         viewModel
     )
-
-
 }
 
 @Composable
@@ -156,7 +162,6 @@ fun JsonFileListScreen(
                         ),
                     trailingIcon = Icons.Default.Delete,
                     trailingIconButton = {
-
                         // delete file from storage
                         if (JsonHelper().removeJsonFile(
                                 fileName = item.fileName,
@@ -169,15 +174,10 @@ fun JsonFileListScreen(
                             viewModel.viewModelScope.launch {
                                 viewModel.deleteJsonFile(item)
                             }
-
-
                         }
-
-
                     }
                 )
                 Spacer(modifier = Modifier.height(8.dp))
-
             }
         }
     }
@@ -242,14 +242,22 @@ fun SurveyTitleDialog(
 
     if (openDialog.value) {
         AlertDialog(
-            modifier = Modifier.padding(16.dp).heightIn(min = 300.dp, max = 500.dp),
+            modifier = Modifier
+                .padding(16.dp)
+                .heightIn(min = 300.dp, max = 500.dp),
             onDismissRequest = {
                 openDialog.value = false
                 title = ""
                 descriptions.clear()
                 descriptions.add("")
             },
-            title = { Text("Anket Başlığı", style = MaterialTheme.typography.headlineLarge) },
+            title = {
+                Text(
+                    modifier = Modifier.fillMaxWidth(),
+                    text = "Anket Oluştur",
+                    textAlign = TextAlign.Center,
+                    style = MaterialTheme.typography.headlineLarge)
+            },
             text = {
                 Column(
                     modifier = Modifier
@@ -258,16 +266,38 @@ fun SurveyTitleDialog(
                     verticalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
                     TextField(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(60.dp),
+                        colors = TextFieldDefaults.colors(
+                            focusedContainerColor = MaterialTheme.colorScheme.surfaceVariant,
+                            unfocusedContainerColor = MaterialTheme.colorScheme.surfaceContainer, // Hafif belirgin bir renk önerisi
+                            focusedIndicatorColor = Color.Transparent, // Alt çizgiyi gizler
+                            unfocusedIndicatorColor = Color.Transparent,
+                            cursorColor = MaterialTheme.colorScheme.primary, // Gözle görülür bir imleç
+                            disabledContainerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.12f) // Devre dışı durum
+                        ),
                         value = title,
                         onValueChange = { title = it },
                         label = { Text("Başlık Girin") },
-                        modifier = Modifier
-                            .fillMaxWidth()
                     )
 
                     LazyColumn {
                         itemsIndexed(descriptions) { index, desc ->
                             TextField(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .height(60.dp),
+                                colors = TextFieldDefaults.colors(
+                                    focusedContainerColor = MaterialTheme.colorScheme.surfaceVariant,
+                                    unfocusedContainerColor = MaterialTheme.colorScheme.surfaceContainer, // Hafif belirgin bir renk önerisi
+                                    focusedIndicatorColor = Color.Transparent, // Alt çizgiyi gizler
+                                    unfocusedIndicatorColor = Color.Transparent,
+                                    cursorColor = MaterialTheme.colorScheme.primary, // Gözle görülür bir imleç
+                                    disabledContainerColor = MaterialTheme.colorScheme.surface.copy(
+                                        alpha = 0.12f
+                                    ) // Devre dışı durum
+                                ),
                                 value = desc,
                                 onValueChange = {
                                     descriptions[index] = it
@@ -276,8 +306,7 @@ fun SurveyTitleDialog(
                                     if (index == descriptions.lastIndex && it.isNotBlank())
                                         descriptions.add("")
                                 },
-                                label = { Text("Açıklama ${index + 1}") },
-                                modifier = Modifier.fillMaxWidth()
+                                label = { Text("Açıklama ${index + 1}") }
                             )
                             Spacer(modifier = Modifier.height(8.dp))
                         }
@@ -286,6 +315,11 @@ fun SurveyTitleDialog(
             },
             confirmButton = {
                 Button(
+                    modifier = Modifier
+                        .padding(end = 8.dp)
+                        .height(48.dp)
+                        .width(96.dp),
+                    shape = RoundedCornerShape(3.dp),
                     onClick = {
                         descriptions.removeAt(descriptions.lastIndex)
                         openDialog.value = false
@@ -311,14 +345,18 @@ fun SurveyTitleDialog(
                             )
                             navController.navigate(CreateSurvey(title = title, id = id.toInt()))
                         }
-                    },
-                    modifier = Modifier.padding(end = 8.dp)
+                    }
                 ) {
                     Text("Onayla", color = MaterialTheme.colorScheme.onPrimary)
                 }
             },
             dismissButton = {
                 Button(
+                    modifier = Modifier
+                        .padding(end = 8.dp)
+                        .height(48.dp)
+                        .width(96.dp),
+                    shape = RoundedCornerShape(3.dp),
                     onClick = { openDialog.value = false },
                 ) {
                     Text("İptal", color = MaterialTheme.colorScheme.onPrimary)
