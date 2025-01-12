@@ -62,7 +62,9 @@ fun SimpleQuestionDialog(
             ) {
                 itemsIndexed(text) { index, optionText ->
                     TextField(
-                        modifier = Modifier.fillMaxWidth().heightIn(min = 60.dp),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .heightIn(min = 60.dp),
                         colors = TextFieldDefaults.colors(
                             focusedContainerColor = MaterialTheme.colorScheme.surfaceVariant,
                             unfocusedContainerColor = MaterialTheme.colorScheme.surfaceContainer, // Hafif belirgin bir renk önerisi
@@ -75,7 +77,7 @@ fun SimpleQuestionDialog(
                         onValueChange = {
                             text[index] = it
 
-                            if (it.isEmpty())
+                            if (it.isEmpty() && it.isBlank())
                                 text.removeAt(text.lastIndex)
 
                             if (index == text.lastIndex && it.isNotBlank())
@@ -103,15 +105,17 @@ fun SimpleQuestionDialog(
                         ),
                         onClick = {
                             text.removeAt(text.lastIndex)
-                            val survey = SurveyItem(
-                                type = "0",
-                                questions = listOf(
-                                    Question.SurveyDescription(
-                                        description = text
-                                    )
-                                ),
-                            )
-                            viewModel.addSurveyItem(survey)
+                            if (text.isNotEmpty()) {
+                                val survey = SurveyItem(
+                                    type = "0",
+                                    questions = listOf(
+                                        Question.SurveyDescription(
+                                            description = text
+                                        )
+                                    ),
+                                )
+                                viewModel.addSurveyItem(survey)
+                            }
                             onDismissRequest()
                         }) {
                         Text("Ekle")
@@ -147,10 +151,12 @@ fun RatingQuestionDialog(
                 modifier = modifier
                     .padding(16.dp),
                 verticalArrangement = Arrangement.Center,
-                horizontalAlignment = Alignment.CenterHorizontally,
+                horizontalAlignment = Alignment.End,
             ) {
                 TextField(
-                    modifier = Modifier.fillMaxWidth().heightIn(min = 60.dp),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .heightIn(min = 60.dp),
                     colors = TextFieldDefaults.colors(
                         focusedContainerColor = MaterialTheme.colorScheme.surfaceVariant,
                         unfocusedContainerColor = MaterialTheme.colorScheme.surfaceContainer, // Hafif belirgin bir renk önerisi
@@ -168,18 +174,32 @@ fun RatingQuestionDialog(
 
                 Spacer(modifier = Modifier.height(16.dp))
 
-                Button(onClick = {
-                    val survey = SurveyItem(
-                        type = "1",
-                        questions = listOf(
-                            Question.RatingQuestion(
-                                question = text
-                            ),
-                        )
-                    )
-                    viewModel.addSurveyItem(survey)
-                    onDismissRequest()
-                }) {
+                Button(
+                    modifier = Modifier
+                        .height(48.dp)
+                        .width(90.dp),
+                    shape = RoundedCornerShape(3.dp),
+                    colors = ButtonColors(
+                        containerColor = MaterialTheme.colorScheme.primary,
+                        contentColor = MaterialTheme.colorScheme.onPrimary,
+                        disabledContainerColor = Color.Transparent,
+                        disabledContentColor = Color.Transparent
+                    ),
+                    onClick = {
+                        if (text.isNotEmpty() && text.isNotBlank()) {
+                            val survey = SurveyItem(
+                                type = "1",
+                                questions = listOf(
+                                    Question.RatingQuestion(
+                                        question = text
+                                    ),
+                                )
+                            )
+                            viewModel.addSurveyItem(survey)
+                        }
+
+                        onDismissRequest()
+                    }) {
                     Text("Ekle")
                 }
             }
@@ -210,11 +230,13 @@ fun MultipleChoiceQuestionDialog(
             LazyColumn(
                 modifier = modifier.padding(16.dp),
                 verticalArrangement = Arrangement.Center,
-                horizontalAlignment = Alignment.CenterHorizontally,
+                horizontalAlignment = Alignment.End,
             ) {
                 item {
                     TextField(
-                        modifier = Modifier.fillMaxWidth().heightIn(min = 60.dp),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .heightIn(min = 60.dp),
                         colors = TextFieldDefaults.colors(
                             focusedContainerColor = MaterialTheme.colorScheme.surfaceVariant,
                             unfocusedContainerColor = MaterialTheme.colorScheme.surfaceContainer, // Hafif belirgin bir renk önerisi
@@ -245,7 +267,7 @@ fun MultipleChoiceQuestionDialog(
                         onValueChange = {
                             options[index] = it
 
-                            if (it.isEmpty())
+                            if (it.isEmpty() && it.isBlank())
                                 options.removeAt(options.lastIndex)
 
                             if (index == options.lastIndex && it.isNotBlank())
@@ -259,20 +281,33 @@ fun MultipleChoiceQuestionDialog(
 
                 item {
                     Spacer(modifier = Modifier.height(16.dp))
-                    Button(onClick = {
-                        options.removeAt(options.lastIndex)
-                        val survey = SurveyItem(
-                            type = "2",
-                            questions = listOf(
-                                Question.MultipleChoiceQuestion(
-                                    question = questionText,
-                                    options = options
+                    Button(
+                        modifier = Modifier
+                            .height(48.dp)
+                            .width(90.dp),
+                        shape = RoundedCornerShape(3.dp),
+                        colors = ButtonColors(
+                            containerColor = MaterialTheme.colorScheme.primary,
+                            contentColor = MaterialTheme.colorScheme.onPrimary,
+                            disabledContainerColor = Color.Transparent,
+                            disabledContentColor = Color.Transparent
+                        ),
+                        onClick = {
+                            options.removeAt(options.lastIndex)
+                            if (options.isNotEmpty() && questionText.isNotEmpty() && questionText.isNotBlank()) {
+                                val survey = SurveyItem(
+                                    type = "2",
+                                    questions = listOf(
+                                        Question.MultipleChoiceQuestion(
+                                            question = questionText,
+                                            options = options
+                                        )
+                                    )
                                 )
-                            )
-                        )
-                        viewModel.addSurveyItem(survey)
-                        onDismissRequest()
-                    }) {
+                                viewModel.addSurveyItem(survey)
+                            }
+                            onDismissRequest()
+                        }) {
                         Text("Ekle")
                     }
                 }
