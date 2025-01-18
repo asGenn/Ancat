@@ -83,12 +83,13 @@ class PagedQuestionHandler @Inject constructor(
         questionMultiChoQuest.forEach { question ->
             val questionHeight = drawingMeasurerHandler.multiChoQuestLength(listOf(question))
             if (currentHeight + questionHeight > QUESTION_HEIGHT) {
-                splitSurveyItems.add(
-                    SurveyItem(
-                        type = drawings.type,
-                        questions = currentPageQuestions.toList()
+                if (currentPageQuestions.isNotEmpty())
+                    splitSurveyItems.add(
+                        SurveyItem(
+                            type = drawings.type,
+                            questions = currentPageQuestions.toList()
+                        )
                     )
-                )
                 currentPageQuestions.clear()
                 currentHeight = START_CURSOR
             }
