@@ -40,36 +40,33 @@ object Survey
 @Composable
 fun MainNavGraph(modifier: Modifier = Modifier, navController: NavHostController) {
 
-    Scaffold { innerPadding ->
-        NavHost(
-            navController = navController,
-            startDestination = Home,
-            modifier = modifier.padding(innerPadding)
-        ) {
+    NavHost(
+        navController = navController,
+        startDestination = Home,
+        modifier = modifier
+    ) {
 
-            composable<Home> {
-                AnalyzeScreen()
-            }
-
-            navigation<CreateNested>(startDestination = Create) {
-                composable<Create> {
-                    CreateScreen(navController)
-                }
-                composable<CreateSurvey> { backStackEntry ->
-                    val createSurvey: CreateSurvey = backStackEntry.toRoute()
-                    CreateSurveyScreen(id = createSurvey.id)
-                }
-            }
-
-            composable<Survey> {
-                Box(
-                    modifier = modifier.fillMaxSize()
-                ) {
-                    Text("Surveys Screen")
-                }
-            }
-
+        composable<Home> {
+            AnalyzeScreen()
         }
-    }
 
+        navigation<CreateNested>(startDestination = Create) {
+            composable<Create> {
+                CreateScreen(navController)
+            }
+            composable<CreateSurvey> { backStackEntry ->
+                val createSurvey: CreateSurvey = backStackEntry.toRoute()
+                CreateSurveyScreen(id = createSurvey.id)
+            }
+        }
+
+        composable<Survey> {
+            Box(
+                modifier = modifier.fillMaxSize()
+            ) {
+                Text("Surveys Screen")
+            }
+        }
+
+    }
 }
