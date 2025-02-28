@@ -113,8 +113,7 @@ fun RatingType(modifier: Modifier = Modifier, item: SurveyItem) {
                         .padding(top = 8.dp)
                         .wrapContentWidth(Alignment.CenterHorizontally),
                     fontSize = 16.sp,
-                    fontWeight = FontWeight.Black,
-                    color = Color.White
+                    fontWeight = FontWeight.Black
                 )
 
                 // Derecelendirme Seçenekleri
