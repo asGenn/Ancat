@@ -19,6 +19,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -33,15 +34,13 @@ import coil3.compose.AsyncImage
 
 @Composable
 fun AnalyzeScreen() {
-
     val viewModel: AnalyzeScreenViewModel = hiltViewModel()
     val context = LocalContext.current
 
-    Surface(
+    Scaffold(
         modifier = Modifier.fillMaxSize(),
-        color = MaterialTheme.colorScheme.background,
-
-        ) {
+        containerColor = MaterialTheme.colorScheme.background
+    ) { innerPadding ->
         val scannerLauncher = rememberLauncherForActivityResult(
             contract = ActivityResultContracts.StartIntentSenderForResult(),
             onResult = { scanner ->
@@ -51,24 +50,27 @@ fun AnalyzeScreen() {
 
         Box(
             modifier = Modifier
-                .fillMaxSize(),
+                .fillMaxSize()
+                .padding(innerPadding)
+                .padding(bottom = 80.dp), // Alt navigasyon çubuğu için ekstra padding
         ) {
-
             LazyVerticalGrid(
                 columns = GridCells.Fixed(2), // Yatayda 2 sütun olacak
                 modifier = Modifier.fillMaxSize(), // Tüm kullanılabilir alanı kaplar
                 verticalArrangement = Arrangement.spacedBy(8.dp), // Kartlar arası dikey boşluk
-                horizontalArrangement = Arrangement.spacedBy(8.dp) // Kartlar arası yatay boşluk
+                horizontalArrangement = Arrangement.spacedBy(8.dp), // Kartlar arası yatay boşluk
+                contentPadding = androidx.compose.foundation.layout.PaddingValues(8.dp)
             ) {
                 items(viewModel.imageUris) { uri ->
                     AsyncImage(
                         model = uri,
                         contentDescription = null,
                         contentScale = ContentScale.FillWidth,
-                        modifier = Modifier.fillMaxWidth()
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(4.dp)
                     )
                 }
-
             }
 
             Button(
@@ -89,11 +91,9 @@ fun AnalyzeScreen() {
                                 IntentSenderRequest.Builder(it).build()
                             )
                         }
-
                         .addOnFailureListener {
                             Toast.makeText(context, "Fail", Toast.LENGTH_SHORT).show()
                         }
-
                 }
             ) {
                 Text(

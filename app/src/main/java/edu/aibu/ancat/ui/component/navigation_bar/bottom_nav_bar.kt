@@ -7,6 +7,7 @@ import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.vectorResource
 import androidx.navigation.NavController
@@ -23,7 +24,7 @@ import edu.aibu.ancat.core.navigation.Survey
 data class TopLevelRoute<T : Any>(val route: T, val icon: ImageVector, val label: String)
 
 @Composable
-fun BottomNavigationBar(navController: NavController) {
+fun BottomNavigationBar(navController: NavController, modifier: Modifier = Modifier) {
     val bottomRoutes = listOf(
         TopLevelRoute(
             route = Home,
@@ -42,7 +43,7 @@ fun BottomNavigationBar(navController: NavController) {
         ),
     )
 
-    NavigationBar {
+    NavigationBar(modifier = modifier) {
         val navBackStackEntry by navController.currentBackStackEntryAsState()
         val currentDestination = navBackStackEntry?.destination
 

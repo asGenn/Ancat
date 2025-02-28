@@ -3,8 +3,10 @@ package edu.aibu.ancat
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Scaffold
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.navigation.compose.rememberNavController
 import edu.aibu.ancat.core.navigation.MainNavGraph
@@ -20,10 +22,15 @@ class MainActivity : ComponentActivity() {
         setContent {
             AncatTheme {
                 val navController = rememberNavController()
-                Scaffold(modifier = Modifier,
-                    bottomBar = { BottomNavigationBar(navController) }
-                ) { innerPadding ->
-                    MainNavGraph(modifier = Modifier.padding(innerPadding), navController)
+                Box(modifier = Modifier.fillMaxSize()) {
+                    MainNavGraph(
+                        modifier = Modifier.fillMaxSize(),
+                        navController = navController
+                    )
+                    BottomNavigationBar(
+                        navController = navController,
+                        modifier = Modifier.align(Alignment.BottomCenter)
+                    )
                 }
             }
         }

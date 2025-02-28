@@ -32,6 +32,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import edu.aibu.ancat.data.model.SurveyItem
@@ -93,6 +94,21 @@ fun SurveyCreator(
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
     val showSaveConfirmation = remember { mutableStateOf(false) }
+    
+    // Ekran boyutlarını al
+    val configuration = LocalConfiguration.current
+    val screenHeight = configuration.screenHeightDp.dp
+    val screenWidth = configuration.screenWidthDp.dp
+    
+    // Responsive padding değerleri
+    val horizontalPadding = screenWidth * 0.04f // Ekran genişliğinin %4'ü
+    val bottomPadding = screenHeight * 0.02f // Ekran yüksekliğinin %2'si
+    
+    // Navigation bar yüksekliği için ek padding (yaklaşık 56dp standart yükseklik + güvenlik payı)
+    val navBarHeight = 72.dp
+    
+    // Butonlar arası mesafe
+    val buttonSpacing = screenHeight * 0.08f // Butonlar arası mesafe
 
     Scaffold(
         topBar = {
@@ -103,20 +119,6 @@ fun SurveyCreator(
                     showSaveConfirmation.value = true
                 }
             )
-        },
-        floatingActionButton = {
-            FloatingActionButton(
-                onClick = { showBottomSheet.value = true },
-                containerColor = MaterialTheme.colorScheme.primary,
-                contentColor = MaterialTheme.colorScheme.onPrimary,
-                shape = CircleShape
-            ) {
-                Icon(
-                    imageVector = Icons.Rounded.Add,
-                    contentDescription = "Soru Ekle",
-                    modifier = Modifier.size(24.dp)
-                )
-            }
         }
     ) { paddingValues ->
         Box(
@@ -142,10 +144,10 @@ fun SurveyCreator(
                 Surface(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(16.dp)
+                        .padding(horizontalPadding)
                         .align(Alignment.TopCenter),
                     color = MaterialTheme.colorScheme.primaryContainer,
-                    shape = androidx.compose.foundation.shape.RoundedCornerShape(8.dp)
+                    shape = RoundedCornerShape(8.dp)
                 ) {
                     androidx.compose.foundation.layout.Row(
                         modifier = Modifier
@@ -174,6 +176,23 @@ fun SurveyCreator(
                 }
             }
 
+            // Soru ekleme butonu (FAB)
+            FloatingActionButton(
+                onClick = { showBottomSheet.value = true },
+                containerColor = MaterialTheme.colorScheme.primary,
+                contentColor = MaterialTheme.colorScheme.onPrimary,
+                shape = CircleShape,
+                modifier = Modifier
+                    .align(Alignment.BottomEnd)
+                    .padding(end = horizontalPadding, bottom = bottomPadding + navBarHeight)
+            ) {
+                Icon(
+                    imageVector = Icons.Rounded.Add,
+                    contentDescription = "Soru Ekle",
+                    modifier = Modifier.size(24.dp)
+                )
+            }
+
             // Anket oluşturma butonu
             ExtendedFloatingActionButton(
                 onClick = {
@@ -193,8 +212,8 @@ fun SurveyCreator(
                 contentColor = MaterialTheme.colorScheme.onSecondary,
                 expanded = true,
                 modifier = Modifier
-                    .align(Alignment.BottomCenter)
-                    .padding(bottom = 16.dp)
+                    .align(Alignment.BottomStart)
+                    .padding(start = horizontalPadding, bottom = bottomPadding + navBarHeight)
             )
         }
 
