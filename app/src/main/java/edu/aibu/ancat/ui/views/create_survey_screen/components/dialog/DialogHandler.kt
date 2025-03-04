@@ -1,11 +1,8 @@
-package edu.aibu.ancat.ui.views.create_survey_screen.components
+package edu.aibu.ancat.ui.views.create_survey_screen.components.dialog
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import edu.aibu.ancat.ui.component.survey_item.MultipleChoiceQuestionDialog
-import edu.aibu.ancat.ui.component.survey_item.RatingQuestionDialog
-import edu.aibu.ancat.ui.component.survey_item.SimpleQuestionDialog
 import edu.aibu.ancat.ui.views.create_survey_screen.CreateSurveyViewModel
 import edu.aibu.ancat.ui.views.create_survey_screen.DialogType
 

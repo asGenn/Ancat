@@ -1,4 +1,4 @@
-package edu.aibu.ancat.ui.component.survey_item
+package edu.aibu.ancat.ui.views.create_survey_screen.components.item
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box

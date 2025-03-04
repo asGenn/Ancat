@@ -1,4 +1,4 @@
-package edu.aibu.ancat.ui.views.create_survey_screen.components
+package edu.aibu.ancat.ui.views.create_survey_screen.components.item
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -18,10 +18,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import edu.aibu.ancat.data.model.SurveyItem
-import edu.aibu.ancat.ui.component.survey_item.DescriptionType
-import edu.aibu.ancat.ui.component.survey_item.MultipleChoiceType
-import edu.aibu.ancat.ui.component.survey_item.RatingType
-import edu.aibu.ancat.ui.component.survey_item.SurveyTitleType
 
 /**
  * Anket öğelerinin listelendiği bileşen

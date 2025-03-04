@@ -1,4 +1,4 @@
-package edu.aibu.ancat.ui.views.create_survey_screen.components
+package edu.aibu.ancat.ui.views.create_survey_screen.components.common
 
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Done

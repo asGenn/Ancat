@@ -37,11 +37,11 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import edu.aibu.ancat.data.model.SurveyItem
 import edu.aibu.ancat.domain.entity.JsonFilesInfoEntity
-import edu.aibu.ancat.ui.views.create_survey_screen.components.CustomModalBottomSheet
-import edu.aibu.ancat.ui.views.create_survey_screen.components.DialogHandler
-import edu.aibu.ancat.ui.views.create_survey_screen.components.EmptySurveyContent
-import edu.aibu.ancat.ui.views.create_survey_screen.components.SurveyCreatorTopBar
-import edu.aibu.ancat.ui.views.create_survey_screen.components.SurveyItemsList
+import edu.aibu.ancat.ui.views.create_survey_screen.components.bottomsheet.CustomModalBottomSheet
+import edu.aibu.ancat.ui.views.create_survey_screen.components.dialog.DialogHandler
+import edu.aibu.ancat.ui.views.create_survey_screen.components.common.EmptySurveyContent
+import edu.aibu.ancat.ui.views.create_survey_screen.components.common.SurveyCreatorTopBar
+import edu.aibu.ancat.ui.views.create_survey_screen.components.item.SurveyItemsList
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch

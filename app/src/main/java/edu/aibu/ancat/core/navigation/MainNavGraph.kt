@@ -2,11 +2,7 @@ package edu.aibu.ancat.core.navigation
 
 import edu.aibu.ancat.ui.views.home_screen.AnalyzeScreen
 import androidx.compose.foundation.layout.Box
-
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Scaffold
-
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -18,6 +14,10 @@ import androidx.navigation.toRoute
 import edu.aibu.ancat.ui.views.create_screen.CreateScreen
 import edu.aibu.ancat.ui.views.create_survey_screen.CreateSurveyScreen
 import kotlinx.serialization.Serializable
+import androidx.compose.animation.AnimatedContentTransitionScope
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 
 @Serializable
 object Home
@@ -46,12 +46,76 @@ fun MainNavGraph(modifier: Modifier = Modifier, navController: NavHostController
         modifier = modifier
     ) {
 
-        composable<Home> {
+        composable<Home>(
+            enterTransition = {
+                slideIntoContainer(
+                    towards = AnimatedContentTransitionScope.SlideDirection.Left,
+                    animationSpec = tween(500)
+                ) + fadeIn(animationSpec = tween(500))
+            },
+            exitTransition = {
+                slideOutOfContainer(
+                    towards = AnimatedContentTransitionScope.SlideDirection.Left,
+                    animationSpec = tween(500)
+                ) + fadeOut(animationSpec = tween(500))
+            },
+            popEnterTransition = {
+                slideIntoContainer(
+                    towards = AnimatedContentTransitionScope.SlideDirection.Right,
+                    animationSpec = tween(500)
+                ) + fadeIn(animationSpec = tween(500))
+            },
+            popExitTransition = {
+                slideOutOfContainer(
+                    towards = AnimatedContentTransitionScope.SlideDirection.Right,
+                    animationSpec = tween(500)
+                ) + fadeOut(animationSpec = tween(500))
+            }
+        ) {
             AnalyzeScreen()
         }
 
         navigation<CreateNested>(startDestination = Create) {
-            composable<Create> {
+            composable<Create>(
+                enterTransition = {
+                    val initialRoute = initialState.destination.route?.substringBefore("/") ?: ""
+                    val direction = if (initialRoute.contains("Survey")) {
+                        AnimatedContentTransitionScope.SlideDirection.Right
+                    } else {
+                        AnimatedContentTransitionScope.SlideDirection.Left
+                    }
+                    
+                    slideIntoContainer(
+                        towards = direction,
+                        animationSpec = tween(500)
+                    ) + fadeIn(animationSpec = tween(500))
+                },
+                exitTransition = {
+                    val targetRoute = targetState.destination.route?.substringBefore("/") ?: ""
+                    val direction = if (targetRoute.contains("Survey")) {
+                        AnimatedContentTransitionScope.SlideDirection.Left
+                    } else {
+                        AnimatedContentTransitionScope.SlideDirection.Left
+                    }
+                    
+                    slideOutOfContainer(
+                        towards = direction,
+                        animationSpec = tween(500)
+                    ) + fadeOut(animationSpec = tween(500))
+                },
+                popEnterTransition = {
+                    slideIntoContainer(
+                        towards = AnimatedContentTransitionScope.SlideDirection.Right,
+                        animationSpec = tween(500)
+                    ) + fadeIn(animationSpec = tween(500))
+                },
+                popExitTransition = {
+                    slideOutOfContainer(
+                        towards = AnimatedContentTransitionScope.SlideDirection.Right,
+                        animationSpec = tween(500)
+                    ) + fadeOut(animationSpec = tween(500))
+                }
+            ) {
                 CreateScreen(navController)
             }
             composable<CreateSurvey> { backStackEntry ->
@@ -60,7 +124,46 @@ fun MainNavGraph(modifier: Modifier = Modifier, navController: NavHostController
             }
         }
 
-        composable<Survey> {
+        composable<Survey>(
+            enterTransition = {
+                val initialRoute = initialState.destination.route?.substringBefore("/") ?: ""
+                val direction = if (initialRoute.contains("Create")) {
+                    AnimatedContentTransitionScope.SlideDirection.Left
+                } else {
+                    AnimatedContentTransitionScope.SlideDirection.Left
+                }
+                
+                slideIntoContainer(
+                    towards = direction,
+                    animationSpec = tween(500)
+                ) + fadeIn(animationSpec = tween(500))
+            },
+            exitTransition = {
+                val targetRoute = targetState.destination.route?.substringBefore("/") ?: ""
+                val direction = if (targetRoute.contains("Create")) {
+                    AnimatedContentTransitionScope.SlideDirection.Right
+                } else {
+                    AnimatedContentTransitionScope.SlideDirection.Left
+                }
+                
+                slideOutOfContainer(
+                    towards = direction,
+                    animationSpec = tween(500)
+                ) + fadeOut(animationSpec = tween(500))
+            },
+            popEnterTransition = {
+                slideIntoContainer(
+                    towards = AnimatedContentTransitionScope.SlideDirection.Right,
+                    animationSpec = tween(500)
+                ) + fadeIn(animationSpec = tween(500))
+            },
+            popExitTransition = {
+                slideOutOfContainer(
+                    towards = AnimatedContentTransitionScope.SlideDirection.Right,
+                    animationSpec = tween(500)
+                ) + fadeOut(animationSpec = tween(500))
+            }
+        ) {
             Box(
                 modifier = modifier.fillMaxSize()
             ) {
