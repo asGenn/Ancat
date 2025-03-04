@@ -52,7 +52,6 @@ fun AnalyzeScreen() {
             modifier = Modifier
                 .fillMaxSize()
                 .padding(innerPadding)
-                .padding(bottom = 80.dp), // Alt navigasyon çubuğu için ekstra padding
         ) {
             LazyVerticalGrid(
                 columns = GridCells.Fixed(2), // Yatayda 2 sütun olacak

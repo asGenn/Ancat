@@ -1,6 +1,5 @@
 package edu.aibu.ancat.core.renderer.survey_drawings.utils
 
-import android.util.Log
 import edu.aibu.ancat.data.model.Question
 import edu.aibu.ancat.utils.DocumentConstants.CELL_HEIGHT
 import edu.aibu.ancat.utils.DocumentConstants.MARGIN
@@ -85,7 +84,6 @@ class DrawingMeasurerHandler @Inject constructor(
             hasMultipleChoiceQuestions -> multiChoQuestLength(drawings as List<Question.MultipleChoiceQuestion>)
             else -> cursorPosition
         }
-        Log.d("Hesaplanan cursor ->", "${cursorLength + cursorPosition}")
         return QUESTION_HEIGHT < cursorLength + cursorPosition
     }
 }
