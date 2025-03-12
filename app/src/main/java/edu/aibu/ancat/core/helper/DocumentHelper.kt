@@ -38,13 +38,13 @@ class DocumentHelper @Inject constructor(
      * @param context Uygulama bağlamı
      * @param data Anket verileri listesi
      */
-    suspend fun createDocument(context: Context, data: List<SurveyItem>) {
+    suspend fun createDocument(context: Context, data: List<SurveyItem>, jsonName: String) {
         pdfDocument = documentFactory.createPdfDocument()
         page = documentFactory.createPage(pdfDocument, ++pageNumber)
         canvas = page.canvas
         
         data.forEach {
-            processItem(it)
+            processItem(it, jsonName)
         }
         
         documentFactory.finishPage(pdfDocument, page)
@@ -59,7 +59,7 @@ class DocumentHelper @Inject constructor(
      * Bir anket öğesini işler ve canvas'a çizer
      * @param item İşlenecek anket öğesi
      */
-    private suspend fun processItem(item: SurveyItem) {
+    private suspend fun processItem(item: SurveyItem, jsonName: String) {
         val needPageBreak = drawingMeasurerHandler.handlePageBreakIfNeeded(item.questions, cursor)
         var splitQuest = false
         var splitList = emptyList<SurveyItem>()
@@ -77,9 +77,15 @@ class DocumentHelper @Inject constructor(
         }
         
         cursor = if (splitQuest) {
-            processSplitItems(splitList)
+            processSplitItems(splitList, jsonName)
         } else {
-            documentRenderer.renderDocument(canvas, cursor + MARGIN*2, item)
+            documentRenderer.renderDocument(
+                canvas = canvas,
+                cursor = cursor + MARGIN*2,
+                data = item,
+                jsonFileName = jsonName,
+                pageNumber = pageNumber
+            )
         }
         
         Log.d("Cursor ->", "$cursor")
@@ -90,7 +96,7 @@ class DocumentHelper @Inject constructor(
      * @param splitList Sayfalara bölünmüş anket öğeleri listesi
      * @return Güncellenmiş cursor pozisyonu
      */
-    private suspend fun processSplitItems(splitList: List<SurveyItem>): Float {
+    private suspend fun processSplitItems(splitList: List<SurveyItem>, jsonName: String): Float {
         splitList.forEachIndexed { index, spl ->
             if (index != 0) {
                 documentFactory.finishPage(pdfDocument, page)
@@ -98,7 +104,13 @@ class DocumentHelper @Inject constructor(
                 canvas = page.canvas
                 cursor = START_CURSOR
             }
-            cursor = documentRenderer.renderDocument(canvas, cursor + MARGIN*2, spl)
+            cursor = documentRenderer.renderDocument(
+                canvas = canvas,
+                cursor = cursor + MARGIN*2,
+                data = spl,
+                jsonFileName = jsonName,
+                pageNumber = pageNumber
+            )
         }
         return cursor
     }

@@ -28,7 +28,7 @@ import edu.aibu.ancat.ui.views.create_survey_screen.DialogType
 
 /**
  * Özel modal bottom sheet
- * 
+ *
  * @param show Gösterme durumu
  * @param viewModel ViewModel
  */
@@ -61,7 +61,7 @@ fun CustomModalBottomSheet(
                     fontWeight = FontWeight.Bold,
                     modifier = Modifier.padding(bottom = 16.dp)
                 )
-                
+
                 QuestionTypeButton(
                     title = "Açıklama Metni",
                     description = "Kullanıcılara bilgi vermek için metin ekleyin",
@@ -70,9 +70,9 @@ fun CustomModalBottomSheet(
                         viewModel.showDialog(DialogType.DescriptionType)
                     }
                 )
-                
+
                 Spacer(modifier = Modifier.height(8.dp))
-                
+
                 QuestionTypeButton(
                     title = "Çoktan Seçmeli",
                     description = "Kullanıcıların seçenekler arasından seçim yapmasını sağlayın",
@@ -81,9 +81,9 @@ fun CustomModalBottomSheet(
                         viewModel.showDialog(DialogType.MultipleChoiceType)
                     }
                 )
-                
+
                 Spacer(modifier = Modifier.height(8.dp))
-                
+
                 QuestionTypeButton(
                     title = "Derecelendirme Sorusu",
                     description = "Kullanıcıların bir ölçekte derecelendirme yapmasını sağlayın",
@@ -92,7 +92,7 @@ fun CustomModalBottomSheet(
                         viewModel.showDialog(DialogType.RatingType)
                     }
                 )
-                
+
                 Spacer(modifier = Modifier.height(24.dp))
             }
         }
@@ -101,12 +101,11 @@ fun CustomModalBottomSheet(
 
 /**
  * Soru tipi butonu
- * 
+ *
  * @param title Başlık
  * @param description Açıklama
  * @param onClick Tıklama olayı
  */
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun QuestionTypeButton(
     title: String,
@@ -136,16 +135,16 @@ fun QuestionTypeButton(
                     fontWeight = FontWeight.Bold,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
-                
+
                 Spacer(modifier = Modifier.height(4.dp))
-                
+
                 Text(
                     text = description,
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.8f)
                 )
             }
-            
+
             Icon(
                 imageVector = Icons.Default.Add,
                 contentDescription = null,

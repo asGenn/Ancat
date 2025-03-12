@@ -14,7 +14,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
@@ -46,13 +45,12 @@ import java.util.UUID
 
 /**
  * Anket başlığı oluşturma dialogu
- * 
+ *
  * @param openDialog Dialog açık/kapalı durumu
  * @param navController Navigasyon kontrolcüsü
  * @param context Context
  * @param viewModel ViewModel
  */
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SurveyTitleDialog(
     openDialog: MutableState<Boolean>,
@@ -151,7 +149,10 @@ fun SurveyTitleDialog(
                                 val surveyItem = SurveyItem(
                                     type = "_",
                                     questions = listOf(
-                                        Question.SurveyTitle(title = title, description = descriptions)
+                                        Question.SurveyTitle(
+                                            title = title,
+                                            description = descriptions
+                                        )
                                     )
                                 )
                                 surveyItemList.add(surveyItem)
@@ -186,7 +187,7 @@ fun SurveyTitleDialog(
             },
             dismissButton = {
                 Button(
-                    onClick = { 
+                    onClick = {
                         openDialog.value = false
                         title = ""
                         descriptions.clear()
