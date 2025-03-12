@@ -103,6 +103,9 @@ dependencies {
     implementation(libs.androidx.room.runtime) // Room database runtime
     ksp(libs.androidx.room.compiler) // Room annotation processor
     implementation(libs.androidx.room.ktx) // Room KTX extensions
+
+    //QR Create
+    implementation (libs.zxing.core)
 }
 
 java {

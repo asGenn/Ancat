@@ -103,12 +103,6 @@ fun SurveyCreator(
     // Responsive padding değerleri
     val horizontalPadding = screenWidth * 0.04f // Ekran genişliğinin %4'ü
     val bottomPadding = screenHeight * 0.02f // Ekran yüksekliğinin %2'si
-    
-    // Navigation bar yüksekliği için ek padding (yaklaşık 56dp standart yükseklik + güvenlik payı)
-    val navBarHeight = 72.dp
-    
-    // Butonlar arası mesafe
-    val buttonSpacing = screenHeight * 0.08f // Butonlar arası mesafe
 
     Scaffold(
         topBar = {
@@ -184,7 +178,7 @@ fun SurveyCreator(
                 shape = CircleShape,
                 modifier = Modifier
                     .align(Alignment.BottomEnd)
-                    .padding(end = horizontalPadding, bottom = bottomPadding + navBarHeight)
+                    .padding(end = horizontalPadding, bottom = bottomPadding)
             ) {
                 Icon(
                     imageVector = Icons.Rounded.Add,
@@ -198,7 +192,7 @@ fun SurveyCreator(
                 onClick = {
                     viewModel.saveJson(context, jsonFilesInfoEntity, surveyItem)
                     CoroutineScope(Dispatchers.Main).launch {
-                        viewModel.createSurvey(context)
+                        viewModel.createSurvey(context, jsonFilesInfoEntity)
                     }
                 },
                 icon = { 
@@ -213,7 +207,7 @@ fun SurveyCreator(
                 expanded = true,
                 modifier = Modifier
                     .align(Alignment.BottomStart)
-                    .padding(start = horizontalPadding, bottom = bottomPadding + navBarHeight)
+                    .padding(start = horizontalPadding, bottom = bottomPadding)
             )
         }
 

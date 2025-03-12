@@ -42,8 +42,8 @@ class CreateSurveyViewModel @Inject constructor(
     private val _surveyItems = MutableStateFlow<List<SurveyItem>>(emptyList())
     val surveyItems: StateFlow<List<SurveyItem>> get() = _surveyItems
 
-    suspend fun createSurvey(context: Context) {
-        documentHelper.createDocument(context, surveyItems.value)
+    suspend fun createSurvey(context: Context, jsonFilesInfoEntity: JsonFilesInfoEntity) {
+        documentHelper.createDocument(context, surveyItems.value, jsonFilesInfoEntity.fileName)
     }
 
     fun addSurveyItem(surveyItem: SurveyItem) {

@@ -17,6 +17,7 @@ navigationCompose = "2.8.3"
 roomRuntime = "2.6.1"
 mlkit-document-scanner = "16.0.0-beta1"
 coil3 = "3.0.4"
+zxing = "3.5.2"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -45,6 +46,7 @@ kotlinx-serialization-core = { module = "org.jetbrains.kotlinx:kotlinx-serializa
 kotlinx-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "kotlinxSerializationJson" }
 mlkit-document-scanner = { group = "com.google.android.gms", name = "play-services-mlkit-document-scanner", version.ref = "mlkit-document-scanner" }
 coil-compose = { group = "io.coil-kt.coil3", name = "coil-compose", version.ref = "coil3" }
+zxing-core = { group = "com.google.zxing", name = "core", version.ref = "zxing" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

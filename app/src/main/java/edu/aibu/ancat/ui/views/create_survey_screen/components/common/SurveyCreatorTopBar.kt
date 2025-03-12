@@ -33,16 +33,16 @@ fun SurveyCreatorTopBar(
             )
         },
         colors = TopAppBarDefaults.topAppBarColors(
-            containerColor = MaterialTheme.colorScheme.primary,
-            titleContentColor = MaterialTheme.colorScheme.onPrimary,
-            actionIconContentColor = MaterialTheme.colorScheme.onPrimary
+            containerColor = MaterialTheme.colorScheme.surfaceContainer,
+            titleContentColor = MaterialTheme.colorScheme.onSecondaryContainer,
+            actionIconContentColor = MaterialTheme.colorScheme.onSecondaryContainer
         ),
         actions = {
             IconButton(onClick = onSaveClick) {
                 Icon(
                     imageVector = Icons.Default.Done,
                     contentDescription = "Kaydet",
-                    tint = MaterialTheme.colorScheme.onPrimary
+                    tint = MaterialTheme.colorScheme.onSecondaryContainer
                 )
             }
         }
