@@ -40,7 +40,7 @@ class DocumentHelper @Inject constructor(
      */
     suspend fun createDocument(context: Context, data: List<SurveyItem>, jsonName: String) {
         pdfDocument = documentFactory.createPdfDocument()
-        page = documentFactory.createPage(pdfDocument, ++pageNumber)
+        page = documentFactory.createPage(pdfDocument, pageNumber)
         canvas = page.canvas
         
         data.forEach {

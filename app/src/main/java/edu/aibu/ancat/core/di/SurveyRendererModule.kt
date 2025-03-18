@@ -49,4 +49,10 @@ object SurveyRendererModule {
         canvasContentDrawer: CanvasContentDrawer,
         textHandler: TextHandler
     ): RatingQuestion = RatingQuestion(canvasContentDrawer, textHandler, PaintFactory)
+
+    @Provides
+    @Singleton
+    fun provideQRCodeDrawer(): QRCodeDrawer = QRCodeDrawer()
+
+
 } 
