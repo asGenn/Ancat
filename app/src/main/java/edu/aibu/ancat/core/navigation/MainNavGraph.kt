@@ -1,9 +1,6 @@
 package edu.aibu.ancat.core.navigation
 
 import edu.aibu.ancat.ui.views.home_screen.AnalyzeScreen
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.navigation.NavHostController
@@ -18,6 +15,7 @@ import androidx.compose.animation.AnimatedContentTransitionScope
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
+import edu.aibu.ancat.ui.views.test_screen.TestView
 
 @Serializable
 object Home
@@ -164,11 +162,7 @@ fun MainNavGraph(modifier: Modifier = Modifier, navController: NavHostController
                 ) + fadeOut(animationSpec = tween(500))
             }
         ) {
-            Box(
-                modifier = modifier.fillMaxSize()
-            ) {
-                Text("Surveys Screen")
-            }
+            TestView()
         }
 
     }
