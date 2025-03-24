@@ -1,12 +1,7 @@
 package edu.aibu.ancat.core.renderer
 
-import android.graphics.Bitmap
+import android.content.Context
 import android.graphics.Canvas
-import android.graphics.Color
-import android.graphics.Paint
-import com.google.zxing.BarcodeFormat
-import com.google.zxing.EncodeHintType
-import com.google.zxing.qrcode.QRCodeWriter
 import edu.aibu.ancat.core.renderer.strategy.QRRendererStrategy
 import edu.aibu.ancat.core.renderer.strategy.QuestionStrategyFactory
 import edu.aibu.ancat.data.model.SurveyItem
@@ -27,7 +22,7 @@ class DocumentRenderer @Inject constructor(
      * @param cursor Başlangıç Y pozisyonu
      * @param data Render edilecek anket öğesi
      * @param jsonFileName JSON dosyasının adı
-     * @param pageNumber Sayfa numarası
+     * @param surveyIndex Index numarası
      * @return Render sonrası güncellenmiş Y pozisyonu (cursor)
      */
     fun renderDocument(
@@ -35,7 +30,8 @@ class DocumentRenderer @Inject constructor(
         cursor: Float,
         data: SurveyItem,
         jsonFileName: String,
-        pageNumber: Int
+        surveyIndex: Int,
+        context: Context
     ): Float {
         var cursorPosition = cursor
         
@@ -43,8 +39,14 @@ class DocumentRenderer @Inject constructor(
         val strategy = questionStrategyFactory.getStrategyForType(data.type)
         
         // Her soruyu sırayla render et
-        data.questions.forEach { question ->
-            cursorPosition = strategy.renderQuestion(canvas, question, cursorPosition)
+        data.questions.forEachIndexed { index, question ->
+            cursorPosition = strategy.renderQuestion(
+                canvas, question, cursorPosition,
+                surveyIndex = surveyIndex,
+                questionIndex = index,
+                jsonFileName = jsonFileName,
+                context = context,
+            )
         }
 
         // QR kodu oluştur ve render et

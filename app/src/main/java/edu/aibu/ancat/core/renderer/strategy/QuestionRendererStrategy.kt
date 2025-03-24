@@ -1,5 +1,6 @@
 package edu.aibu.ancat.core.renderer.strategy
 
+import android.content.Context
 import android.graphics.Canvas
 import edu.aibu.ancat.data.model.Question
 
@@ -16,5 +17,13 @@ interface QuestionRendererStrategy {
      * @param cursorPosition Y-ekseni başlangıç pozisyonu
      * @return Render sonrası güncellenmiş Y pozisyonu
      */
-    fun renderQuestion(canvas: Canvas, question: Question, cursorPosition: Float): Float
+    fun renderQuestion(
+        canvas: Canvas,
+        question: Question,
+        cursorPosition: Float,
+        surveyIndex: Int,
+        questionIndex: Int,
+        jsonFileName: String,
+        context: Context
+    ): Float
 } 

@@ -41,7 +41,8 @@ object SurveyRendererModule {
     fun provideMultipleChoiceQuestions(
         canvasContentDrawer: CanvasContentDrawer,
         textHandler: TextHandler
-    ): MultipleChoiceQuestions = MultipleChoiceQuestions(canvasContentDrawer, textHandler, PaintFactory)
+    ): MultipleChoiceQuestions =
+        MultipleChoiceQuestions(canvasContentDrawer, textHandler, PaintFactory)
 
     @Provides
     @Singleton

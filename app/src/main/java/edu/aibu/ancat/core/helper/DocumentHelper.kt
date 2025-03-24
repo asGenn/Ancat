@@ -43,8 +43,8 @@ class DocumentHelper @Inject constructor(
         page = documentFactory.createPage(pdfDocument, pageNumber)
         canvas = page.canvas
         
-        data.forEach {
-            processItem(it, jsonName)
+        data.forEachIndexed { index, it ->
+            processItem(context, it, index, jsonName)
         }
         
         documentFactory.finishPage(pdfDocument, page)
@@ -59,7 +59,7 @@ class DocumentHelper @Inject constructor(
      * Bir anket öğesini işler ve canvas'a çizer
      * @param item İşlenecek anket öğesi
      */
-    private suspend fun processItem(item: SurveyItem, jsonName: String) {
+    private suspend fun processItem(context: Context, item: SurveyItem, surveyIndex: Int, jsonName: String) {
         val needPageBreak = drawingMeasurerHandler.handlePageBreakIfNeeded(item.questions, cursor)
         var splitQuest = false
         var splitList = emptyList<SurveyItem>()
@@ -77,14 +77,15 @@ class DocumentHelper @Inject constructor(
         }
         
         cursor = if (splitQuest) {
-            processSplitItems(splitList, jsonName)
+            processSplitItems(context, splitList, surveyIndex, jsonName)
         } else {
             documentRenderer.renderDocument(
                 canvas = canvas,
-                cursor = cursor + MARGIN*2,
+                cursor = cursor + MARGIN * 2,
                 data = item,
                 jsonFileName = jsonName,
-                pageNumber = pageNumber
+                surveyIndex = surveyIndex,
+                context = context
             )
         }
         
@@ -96,7 +97,7 @@ class DocumentHelper @Inject constructor(
      * @param splitList Sayfalara bölünmüş anket öğeleri listesi
      * @return Güncellenmiş cursor pozisyonu
      */
-    private suspend fun processSplitItems(splitList: List<SurveyItem>, jsonName: String): Float {
+    private suspend fun processSplitItems(context: Context, splitList: List<SurveyItem>, surveyIndex: Int, jsonName: String): Float {
         splitList.forEachIndexed { index, spl ->
             if (index != 0) {
                 documentFactory.finishPage(pdfDocument, page)
@@ -106,10 +107,11 @@ class DocumentHelper @Inject constructor(
             }
             cursor = documentRenderer.renderDocument(
                 canvas = canvas,
-                cursor = cursor + MARGIN*2,
+                cursor = cursor + MARGIN * 2,
                 data = spl,
                 jsonFileName = jsonName,
-                pageNumber = pageNumber
+                surveyIndex = surveyIndex,
+                context = context
             )
         }
         return cursor

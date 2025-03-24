@@ -1,6 +1,8 @@
 package edu.aibu.ancat.core.renderer.survey_drawings.drawer
 
+import android.content.Context
 import android.graphics.Canvas
+import edu.aibu.ancat.core.helper.JsonHelper
 import edu.aibu.ancat.core.renderer.survey_drawings.utils.TextHandler
 import edu.aibu.ancat.utils.PaintFactory
 import edu.aibu.ancat.utils.DocumentConstants.CELL_HEIGHT
@@ -20,10 +22,15 @@ class MultipleChoiceQuestions @Inject constructor(
     fun drawMultipleChoiceQuestions(
         canvas: Canvas,
         data: Question.MultipleChoiceQuestion,
-        cursorPosition: Float
+        cursorPosition: Float,
+        surveyIndex: Int,
+        questionIndex: Int,
+        jsonFileName: String,
+        context: Context
     ): Float {
 
         var currentCursor = cursorPosition
+        val markPositions = mutableListOf<Float>()
 
         var tempCursor = currentCursor
         val textList: List<String> = textHandler.getWrappedText(
@@ -48,7 +55,14 @@ class MultipleChoiceQuestions @Inject constructor(
             canvas = canvas,
             options = data.options,
             cursorPosition = currentCursor
-        )
+        ) { yCursor ->
+            markPositions.add(yCursor)
+        }
+
+        val jsonHelper = JsonHelper()
+        jsonHelper.addMarks(surveyIndex, questionIndex, markPositions, jsonFileName, context)
+
+
 
         if (tempCursor > currentCursor)
             currentCursor = tempCursor
@@ -70,7 +84,8 @@ class MultipleChoiceQuestions @Inject constructor(
     private fun drawOptions(
         canvas: Canvas,
         options: List<String>,
-        cursorPosition: Float
+        cursorPosition: Float,
+        callback: (Float) -> Unit
     ): Float {
 
         var currentCursor = cursorPosition
@@ -92,6 +107,7 @@ class MultipleChoiceQuestions @Inject constructor(
                     xCursor = PAGE_WIDTH - MARGIN * 17,
                     yCursor = textCenter
                 )
+                callback(textCenter)
             }
 
             currentCursor += MARGIN
