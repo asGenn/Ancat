@@ -1,6 +1,9 @@
 package edu.aibu.ancat.core.helper
 
 import android.content.Context
+import edu.aibu.ancat.data.model.Question
+import edu.aibu.ancat.data.model.SurveyItem
+import kotlinx.serialization.encodeToString
 import java.io.File
 import javax.inject.Singleton
 
@@ -59,5 +62,42 @@ class JsonHelper {
             return false
         }
     }
+
+    fun addMarks(surveyIndex: Int, questionIndex: Int, data: List<Float>, fileName: String, context: Context): Boolean {
+        try {
+            // 1️⃣ JSON dosyasını oku
+            val jsonString = readJsonFile(fileName, context)
+
+            // 2️⃣ JSON'u Kotlin nesnelerine çevir
+            val jsonFormat = kotlinx.serialization.json.Json { ignoreUnknownKeys = true }
+            val surveyItems = jsonFormat.decodeFromString<List<SurveyItem>>(jsonString).toMutableList()
+
+            // 3️⃣ Geçerli indexleri kontrol et
+            if (surveyIndex !in surveyItems.indices) return false
+            if (questionIndex !in surveyItems[surveyIndex].questions.indices) return false
+
+            // 4️⃣ Güncellenecek soruyu bul
+            val question = surveyItems[surveyIndex].questions[questionIndex]
+
+            // 5️⃣ Eğer soru `MultipleChoiceQuestion` ise `marks` güncelle
+            if (question is Question.MultipleChoiceQuestion) {
+                question.marks.clear() // 🔥 Mevcut listeyi temizle
+                question.marks.addAll(data.take(question.options.size)) // 🔥 Yeni değerleri ekle
+            } else {
+                return false // Eğer soru `MultipleChoiceQuestion` değilse işlem yapma
+            }
+
+            // 6️⃣ Güncellenmiş JSON'u stringe çevir
+            val updatedJsonString = jsonFormat.encodeToString(surveyItems)
+
+            // 7️⃣ Yeni JSON'u dosyaya yaz
+            return openFileAndWriteNewContent(fileName, updatedJsonString, context)
+
+        } catch (e: Exception) {
+            println("Error: ${e.message}")
+            return false
+        }
+    }
+
 
 }

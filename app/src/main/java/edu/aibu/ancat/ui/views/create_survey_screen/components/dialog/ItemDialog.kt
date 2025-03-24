@@ -300,7 +300,8 @@ fun MultipleChoiceQuestionDialog(
                                     questions = listOf(
                                         Question.MultipleChoiceQuestion(
                                             question = questionText,
-                                            options = options
+                                            options = options,
+                                            marks = mutableStateListOf(),
                                         )
                                     )
                                 )
