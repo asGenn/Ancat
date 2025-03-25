@@ -44,7 +44,7 @@ fun CreateScreen(navController: NavController) {
     }
 
     Scaffold(
-        floatingActionButton = {
+        floatingActionButton  = {
             if (jsonFilesList.isNotEmpty()) {
                 FloatingActionButton(
                     onClick = { openDialog.value = true },

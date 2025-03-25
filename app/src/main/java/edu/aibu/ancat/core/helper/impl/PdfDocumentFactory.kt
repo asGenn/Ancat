@@ -24,6 +24,7 @@ class PdfDocumentFactory @Inject constructor() : DocumentFactory {
         return withContext(Dispatchers.IO) {
             val pageInfo = Builder(PAGE_WIDTH, PAGE_HEIGHT, pageNumber).create()
             document.startPage(pageInfo)
+
         }
     }
     
