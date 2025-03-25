@@ -7,7 +7,6 @@ import android.graphics.pdf.PdfDocument.Page
 import android.util.Log
 import edu.aibu.ancat.core.renderer.DocumentRenderer
 import edu.aibu.ancat.core.renderer.survey_drawings.utils.DrawingMeasurerHandler
-import edu.aibu.ancat.core.renderer.survey_drawings.utils.PagedQuestionHandler
 import edu.aibu.ancat.data.model.Question
 import edu.aibu.ancat.data.model.SurveyItem
 import edu.aibu.ancat.utils.DocumentConstants.MARGIN
@@ -22,7 +21,6 @@ import javax.inject.Inject
 class DocumentHelper @Inject constructor(
     private val documentRenderer: DocumentRenderer,
     private val drawingMeasurerHandler: DrawingMeasurerHandler,
-    private val pagedQuestionHandler: PagedQuestionHandler,
     private val documentStorage: DocumentStorage,
     private val documentFactory: DocumentFactory
 ) {
@@ -42,78 +40,53 @@ class DocumentHelper @Inject constructor(
         pdfDocument = documentFactory.createPdfDocument()
         page = documentFactory.createPage(pdfDocument, pageNumber)
         canvas = page.canvas
-        
+
         data.forEachIndexed { index, it ->
             processItem(context, it, index, jsonName)
+            cursor += MARGIN * 2
         }
-        
+
         documentFactory.finishPage(pdfDocument, page)
-        
+
         val survey = data[0].questions[0] as Question.SurveyTitle
         val title = survey.title
 
         documentStorage.saveDocument(context, pdfDocument, title)
     }
-    
+
     /**
      * Bir anket öğesini işler ve canvas'a çizer
      * @param item İşlenecek anket öğesi
      */
-    private suspend fun processItem(context: Context, item: SurveyItem, surveyIndex: Int, jsonName: String) {
-        val needPageBreak = drawingMeasurerHandler.handlePageBreakIfNeeded(item.questions, cursor)
-        var splitQuest = false
-        var splitList = emptyList<SurveyItem>()
+    private suspend fun processItem(
+        context: Context,
+        item: SurveyItem,
+        surveyIndex: Int,
+        jsonName: String
+    ) {
+        var needPageBreak: Boolean
+        item.questions.forEachIndexed { index, it ->
+            needPageBreak = drawingMeasurerHandler.handlePageBreakIfNeeded(it, cursor)
+            Log.d("Cursor ->", "$cursor")
 
-        if (needPageBreak) {
-            splitList = pagedQuestionHandler.splitQuestion(item, cursor)
-            splitQuest = true
-            
-            if (drawingMeasurerHandler.handlePageBreakIfNeeded(splitList[0].questions, cursor)) {
+            if (needPageBreak) {
+                Log.d("needPageBreak", "Girdi")
                 documentFactory.finishPage(pdfDocument, page)
                 page = documentFactory.createPage(pdfDocument, ++pageNumber)
                 canvas = page.canvas
                 cursor = START_CURSOR
             }
-        }
-        
-        cursor = if (splitQuest) {
-            processSplitItems(context, splitList, surveyIndex, jsonName)
-        } else {
-            documentRenderer.renderDocument(
-                canvas = canvas,
-                cursor = cursor + MARGIN * 2,
-                data = item,
-                jsonFileName = jsonName,
-                surveyIndex = surveyIndex,
-                context = context
-            )
-        }
-        
-        Log.d("Cursor ->", "$cursor")
-    }
-    
-    /**
-     * Sayfalara bölünmüş anket öğelerini işler
-     * @param splitList Sayfalara bölünmüş anket öğeleri listesi
-     * @return Güncellenmiş cursor pozisyonu
-     */
-    private suspend fun processSplitItems(context: Context, splitList: List<SurveyItem>, surveyIndex: Int, jsonName: String): Float {
-        splitList.forEachIndexed { index, spl ->
-            if (index != 0) {
-                documentFactory.finishPage(pdfDocument, page)
-                page = documentFactory.createPage(pdfDocument, ++pageNumber)
-                canvas = page.canvas
-                cursor = START_CURSOR
-            }
+
             cursor = documentRenderer.renderDocument(
                 canvas = canvas,
-                cursor = cursor + MARGIN * 2,
-                data = spl,
+                cursor = cursor,
+                data = it,
+                type = item.type,
+                index = index,
                 jsonFileName = jsonName,
                 surveyIndex = surveyIndex,
                 context = context
             )
         }
-        return cursor
     }
 }

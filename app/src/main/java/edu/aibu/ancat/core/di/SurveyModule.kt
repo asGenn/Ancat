@@ -9,7 +9,6 @@ import edu.aibu.ancat.core.helper.DocumentHelper
 import edu.aibu.ancat.core.helper.DocumentStorage
 import edu.aibu.ancat.core.renderer.DocumentRenderer
 import edu.aibu.ancat.core.renderer.survey_drawings.utils.DrawingMeasurerHandler
-import edu.aibu.ancat.core.renderer.survey_drawings.utils.PagedQuestionHandler
 import javax.inject.Singleton
 
 @Module
@@ -20,13 +19,11 @@ object SurveyModule {
     fun provideDocumentHelper(
         documentRenderer: DocumentRenderer,
         drawingMeasurerHandler: DrawingMeasurerHandler,
-        pagedQuestionHandler: PagedQuestionHandler,
         documentStorage: DocumentStorage,
         documentFactory: DocumentFactory
     ): DocumentHelper = DocumentHelper(
         documentRenderer,
         drawingMeasurerHandler,
-        pagedQuestionHandler,
         documentStorage,
         documentFactory
     )

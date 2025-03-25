@@ -4,7 +4,7 @@ import android.content.Context
 import android.graphics.Canvas
 import edu.aibu.ancat.core.renderer.strategy.QRRendererStrategy
 import edu.aibu.ancat.core.renderer.strategy.QuestionStrategyFactory
-import edu.aibu.ancat.data.model.SurveyItem
+import edu.aibu.ancat.data.model.Question
 import javax.inject.Inject
 
 /**
@@ -28,7 +28,9 @@ class DocumentRenderer @Inject constructor(
     fun renderDocument(
         canvas: Canvas,
         cursor: Float,
-        data: SurveyItem,
+        data: Question,
+        type: String,
+        index: Int,
         jsonFileName: String,
         surveyIndex: Int,
         context: Context
@@ -36,18 +38,25 @@ class DocumentRenderer @Inject constructor(
         var cursorPosition = cursor
         
         // Soru tipi için uygun stratejiyi al
-        val strategy = questionStrategyFactory.getStrategyForType(data.type)
+        val strategy = questionStrategyFactory.getStrategyForType(type)
         
-        // Her soruyu sırayla render et
-        data.questions.forEachIndexed { index, question ->
-            cursorPosition = strategy.renderQuestion(
-                canvas, question, cursorPosition,
-                surveyIndex = surveyIndex,
-                questionIndex = index,
-                jsonFileName = jsonFileName,
-                context = context,
-            )
-        }
+        // Soruyu sırayla render et
+        cursorPosition = strategy.renderQuestion(
+            canvas, data, cursorPosition,
+            surveyIndex = surveyIndex,
+            questionIndex = index,
+            jsonFileName = jsonFileName,
+            context = context,
+        )
+//        data.questions.forEachIndexed { index, question ->
+//            cursorPosition = strategy.renderQuestion(
+//                canvas, question, cursorPosition,
+//                surveyIndex = surveyIndex,
+//                questionIndex = index,
+//                jsonFileName = jsonFileName,
+//                context = context,
+//            )
+//        }
 
         // QR kodu oluştur ve render et
         qrRendererStrategy.renderQRCode(canvas, jsonFileName)

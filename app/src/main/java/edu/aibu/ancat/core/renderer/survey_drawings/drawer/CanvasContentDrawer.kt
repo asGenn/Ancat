@@ -2,7 +2,6 @@ package edu.aibu.ancat.core.renderer.survey_drawings.drawer
 
 import android.graphics.Canvas
 import android.graphics.Paint
-import edu.aibu.ancat.utils.DocumentConstants.TEXT
 import javax.inject.Singleton
 
 @Singleton
@@ -16,7 +15,7 @@ class CanvasContentDrawer {
         yCursor: Float,
     ): Float {
         canvas.drawText(text, xCursor, yCursor, paint)
-        return yCursor + TEXT
+        return yCursor
     }
 
     fun drawFrame(
