@@ -51,6 +51,8 @@ class MultipleChoiceQuestions @Inject constructor(
             )
         }
 
+        tempCursor += MARGIN
+
         currentCursor = drawOptions(
             canvas = canvas,
             options = data.options,
@@ -62,12 +64,8 @@ class MultipleChoiceQuestions @Inject constructor(
         val jsonHelper = JsonHelper()
         jsonHelper.addMarks(surveyIndex, questionIndex, markPositions, jsonFileName, context)
 
-
-
         if (tempCursor > currentCursor)
             currentCursor = tempCursor
-
-        currentCursor += CELL_HEIGHT
 
         canvasContentDrawer.drawFrame(
             canvas = canvas,
@@ -109,10 +107,8 @@ class MultipleChoiceQuestions @Inject constructor(
                 )
                 callback(textCenter)
             }
-
-            currentCursor += MARGIN
         }
-        return currentCursor
+        return currentCursor + MARGIN
     }
 
 }

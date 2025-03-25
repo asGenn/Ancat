@@ -24,17 +24,13 @@ object SurveyRendererModule {
 
     @Provides
     @Singleton
-    fun providePagedQuestionHandler(
-        drawingMeasurerHandler: DrawingMeasurerHandler
-    ): PagedQuestionHandler = PagedQuestionHandler(drawingMeasurerHandler)
-
-    @Provides
-    @Singleton
     fun provideTextHandler(): TextHandler = TextHandler()
 
     @Provides
     @Singleton
-    fun provideTitleAndCommits(): TitleAndCommits = TitleAndCommits(PaintFactory)
+    fun provideTitleAndCommits(
+        textHandler: TextHandler
+    ): TitleAndCommits = TitleAndCommits(PaintFactory, textHandler)
 
     @Provides
     @Singleton

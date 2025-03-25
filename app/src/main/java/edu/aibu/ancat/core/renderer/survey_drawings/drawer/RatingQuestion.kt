@@ -45,19 +45,16 @@ class RatingQuestion @Inject constructor(
             )
         }
 
-
-        currentCursor += CELL_HEIGHT
-
         canvasContentDrawer.drawFrame(
             canvas = canvas,
             xLeft = MARGIN * 2,
             xRight = PAGE_WIDTH - MARGIN * 2,
             yTop = cursorPosition,
-            yBottom = currentCursor,
+            yBottom = currentCursor + MARGIN,
             paint = paintFactory.text()
         )
 
-        return currentCursor
+        return currentCursor + MARGIN
     }
 
     private fun drawRating(
