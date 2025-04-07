@@ -191,7 +191,8 @@ fun RatingQuestionDialog(
                                 type = "1",
                                 questions = listOf(
                                     Question.RatingQuestion(
-                                        question = text
+                                        question = text,
+                                        mark = 0f,
                                     ),
                                 )
                             )
@@ -301,7 +302,7 @@ fun MultipleChoiceQuestionDialog(
                                         Question.MultipleChoiceQuestion(
                                             question = questionText,
                                             options = options,
-                                            marks = mutableStateListOf(),
+                                            marks = emptyList(),
                                         )
                                     )
                                 )

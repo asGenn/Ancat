@@ -36,30 +36,23 @@ class DocumentRenderer @Inject constructor(
         context: Context
     ): Float {
         var cursorPosition = cursor
-        
+
         // Soru tipi için uygun stratejiyi al
         val strategy = questionStrategyFactory.getStrategyForType(type)
-        
+
         // Soruyu sırayla render et
         cursorPosition = strategy.renderQuestion(
-            canvas, data, cursorPosition,
+            context = context,
+            canvas = canvas,
+            question = data,
             surveyIndex = surveyIndex,
             questionIndex = index,
+            cursorPosition = cursorPosition,
             jsonFileName = jsonFileName,
-            context = context,
         )
-//        data.questions.forEachIndexed { index, question ->
-//            cursorPosition = strategy.renderQuestion(
-//                canvas, question, cursorPosition,
-//                surveyIndex = surveyIndex,
-//                questionIndex = index,
-//                jsonFileName = jsonFileName,
-//                context = context,
-//            )
-//        }
 
         // QR kodu oluştur ve render et
-        qrRendererStrategy.renderQRCode(canvas, jsonFileName)
+        qrRendererStrategy.renderQRCode(canvas = canvas, content = jsonFileName)
 
         return cursorPosition
     }

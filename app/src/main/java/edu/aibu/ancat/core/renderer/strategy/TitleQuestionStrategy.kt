@@ -15,13 +15,13 @@ class TitleQuestionStrategy @Inject constructor(
 ) : QuestionRendererStrategy {
     
     override fun renderQuestion(
+        context: Context,
         canvas: Canvas,
         question: Question,
-        cursorPosition: Float,
         surveyIndex: Int,
         questionIndex: Int,
-        jsonFileName: String,
-        context: Context
+        cursorPosition: Float,
+        jsonFileName: String
     ): Float {
         if (question !is Question.SurveyTitle) return cursorPosition
         

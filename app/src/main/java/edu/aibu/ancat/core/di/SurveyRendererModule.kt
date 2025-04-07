@@ -4,6 +4,7 @@ import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
+import edu.aibu.ancat.core.helper.JsonHelper
 import edu.aibu.ancat.core.renderer.survey_drawings.drawer.*
 import edu.aibu.ancat.core.renderer.survey_drawings.utils.*
 import edu.aibu.ancat.utils.PaintFactory
@@ -36,16 +37,18 @@ object SurveyRendererModule {
     @Singleton
     fun provideMultipleChoiceQuestions(
         canvasContentDrawer: CanvasContentDrawer,
+        jsonHelper: JsonHelper,
         textHandler: TextHandler
     ): MultipleChoiceQuestions =
-        MultipleChoiceQuestions(canvasContentDrawer, textHandler, PaintFactory)
+        MultipleChoiceQuestions(canvasContentDrawer, jsonHelper, textHandler, PaintFactory)
 
     @Provides
     @Singleton
     fun provideRatingQuestion(
         canvasContentDrawer: CanvasContentDrawer,
+        jsonHelper: JsonHelper,
         textHandler: TextHandler
-    ): RatingQuestion = RatingQuestion(canvasContentDrawer, textHandler, PaintFactory)
+    ): RatingQuestion = RatingQuestion(canvasContentDrawer, jsonHelper, textHandler, PaintFactory)
 
     @Provides
     @Singleton

@@ -1,7 +1,6 @@
 package edu.aibu.ancat.core.renderer.survey_drawings.drawer
 
 import android.graphics.Canvas
-import android.util.Log
 import edu.aibu.ancat.core.renderer.survey_drawings.utils.TextHandler
 import edu.aibu.ancat.utils.DocumentConstants.MARGIN
 import edu.aibu.ancat.utils.DocumentConstants.PAGE_WIDTH

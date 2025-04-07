@@ -57,13 +57,13 @@ fun SurveyItemCard(item: SurveyItem) {
         elevation = CardDefaults.elevatedCardElevation(defaultElevation = 2.dp),
         shape = RoundedCornerShape(16.dp),
         colors = CardDefaults.elevatedCardColors(
-            containerColor = MaterialTheme.colorScheme.surface
+            containerColor = MaterialTheme.colorScheme.onTertiary
         )
     ) {
         Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(16.dp)
+                .padding(8.dp)
         ) {
             when (item.type) {
                 "_" -> SurveyTitleType(item = item)

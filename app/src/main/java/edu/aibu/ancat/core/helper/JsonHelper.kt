@@ -63,34 +63,40 @@ class JsonHelper {
         }
     }
 
-    fun addMarks(surveyIndex: Int, questionIndex: Int, data: List<Float>, fileName: String, context: Context): Boolean {
+    fun addMarksToRatingQuest(context: Context, data: Float, surveyIndex: Int, questionIndex: Int, fileName: String): Boolean {
         try {
-            // 1️⃣ JSON dosyasını oku
             val jsonString = readJsonFile(fileName, context)
-
-            // 2️⃣ JSON'u Kotlin nesnelerine çevir
             val jsonFormat = kotlinx.serialization.json.Json { ignoreUnknownKeys = true }
             val surveyItems = jsonFormat.decodeFromString<List<SurveyItem>>(jsonString).toMutableList()
-
-            // 3️⃣ Geçerli indexleri kontrol et
-            if (surveyIndex !in surveyItems.indices) return false
-            if (questionIndex !in surveyItems[surveyIndex].questions.indices) return false
-
-            // 4️⃣ Güncellenecek soruyu bul
             val question = surveyItems[surveyIndex].questions[questionIndex]
 
-            // 5️⃣ Eğer soru `MultipleChoiceQuestion` ise `marks` güncelle
-            if (question is Question.MultipleChoiceQuestion) {
-                question.marks.clear() // 🔥 Mevcut listeyi temizle
-                question.marks.addAll(data.take(question.options.size)) // 🔥 Yeni değerleri ekle
-            } else {
-                return false // Eğer soru `MultipleChoiceQuestion` değilse işlem yapma
-            }
+            if (surveyIndex !in surveyItems.indices) return false
+            if (questionIndex !in surveyItems[surveyIndex].questions.indices) return false
+            if (question !is Question.RatingQuestion) return false
 
-            // 6️⃣ Güncellenmiş JSON'u stringe çevir
+            question.mark = data //
             val updatedJsonString = jsonFormat.encodeToString(surveyItems)
+            return openFileAndWriteNewContent(fileName, updatedJsonString, context)
 
-            // 7️⃣ Yeni JSON'u dosyaya yaz
+        } catch (e: Exception) {
+            println("Error: ${e.message}")
+            return false
+        }
+    }
+
+    fun addMarksToMultiChoiceQuest(context: Context, data: List<Float>, surveyIndex: Int, questionIndex: Int, fileName: String): Boolean {
+        try {
+            val jsonString = readJsonFile(fileName, context)
+            val jsonFormat = kotlinx.serialization.json.Json { ignoreUnknownKeys = true }
+            val surveyItems = jsonFormat.decodeFromString<List<SurveyItem>>(jsonString).toMutableList()
+            val question = surveyItems[surveyIndex].questions[questionIndex]
+
+            if (surveyIndex !in surveyItems.indices) return false
+            if (questionIndex !in surveyItems[surveyIndex].questions.indices) return false
+            if (question !is Question.MultipleChoiceQuestion) return false
+
+            question.marks = data //
+            val updatedJsonString = jsonFormat.encodeToString(surveyItems)
             return openFileAndWriteNewContent(fileName, updatedJsonString, context)
 
         } catch (e: Exception) {
