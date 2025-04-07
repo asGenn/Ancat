@@ -1,21 +1,13 @@
 package edu.aibu.ancat.ui.views.test_screen
 
-import android.content.Context
 import androidx.lifecycle.ViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
-import edu.aibu.ancat.core.helper.DocumentHelper
-import edu.aibu.ancat.core.helper.JsonHelper
 import edu.aibu.ancat.data.model.SurveyItem
 import kotlinx.serialization.json.Json
 import javax.inject.Inject
 
 @HiltViewModel
-class TestViewModel @Inject constructor(
-    private val documentHelper: DocumentHelper,
-) : ViewModel() {
-
-    private val jsonHelper = JsonHelper()
-
+class TestViewModel @Inject constructor() : ViewModel() {
     private val json = """
         [
           {
@@ -151,63 +143,78 @@ class TestViewModel @Inject constructor(
             "questions": [
               {
                 "type": "edu.aibu.ancat.data.model.Question.RatingQuestion",
-                "question": "Uygulamamızın genel performansını 1 ile 5 arasında nasıl değerlendirirsiniz?"
+                "question": "Uygulamamızın genel performansını 1 ile 5 arasında nasıl değerlendirirsiniz?",
+                "mark" : 0
               },
               {
                 "type": "edu.aibu.ancat.data.model.Question.RatingQuestion",
-                "question": "Arayüz tasarımımızın kullanım kolaylığını 1 ile 5 arasında puanlayın."
+                "question": "Arayüz tasarımımızın kullanım kolaylığını 1 ile 5 arasında puanlayın.",
+                "mark" : 0
               },
               {
                 "type": "edu.aibu.ancat.data.model.Question.RatingQuestion",
-                "question": "Hizmet kalitemizi 1 ile 5 arasında nasıl değerlendirirsiniz?"
+                "question": "Hizmet kalitemizi 1 ile 5 arasında nasıl değerlendirirsiniz?",
+                "mark" : 0
               },
               {
                 "type": "edu.aibu.ancat.data.model.Question.RatingQuestion",
-                "question": "Mobil uygulamamızın hızını 1 ile 5 arasında puanlayın."
+                "question": "Mobil uygulamamızın hızını 1 ile 5 arasında puanlayın.",
+                "mark" : 0
               },
               {
                 "type": "edu.aibu.ancat.data.model.Question.RatingQuestion",
-                "question": "Destek ekibimizin sorunlarınıza çözüm bulma hızını 1 ile 5 arasında değerlendirin."
+                "question": "Destek ekibimizin sorunlarınıza çözüm bulma hızını 1 ile 5 arasında değerlendirin.",
+                "mark" : 0
               },
               {
                 "type": "edu.aibu.ancat.data.model.Question.RatingQuestion",
-                "question": "Web sitemizin görselliğini 1 ile 5 arasında nasıl buluyorsunuz?"
+                "question": "Web sitemizin görselliğini 1 ile 5 arasında nasıl buluyorsunuz?",
+                "mark" : 0
               },
               {
                 "type": "edu.aibu.ancat.data.model.Question.RatingQuestion",
-                "question": "Ürünlerimizin kalitesini 1 ile 5 arasında puanlayın."
+                "question": "Ürünlerimizin kalitesini 1 ile 5 arasında puanlayın.",
+                "mark" : 0
               },
               {
                 "type": "edu.aibu.ancat.data.model.Question.RatingQuestion",
-                "question": "Fiyatlarımızın uygunluğunu 1 ile 5 arasında değerlendirir misiniz?"
+                "question": "Fiyatlarımızın uygunluğunu 1 ile 5 arasında değerlendirir misiniz?",
+                "mark" : 0
               },
               {
                 "type": "edu.aibu.ancat.data.model.Question.RatingQuestion",
-                "question": "Sunduğumuz özelliklerin yeterliliğini 1 ile 5 arasında puanlayın."
+                "question": "Sunduğumuz özelliklerin yeterliliğini 1 ile 5 arasında puanlayın.",
+                "mark" : 0
               },
               {
                 "type": "edu.aibu.ancat.data.model.Question.RatingQuestion",
-                "question": "Sosyal medya paylaşımlarımızın faydalılığını 1 ile 5 arasında değerlendirin."
+                "question": "Sosyal medya paylaşımlarımızın faydalılığını 1 ile 5 arasında değerlendirin.",
+                "mark" : 0
               },
               {
                 "type": "edu.aibu.ancat.data.model.Question.RatingQuestion",
-                "question": "Kampanyalarımızın ilginçliğini 1 ile 5 arasında puanlayın."
+                "question": "Kampanyalarımızın ilginçliğini 1 ile 5 arasında puanlayın.",
+                "mark" : 0
               },
               {
                 "type": "edu.aibu.ancat.data.model.Question.RatingQuestion",
-                "question": "Ödeme seçeneklerimizin yeterliliğini 1 ile 5 arasında değerlendirin."
+                "question": "Ödeme seçeneklerimizin yeterliliğini 1 ile 5 arasında değerlendirin.",
+                "mark" : 0
               },
               {
                 "type": "edu.aibu.ancat.data.model.Question.RatingQuestion",
-                "question": "Teslimat sürecimizi 1 ile 5 arasında nasıl buluyorsunuz?"
+                "question": "Teslimat sürecimizi 1 ile 5 arasında nasıl buluyorsunuz?",
+                "mark" : 0
               },
               {
                 "type": "edu.aibu.ancat.data.model.Question.RatingQuestion",
-                "question": "Güvenli alışveriş deneyimini sağlama konusundaki başarımızı 1 ile 5 arasında değerlendirin."
+                "question": "Güvenli alışveriş deneyimini sağlama konusundaki başarımızı 1 ile 5 arasında değerlendirin.",
+                "mark" : 0
               },
               {
                 "type": "edu.aibu.ancat.data.model.Question.RatingQuestion",
-                "question": "Genel memnuniyetinizi 1 ile 5 arasında nasıl değerlendirirsiniz?"
+                "question": "Genel memnuniyetinizi 1 ile 5 arasında nasıl değerlendirirsiniz?",
+                "mark" : 0
               }
             ]
           },
@@ -331,63 +338,78 @@ class TestViewModel @Inject constructor(
             "questions": [
               {
                 "type": "edu.aibu.ancat.data.model.Question.RatingQuestion",
-                "question": "Uygulamamızın genel performansını 1 ile 5 arasında nasıl değerlendirirsiniz?"
+                "question": "Uygulamamızın genel performansını 1 ile 5 arasında nasıl değerlendirirsiniz?",
+                "mark" : 0
               },
               {
                 "type": "edu.aibu.ancat.data.model.Question.RatingQuestion",
-                "question": "Arayüz tasarımımızın kullanım kolaylığını 1 ile 5 arasında puanlayın."
+                "question": "Arayüz tasarımımızın kullanım kolaylığını 1 ile 5 arasında puanlayın.",
+                "mark" : 0
               },
               {
                 "type": "edu.aibu.ancat.data.model.Question.RatingQuestion",
-                "question": "Hizmet kalitemizi 1 ile 5 arasında nasıl değerlendirirsiniz?"
+                "question": "Hizmet kalitemizi 1 ile 5 arasında nasıl değerlendirirsiniz?",
+                "mark" : 0
               },
               {
                 "type": "edu.aibu.ancat.data.model.Question.RatingQuestion",
-                "question": "Mobil uygulamamızın hızını 1 ile 5 arasında puanlayın."
+                "question": "Mobil uygulamamızın hızını 1 ile 5 arasında puanlayın.",
+                "mark" : 0
               },
               {
                 "type": "edu.aibu.ancat.data.model.Question.RatingQuestion",
-                "question": "Destek ekibimizin sorunlarınıza çözüm bulma hızını 1 ile 5 arasında değerlendirin."
+                "question": "Destek ekibimizin sorunlarınıza çözüm bulma hızını 1 ile 5 arasında değerlendirin.",
+                "mark" : 0
               },
               {
                 "type": "edu.aibu.ancat.data.model.Question.RatingQuestion",
-                "question": "Web sitemizin görselliğini 1 ile 5 arasında nasıl buluyorsunuz?"
+                "question": "Web sitemizin görselliğini 1 ile 5 arasında nasıl buluyorsunuz?",
+                "mark" : 0
               },
               {
                 "type": "edu.aibu.ancat.data.model.Question.RatingQuestion",
-                "question": "Ürünlerimizin kalitesini 1 ile 5 arasında puanlayın."
+                "question": "Ürünlerimizin kalitesini 1 ile 5 arasında puanlayın.",
+                "mark" : 0
               },
               {
                 "type": "edu.aibu.ancat.data.model.Question.RatingQuestion",
-                "question": "Fiyatlarımızın uygunluğunu 1 ile 5 arasında değerlendirir misiniz?"
+                "question": "Fiyatlarımızın uygunluğunu 1 ile 5 arasında değerlendirir misiniz?",
+                "mark" : 0
               },
               {
                 "type": "edu.aibu.ancat.data.model.Question.RatingQuestion",
-                "question": "Sunduğumuz özelliklerin yeterliliğini 1 ile 5 arasında puanlayın."
+                "question": "Sunduğumuz özelliklerin yeterliliğini 1 ile 5 arasında puanlayın.",
+                "mark" : 0
               },
               {
                 "type": "edu.aibu.ancat.data.model.Question.RatingQuestion",
-                "question": "Sosyal medya paylaşımlarımızın faydalılığını 1 ile 5 arasında değerlendirin."
+                "question": "Sosyal medya paylaşımlarımızın faydalılığını 1 ile 5 arasında değerlendirin.",
+                "mark" : 0
               },
               {
                 "type": "edu.aibu.ancat.data.model.Question.RatingQuestion",
-                "question": "Kampanyalarımızın ilginçliğini 1 ile 5 arasında puanlayın."
+                "question": "Kampanyalarımızın ilginçliğini 1 ile 5 arasında puanlayın.",
+                "mark" : 0
               },
               {
                 "type": "edu.aibu.ancat.data.model.Question.RatingQuestion",
-                "question": "Ödeme seçeneklerimizin yeterliliğini 1 ile 5 arasında değerlendirin."
+                "question": "Ödeme seçeneklerimizin yeterliliğini 1 ile 5 arasında değerlendirin.",
+                "mark" : 0
               },
               {
                 "type": "edu.aibu.ancat.data.model.Question.RatingQuestion",
-                "question": "Teslimat sürecimizi 1 ile 5 arasında nasıl buluyorsunuz?"
+                "question": "Teslimat sürecimizi 1 ile 5 arasında nasıl buluyorsunuz?",
+                "mark" : 0
               },
               {
                 "type": "edu.aibu.ancat.data.model.Question.RatingQuestion",
-                "question": "Güvenli alışveriş deneyimini sağlama konusundaki başarımızı 1 ile 5 arasında değerlendirin."
+                "question": "Güvenli alışveriş deneyimini sağlama konusundaki başarımızı 1 ile 5 arasında değerlendirin.",
+                "mark" : 0
               },
               {
                 "type": "edu.aibu.ancat.data.model.Question.RatingQuestion",
-                "question": "Genel memnuniyetinizi 1 ile 5 arasında nasıl değerlendirirsiniz?"
+                "question": "Genel memnuniyetinizi 1 ile 5 arasında nasıl değerlendirirsiniz?",
+                "mark" : 0
               }
             ]
           }
@@ -395,20 +417,4 @@ class TestViewModel @Inject constructor(
     """.trimIndent()
 
     val data = Json.decodeFromString<List<SurveyItem>>(json)
-
-    val testData = "TestData"
-
-    suspend fun createDoc(context: Context) {
-        jsonHelper.saveJsonToFile(
-            json,
-            fileName = testData,
-            context = context,
-        )
-        documentHelper.createDocument(
-            context = context,
-            data = data,
-            jsonName = testData
-        )
-    }
-
 }

@@ -6,15 +6,19 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.hilt.navigation.compose.hiltViewModel
+import edu.aibu.ancat.core.helper.JsonHelper
+import edu.aibu.ancat.ui.views.create_screen.CreateScreenViewModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.serialization.encodeToString
+import kotlinx.serialization.json.Json
 
 @Composable
 fun TestView() {
     val viewModel: TestViewModel = hiltViewModel()
+    val viewModelSec: CreateScreenViewModel = hiltViewModel()
     val context = LocalContext.current
 
     Box(
@@ -23,16 +27,21 @@ fun TestView() {
     ) {
         Button(
             onClick = { CoroutineScope(Dispatchers.Main).launch {
-                viewModel.createDoc(context)
+
+                val path = JsonHelper().saveJsonToFile(
+                    context = context,
+                    fileName = "TestData",
+                    jsonData = Json.encodeToString(viewModel.data)
+                )
+
+                viewModelSec.saveJsonFileToDB(
+                    fileName = "TestData",
+                    filePath = path,
+                    title = "Test Anketi"
+                )
             } }
         ) {
-            Text(text = "Doküman Oluştur")
+            Text(text = "Test Anketi Ekle")
         }
     }
-}
-
-@Preview(showBackground = true)
-@Composable
-fun PreviewTestView() {
-    TestView()
 }
