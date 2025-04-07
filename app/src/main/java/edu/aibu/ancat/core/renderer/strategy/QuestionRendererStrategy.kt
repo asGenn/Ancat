@@ -18,12 +18,12 @@ interface QuestionRendererStrategy {
      * @return Render sonrası güncellenmiş Y pozisyonu
      */
     fun renderQuestion(
+        context: Context,
         canvas: Canvas,
         question: Question,
-        cursorPosition: Float,
         surveyIndex: Int,
         questionIndex: Int,
+        cursorPosition: Float,
         jsonFileName: String,
-        context: Context
     ): Float
 } 

@@ -1,6 +1,8 @@
 package edu.aibu.ancat.core.renderer.survey_drawings.drawer
 
+import android.content.Context
 import android.graphics.Canvas
+import edu.aibu.ancat.core.helper.JsonHelper
 import edu.aibu.ancat.core.renderer.survey_drawings.utils.TextHandler
 import edu.aibu.ancat.utils.PaintFactory
 import edu.aibu.ancat.utils.DocumentConstants.CELL_HEIGHT
@@ -13,19 +15,32 @@ import javax.inject.Singleton
 @Singleton
 class RatingQuestion @Inject constructor(
     private val canvasContentDrawer: CanvasContentDrawer,
+    private val jsonHelper: JsonHelper,
     private val textHandler: TextHandler,
     private val paintFactory: PaintFactory
 ) {
 
     fun drawRatingQuestion(
+        context: Context,
         canvas: Canvas,
         data: Question.RatingQuestion,
+        surveyIndex: Int,
+        questionIndex: Int,
         cursorPosition: Float,
+        jsonFileName: String,
     ): Float {
 
         var currentCursor = cursorPosition
 
         drawRating(canvas = canvas, cursorPosition = currentCursor)
+
+        jsonHelper.addMarksToRatingQuest(
+            context = context,
+            data = cursorPosition + (CELL_HEIGHT + paintFactory.text().textSize) / 2 + 10f,
+            surveyIndex = surveyIndex,
+            questionIndex = questionIndex,
+            fileName = jsonFileName,
+        )
 
         val textList: List<String> = textHandler.getWrappedText(
             text = data.question,

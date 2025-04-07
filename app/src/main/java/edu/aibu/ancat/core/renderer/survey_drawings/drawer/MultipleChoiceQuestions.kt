@@ -15,18 +15,19 @@ import javax.inject.Singleton
 @Singleton
 class MultipleChoiceQuestions @Inject constructor(
     private val canvasContentDrawer: CanvasContentDrawer,
+    private val jsonHelper: JsonHelper,
     private val textHandler: TextHandler,
     private val paintFactory: PaintFactory
 ) {
 
     fun drawMultipleChoiceQuestions(
+        context: Context,
         canvas: Canvas,
         data: Question.MultipleChoiceQuestion,
-        cursorPosition: Float,
         surveyIndex: Int,
         questionIndex: Int,
+        cursorPosition: Float,
         jsonFileName: String,
-        context: Context
     ): Float {
 
         var currentCursor = cursorPosition
@@ -61,8 +62,13 @@ class MultipleChoiceQuestions @Inject constructor(
             markPositions.add(yCursor)
         }
 
-        val jsonHelper = JsonHelper()
-        jsonHelper.addMarks(surveyIndex, questionIndex, markPositions, jsonFileName, context)
+        jsonHelper.addMarksToMultiChoiceQuest(
+            context = context,
+            data = markPositions,
+            surveyIndex = surveyIndex,
+            questionIndex = questionIndex,
+            fileName = jsonFileName
+        )
 
         if (tempCursor > currentCursor)
             currentCursor = tempCursor
@@ -105,7 +111,7 @@ class MultipleChoiceQuestions @Inject constructor(
                     xCursor = PAGE_WIDTH - MARGIN * 17,
                     yCursor = textCenter
                 )
-                callback(textCenter)
+                callback(textCenter + 10f)
             }
         }
         return currentCursor + MARGIN

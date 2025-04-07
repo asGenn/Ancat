@@ -9,6 +9,11 @@ import com.google.zxing.EncodeHintType
 import com.google.zxing.qrcode.QRCodeWriter
 
 class QRCodeDrawer {
+    // QR kodu canvas'a çiz
+    private val paint = Paint()
+    private val margin = 3f // Kenarlardan uzaklık
+    private val qrSize = 50f // QR kodun boyutu
+
     /**
      * QR kodu oluşturur ve canvas'ın sağ alt köşesine render eder
      * @param canvas Render işlemi yapılacak canvas
@@ -48,26 +53,29 @@ class QRCodeDrawer {
                 }
             }
 
-            // QR kodu canvas'a çiz
-            val paint = Paint()
-            val margin = 3f // Kenarlardan uzaklık
-            val qrSize = 50f // QR kodun boyutu
-
             // Canvas'ın boyutlarını al
             val canvasWidth = canvas.width.toFloat()
             val canvasHeight = canvas.height.toFloat()
 
-            // QR kodun konumunu hesapla (sağ alt köşe)
-            val left = canvasWidth - qrSize - margin
-            val top = canvasHeight - qrSize - margin
+            // Sol üst köşe
+            val topLeftX = margin
+            val topLeftY = margin
+            drawQR(canvas, bitmap, paint,topLeftX, topLeftY)
 
-            // QR kodu çiz
-            canvas.drawBitmap(
-                bitmap,
-                null,
-                android.graphics.RectF(left, top, left + qrSize, top + qrSize),
-                paint
-            )
+            // Sağ üst köşe
+            val topRightX = canvasWidth - qrSize - margin
+            val topRightY = margin
+            drawQR(canvas, bitmap, paint, topRightX, topRightY)
+
+            // Sağ alt köşe
+            val bottomRightX = canvasWidth - qrSize - margin
+            val bottomRightY = canvasHeight - qrSize - margin
+            drawQR(canvas, bitmap, paint, bottomRightX, bottomRightY)
+
+            // Sol alt köşe
+            val bottomLeftX = margin
+            val bottomLeftY = canvasHeight - qrSize - margin
+            drawQR(canvas, bitmap, paint, bottomLeftX, bottomLeftY)
 
             // Bitmap'i temizle
             bitmap.recycle()
@@ -75,5 +83,20 @@ class QRCodeDrawer {
         } catch (e: Exception) {
             e.printStackTrace()
         }
+    }
+
+    private fun drawQR(
+        canvas: Canvas,
+        bitmap: Bitmap,
+        paint: Paint,
+        posX: Float,
+        posY: Float
+    ) {
+        canvas.drawBitmap(
+            bitmap,
+            null,
+            android.graphics.RectF(posX, posY, posX + qrSize, posY + qrSize),
+            paint
+        )
     }
 }

@@ -15,20 +15,24 @@ class RatingQuestionStrategy @Inject constructor(
 ) : QuestionRendererStrategy {
     
     override fun renderQuestion(
+        context: Context,
         canvas: Canvas,
         question: Question,
-        cursorPosition: Float,
         surveyIndex: Int,
         questionIndex: Int,
-        jsonFileName: String,
-        context: Context
+        cursorPosition: Float,
+        jsonFileName: String
     ): Float {
         if (question !is Question.RatingQuestion) return cursorPosition
         
         return ratingQuestionDrawer.drawRatingQuestion(
+            context = context,
             canvas = canvas,
             data = question,
-            cursorPosition = cursorPosition
+            surveyIndex = surveyIndex,
+            questionIndex = questionIndex,
+            cursorPosition = cursorPosition,
+            jsonFileName = jsonFileName
         )
     }
 } 

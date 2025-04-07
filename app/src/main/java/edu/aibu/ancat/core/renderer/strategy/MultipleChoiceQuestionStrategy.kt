@@ -15,24 +15,24 @@ class MultipleChoiceQuestionStrategy @Inject constructor(
 ) : QuestionRendererStrategy {
 
     override fun renderQuestion(
+        context: Context,
         canvas: Canvas,
         question: Question,
-        cursorPosition: Float,
         surveyIndex: Int,
         questionIndex: Int,
-        jsonFileName: String,
-        context: Context
+        cursorPosition: Float,
+        jsonFileName: String
     ): Float {
         if (question !is Question.MultipleChoiceQuestion) return cursorPosition
 
         return multipleChoiceQuestions.drawMultipleChoiceQuestions(
+            context = context,
             canvas = canvas,
             data = question,
-            cursorPosition = cursorPosition,
             surveyIndex = surveyIndex,
             questionIndex = questionIndex,
+            cursorPosition = cursorPosition,
             jsonFileName = jsonFileName,
-            context = context
         )
     }
 } 

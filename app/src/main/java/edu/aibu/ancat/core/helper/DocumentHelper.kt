@@ -9,6 +9,7 @@ import edu.aibu.ancat.core.renderer.DocumentRenderer
 import edu.aibu.ancat.core.renderer.survey_drawings.utils.DrawingMeasurerHandler
 import edu.aibu.ancat.data.model.Question
 import edu.aibu.ancat.data.model.SurveyItem
+import edu.aibu.ancat.utils.DocumentConstants.FIRST_PAGE
 import edu.aibu.ancat.utils.DocumentConstants.MARGIN
 import edu.aibu.ancat.utils.DocumentConstants.START_CURSOR
 import javax.inject.Inject
@@ -29,7 +30,7 @@ class DocumentHelper @Inject constructor(
     private lateinit var canvas: Canvas
 
     private var pageNumber = 1
-    private var cursor = START_CURSOR
+    private var cursor = FIRST_PAGE
 
     /**
      * PDF dokümanı oluşturur ve kaydeder
