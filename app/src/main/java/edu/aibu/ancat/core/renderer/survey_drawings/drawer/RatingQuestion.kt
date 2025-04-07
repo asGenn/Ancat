@@ -36,7 +36,7 @@ class RatingQuestion @Inject constructor(
 
         jsonHelper.addMarksToRatingQuest(
             context = context,
-            data = cursorPosition + (CELL_HEIGHT + paintFactory.text().textSize) / 2 + 10f,
+            data = cursorPosition + (CELL_HEIGHT + paintFactory.text().textSize) / 2 - 10f,
             surveyIndex = surveyIndex,
             questionIndex = questionIndex,
             fileName = jsonFileName,
