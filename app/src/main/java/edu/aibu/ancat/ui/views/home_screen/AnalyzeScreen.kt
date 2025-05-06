@@ -7,6 +7,9 @@ import androidx.activity.result.IntentSenderRequest
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -22,6 +25,8 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
@@ -35,6 +40,16 @@ import coil3.compose.AsyncImage
 fun AnalyzeScreen() {
     val viewModel: AnalyzeScreenViewModel = hiltViewModel()
     val context = LocalContext.current
+    
+    // MediaStore'dan görüntüleri yükle
+    LaunchedEffect(Unit) {
+        // Uygulama başladığında MediaStore'dan kayıtlı görüntüleri almak isterseniz
+        // bu kısmı etkinleştirebilirsiniz.
+        // val mediaStoreImages = viewModel.getImagesFromMediaStore(context)
+        // if (mediaStoreImages.isNotEmpty()) {
+        //    viewModel.loadImagesFromMediaStore(mediaStoreImages)
+        // }
+    }
 
     Scaffold(
         modifier = Modifier.fillMaxSize(),
@@ -71,34 +86,64 @@ fun AnalyzeScreen() {
                 }
             }
 
-            Button(
+            Column(
                 modifier = Modifier
                     .align(Alignment.BottomEnd)
                     .padding(16.dp)
-                    .width(160.dp)
-                    .height(48.dp),
-                shape = RoundedCornerShape(3.dp),
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = MaterialTheme.colorScheme.primary, // Arka plan rengi
-                    contentColor = MaterialTheme.colorScheme.onPrimary // İçerik (metin) rengi
-                ),
-                onClick = {
-                    viewModel.scanner.getStartScanIntent(context as Activity)
-                        .addOnSuccessListener {
-                            scannerLauncher.launch(
-                                IntentSenderRequest.Builder(it).build()
-                            )
-                        }
-                        .addOnFailureListener {
-                            Toast.makeText(context, "Fail", Toast.LENGTH_SHORT).show()
-                        }
-                }
             ) {
-                Text(
-                    modifier = Modifier,
-                    textAlign = TextAlign.Center,
-                    text = "Scan Document"
-                )
+                Button(
+                    modifier = Modifier
+                        .width(160.dp)
+                        .height(48.dp),
+                    shape = RoundedCornerShape(3.dp),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = MaterialTheme.colorScheme.primary,
+                        contentColor = MaterialTheme.colorScheme.onPrimary
+                    ),
+                    onClick = {
+                        // MediaStore'a kaydet
+                        if (viewModel.imageUris.isNotEmpty()) {
+                            viewModel.saveScannedImagesToMediaStore(context)
+                            Toast.makeText(context, "Görüntüler kaydedildi", Toast.LENGTH_SHORT).show()
+                        }
+                    }
+                ) {
+                    Text(
+                        modifier = Modifier,
+                        textAlign = TextAlign.Center,
+                        text = "MediaStore'a Kaydet"
+                    )
+                }
+                
+                Spacer(modifier = Modifier.height(8.dp))
+                
+                Button(
+                    modifier = Modifier
+                        .width(160.dp)
+                        .height(48.dp),
+                    shape = RoundedCornerShape(3.dp),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = MaterialTheme.colorScheme.primary,
+                        contentColor = MaterialTheme.colorScheme.onPrimary
+                    ),
+                    onClick = {
+                        viewModel.scanner.getStartScanIntent(context as Activity)
+                            .addOnSuccessListener {
+                                scannerLauncher.launch(
+                                    IntentSenderRequest.Builder(it).build()
+                                )
+                            }
+                            .addOnFailureListener {
+                                Toast.makeText(context, "Fail", Toast.LENGTH_SHORT).show()
+                            }
+                    }
+                ) {
+                    Text(
+                        modifier = Modifier,
+                        textAlign = TextAlign.Center,
+                        text = "Belge Tara"
+                    )
+                }
             }
         }
     }

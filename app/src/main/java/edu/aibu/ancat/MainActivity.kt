@@ -1,6 +1,7 @@
 package edu.aibu.ancat
 
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.animation.AnimatedVisibility
@@ -17,11 +18,14 @@ import edu.aibu.ancat.ui.navigation_bar.BottomNavigationBar
 import edu.aibu.ancat.ui.theme.AncatTheme
 import dagger.hilt.android.AndroidEntryPoint
 
+import org.opencv.android.OpenCVLoader
+
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
         setContent {
             AncatTheme {
                 val navController = rememberNavController()
@@ -49,6 +53,12 @@ class MainActivity : ComponentActivity() {
                 }
             }
         }
+        if (OpenCVLoader.initLocal()) {
+            Log.d("MainActivity", "OpenCV initialized")
+        } else {
+            Log.d("MainActivity", "OpenCV not initialized")
+        }
+
     }
 }
 

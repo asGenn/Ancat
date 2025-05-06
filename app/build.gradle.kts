@@ -57,6 +57,7 @@ android {
     }
 }
 
+
 dependencies {
 
     // Android core libraries
@@ -75,7 +76,8 @@ dependencies {
     implementation(libs.androidx.navigation.compose) // Navigation for Jetpack Compose
 
     // Serialization
-    implementation(libs.kotlinx.serialization.core) // Core library for Kotlin Serialization
+    implementation(libs.kotlinx.serialization.core)
+    implementation(libs.androidx.exifinterface) // Core library for Kotlin Serialization
 
     // Testing libraries
     testImplementation(libs.junit) // JUnit for unit testing
@@ -106,6 +108,17 @@ dependencies {
 
     //QR Create
     implementation (libs.zxing.core)
+
+    // OpenCV
+    implementation(libs.opencv)
+
+    implementation(libs.barcode.scanning)
+
+    implementation (libs.androidx.camera.core)
+    implementation (libs.androidx.camera.camera2)
+    implementation (libs.androidx.camera.lifecycle)
+    implementation (libs.androidx.camera.view)
+
 }
 
 java {
