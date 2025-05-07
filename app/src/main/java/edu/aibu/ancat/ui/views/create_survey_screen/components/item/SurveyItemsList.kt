@@ -57,7 +57,7 @@ fun SurveyItemCard(item: SurveyItem) {
         elevation = CardDefaults.elevatedCardElevation(defaultElevation = 2.dp),
         shape = RoundedCornerShape(16.dp),
         colors = CardDefaults.elevatedCardColors(
-            containerColor = MaterialTheme.colorScheme.onTertiary
+            containerColor = MaterialTheme.colorScheme.surfaceVariant
         )
     ) {
         Box(

@@ -5,21 +5,19 @@ import androidx.compose.animation.expandVertically
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.shrinkVertically
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.rounded.Add
-import androidx.compose.material3.ExtendedFloatingActionButton
-import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -32,11 +30,12 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import edu.aibu.ancat.data.model.SurveyItem
 import edu.aibu.ancat.domain.entity.JsonFilesInfoEntity
+import edu.aibu.ancat.ui.views.components.CustomExtendedFloatingActionButton
+import edu.aibu.ancat.ui.views.components.CustomFloatingActionButton
 import edu.aibu.ancat.ui.views.create_survey_screen.components.bottomsheet.CustomModalBottomSheet
 import edu.aibu.ancat.ui.views.create_survey_screen.components.dialog.DialogHandler
 import edu.aibu.ancat.ui.views.create_survey_screen.components.common.EmptySurveyContent
@@ -44,11 +43,12 @@ import edu.aibu.ancat.ui.views.create_survey_screen.components.common.SurveyCrea
 import edu.aibu.ancat.ui.views.create_survey_screen.components.item.SurveyItemsList
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 /**
  * Anket oluşturma ekranı
- * 
+ *
  * @param id Anket ID'si
  */
 @Composable
@@ -77,7 +77,7 @@ fun CreateSurveyScreen(id: Int?) {
 
 /**
  * Anket oluşturucu ana ekranı
- * 
+ *
  * @param modifier Modifier
  * @param viewModel ViewModel
  * @param surveyItem Anket öğeleri listesi
@@ -94,31 +94,18 @@ fun SurveyCreator(
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
     val showSaveConfirmation = remember { mutableStateOf(false) }
-    
-    // Ekran boyutlarını al
-    val configuration = LocalConfiguration.current
-    val screenHeight = configuration.screenHeightDp.dp
-    val screenWidth = configuration.screenWidthDp.dp
-    
-    // Responsive padding değerleri
-    val horizontalPadding = screenWidth * 0.04f // Ekran genişliğinin %4'ü
-    val bottomPadding = screenHeight * 0.02f // Ekran yüksekliğinin %2'si
 
-    Scaffold(
-        topBar = {
-            SurveyCreatorTopBar(
-                title = jsonFilesInfoEntity.title,
-                onSaveClick = {
-                    viewModel.saveJson(context, jsonFilesInfoEntity, surveyItem)
-                    showSaveConfirmation.value = true
-                }
-            )
-        }
-    ) { paddingValues ->
+    Column {
+        SurveyCreatorTopBar(
+            title = jsonFilesInfoEntity.title,
+            onSaveClick = {
+                viewModel.saveJson(context, jsonFilesInfoEntity, surveyItem)
+                showSaveConfirmation.value = true
+            }
+        )
         Box(
             modifier = modifier
                 .fillMaxSize()
-                .padding(paddingValues)
         ) {
             if (surveyItem.isEmpty()) {
                 EmptySurveyContent()
@@ -130,7 +117,7 @@ fun SurveyCreator(
             }
 
             // Kaydetme onay mesajı
-            AnimatedVisibility(
+            this@Column.AnimatedVisibility(
                 visible = showSaveConfirmation.value,
                 enter = fadeIn() + expandVertically(),
                 exit = fadeOut() + shrinkVertically()
@@ -138,17 +125,16 @@ fun SurveyCreator(
                 Surface(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(horizontalPadding)
                         .align(Alignment.TopCenter),
                     color = MaterialTheme.colorScheme.primaryContainer,
                     shape = RoundedCornerShape(8.dp)
                 ) {
-                    androidx.compose.foundation.layout.Row(
+                    Row(
                         modifier = Modifier
                             .fillMaxWidth()
                             .padding(16.dp),
                         verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = androidx.compose.foundation.layout.Arrangement.spacedBy(8.dp)
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
                         Icon(
                             imageVector = Icons.Default.Check,
@@ -161,53 +147,38 @@ fun SurveyCreator(
                         )
                     }
                 }
-                
+
                 LaunchedEffect(showSaveConfirmation.value) {
                     scope.launch {
-                        kotlinx.coroutines.delay(2000)
+                        delay(2000)
                         showSaveConfirmation.value = false
                     }
                 }
             }
 
             // Soru ekleme butonu (FAB)
-            FloatingActionButton(
+            CustomFloatingActionButton(
                 onClick = { showBottomSheet.value = true },
-                containerColor = MaterialTheme.colorScheme.primary,
-                contentColor = MaterialTheme.colorScheme.onPrimary,
-                shape = CircleShape,
                 modifier = Modifier
                     .align(Alignment.BottomEnd)
-                    .padding(end = horizontalPadding, bottom = bottomPadding)
-            ) {
-                Icon(
-                    imageVector = Icons.Rounded.Add,
-                    contentDescription = "Soru Ekle",
-                    modifier = Modifier.size(24.dp)
-                )
-            }
+                    .padding(16.dp),
+                icon = Icons.Rounded.Add,
+                contentDescription = "Soru Ekle"
+            )
 
             // Anket oluşturma butonu
-            ExtendedFloatingActionButton(
+            CustomExtendedFloatingActionButton(
                 onClick = {
                     viewModel.saveJson(context, jsonFilesInfoEntity, surveyItem)
                     CoroutineScope(Dispatchers.Main).launch {
                         viewModel.createSurvey(context, jsonFilesInfoEntity)
                     }
                 },
-                icon = { 
-                    Icon(
-                        imageVector = Icons.Default.Check,
-                        contentDescription = null
-                    )
-                },
-                text = { Text("Anketi Oluştur") },
-                containerColor = MaterialTheme.colorScheme.secondary,
-                contentColor = MaterialTheme.colorScheme.onSecondary,
-                expanded = true,
                 modifier = Modifier
                     .align(Alignment.BottomStart)
-                    .padding(start = horizontalPadding, bottom = bottomPadding)
+                    .padding(16.dp),
+                icon = Icons.Default.Check,
+                text = "Anketi Oluştur"
             )
         }
 
@@ -215,7 +186,7 @@ fun SurveyCreator(
             show = showBottomSheet,
             viewModel = viewModel
         )
-        
+
         DialogHandler(viewModel = viewModel)
     }
 }

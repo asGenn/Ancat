@@ -1,5 +1,6 @@
 package edu.aibu.ancat.ui.views.create_survey_screen.components.common
 
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Done
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -25,13 +26,14 @@ fun SurveyCreatorTopBar(
     onSaveClick: () -> Unit
 ) {
     TopAppBar(
-        title = {
+        {
             Text(
                 text = title,
                 style = MaterialTheme.typography.titleLarge,
                 fontWeight = FontWeight.Bold
             )
         },
+        windowInsets = WindowInsets(8, 0, 0, 8),
         colors = TopAppBarDefaults.topAppBarColors(
             containerColor = MaterialTheme.colorScheme.surfaceContainer,
             titleContentColor = MaterialTheme.colorScheme.onSecondaryContainer,
