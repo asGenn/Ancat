@@ -11,6 +11,17 @@ object PaintFactory {
         color = Color.BLACK
     }
 
+    fun option(): Paint = Paint().apply {
+        textSize = 15f
+        color = Color.BLACK
+        typeface = Typeface.create(Typeface.DEFAULT, Typeface.BOLD)
+    }
+
+    fun rating(): Paint = Paint().apply {
+        textSize = 8f
+        color = Color.GRAY
+    }
+
     fun text(): Paint = Paint().apply {
         textSize = 12f
         color = Color.BLACK

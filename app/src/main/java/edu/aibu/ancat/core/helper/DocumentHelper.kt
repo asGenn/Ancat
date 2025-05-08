@@ -71,7 +71,6 @@ class DocumentHelper @Inject constructor(
             Log.d("Cursor ->", "$cursor")
 
             if (needPageBreak) {
-                Log.d("needPageBreak", "Girdi")
                 documentFactory.finishPage(pdfDocument, page)
                 page = documentFactory.createPage(pdfDocument, ++pageNumber)
                 canvas = page.canvas

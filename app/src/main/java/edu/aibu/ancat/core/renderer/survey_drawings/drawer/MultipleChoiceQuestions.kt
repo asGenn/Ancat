@@ -96,7 +96,7 @@ class MultipleChoiceQuestions @Inject constructor(
         options.forEachIndexed { index, option ->
 
             val textList: List<String> = textHandler.getWrappedText(
-                text = "${index + 1}. (     ) $option",
+                text = "${index + 1}. \u25EF $option",
                 paint = paintFactory.text(),
                 xCursor = PAGE_WIDTH - MARGIN * 17,
                 maxWidth = PAGE_WIDTH - MARGIN * 3

@@ -78,13 +78,28 @@ class RatingQuestion @Inject constructor(
     ) {
         for (rating in 1..5) {
             val positionX = (PAGE_WIDTH - MARGIN * 3) - (rating * CELL_HEIGHT)
-            val positionY = cursorPosition + (CELL_HEIGHT + paintFactory.text().textSize) / 2
+            val positionY = cursorPosition + (CELL_HEIGHT + paintFactory.option().textSize) / 2
             canvasContentDrawer.writeText(
                 canvas = canvas,
-                text = rating.toString(),
-                paint = paintFactory.text(),
+                text = "\u25EF",
+                paint = paintFactory.option(),
                 xCursor = positionX,
                 yCursor = positionY
+            )
+
+            val ratingText = rating.toString()
+            val optionWidth = paintFactory.option().measureText("\u25EF")
+            val ratingWidth = paintFactory.rating().measureText(ratingText)
+            val correctedX = positionX + optionWidth / 2 - 5 * ratingWidth / 12
+            val optionHeight = (paintFactory.rating().descent() - paintFactory.rating().ascent())
+            val correctedY = positionY - optionHeight / 5
+
+            canvasContentDrawer.writeText(
+                canvas = canvas,
+                text = ratingText,
+                paint = paintFactory.rating(),
+                xCursor = correctedX,
+                yCursor = correctedY
             )
         }
     }

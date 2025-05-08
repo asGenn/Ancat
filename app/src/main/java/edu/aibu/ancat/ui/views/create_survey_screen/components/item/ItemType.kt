@@ -178,7 +178,7 @@ fun MultipleChoiceType(modifier: Modifier = Modifier, item: SurveyItem) {
                     )
                 question.options.forEachIndexed { index, option ->
                     Text(
-                        "${index + 1}. (    ) $option",
+                        "${index + 1}. \u25EF $option",
                         fontSize = 12.sp,
                         lineHeight = 12.sp,
                         fontWeight = FontWeight.Normal
