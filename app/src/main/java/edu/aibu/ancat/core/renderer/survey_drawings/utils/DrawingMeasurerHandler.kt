@@ -17,14 +17,12 @@ class DrawingMeasurerHandler @Inject constructor(
 ) {
     private fun descLength(drawing: Question.SurveyDescription): Float {
         var cursorLength = ZERO
-        drawing.description.forEach {
-            cursorLength += textHandler.getWrappedText(
-                it,
-                paint = paintFactory.text(),
-                xCursor = MARGIN * 3,
-                maxWidth = PAGE_WIDTH - MARGIN * 20
-            ).size * TITLE_PADDING
-        }
+        cursorLength += textHandler.getWrappedText(
+            drawing.description,
+            paint = paintFactory.text(),
+            xCursor = MARGIN * 3,
+            maxWidth = PAGE_WIDTH - MARGIN * 20
+        ).size * TITLE_PADDING
         return cursorLength
     }
 
