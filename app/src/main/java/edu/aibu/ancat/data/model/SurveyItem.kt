@@ -5,7 +5,7 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class SurveyItem(
     val type: String,
-    val questions: List<Question>
+    var questions: List<Question>
 )
 
 
@@ -16,15 +16,15 @@ sealed class Question {
     data class SurveyTitle(val title: String, val description: List<String>) : Question()
 
     @Serializable
-    data class SurveyDescription(val description: List<String>) : Question()
+    data class SurveyDescription(var description: String) : Question()
 
     @Serializable
     data class MultipleChoiceQuestion(
-        val question: String,
-        val options: List<String>,
+        var question: String,
+        var options: List<String>,
         var marks: List<Float>
     ) : Question()
 
     @Serializable
-    data class RatingQuestion(val question: String, var mark: Float) : Question()
+    data class RatingQuestion(var question: String, var mark: Float) : Question()
 }

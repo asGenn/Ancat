@@ -35,8 +35,8 @@ fun SurveyItemsList(
         contentPadding = PaddingValues(16.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
-        itemsIndexed(surveyItems) { _, item ->
-            SurveyItemCard(item = item)
+        itemsIndexed(surveyItems) { index, item ->
+            SurveyItemCard(index = index, item = item)
         }
         
         item {
@@ -51,7 +51,7 @@ fun SurveyItemsList(
  * @param item Anket öğesi
  */
 @Composable
-fun SurveyItemCard(item: SurveyItem) {
+fun SurveyItemCard(index : Int, item: SurveyItem) {
     ElevatedCard(
         modifier = Modifier.fillMaxWidth(),
         elevation = CardDefaults.elevatedCardElevation(defaultElevation = 2.dp),
@@ -67,9 +67,9 @@ fun SurveyItemCard(item: SurveyItem) {
         ) {
             when (item.type) {
                 "_" -> SurveyTitleType(item = item)
-                "0" -> DescriptionType(item = item)
-                "1" -> RatingType(item = item)
-                "2" -> MultipleChoiceType(item = item)
+                "0" -> DescriptionType(range = index, item = item)
+                "1" -> RatingType(range = index, item = item)
+                "2" -> MultipleChoiceType(range = index, item = item)
             }
         }
     }

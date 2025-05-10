@@ -55,19 +55,18 @@ class TitleAndCommits @Inject constructor(
 
         var cursorPos = cursorPosition
 
-        descriptions.description.forEach { text ->
-            val textList: List<String> = textHandler.getWrappedText(
-                text = text,
-                paint = paintFactory.text(),
-                xCursor = MARGIN * 3,
-                maxWidth = PAGE_WIDTH - MARGIN * 3
-            )
+        val textList: List<String> = textHandler.getWrappedText(
+            text = descriptions.description,
+            paint = paintFactory.text(),
+            xCursor = MARGIN * 3,
+            maxWidth = PAGE_WIDTH - MARGIN * 3
+        )
 
-            textList.forEach {
-                canvas.drawText(it, MARGIN * 3, cursorPos, paintFactory.text())
-                cursorPos += CELL_HEIGHT
-            }
+        textList.forEach {
+            canvas.drawText(it, MARGIN * 3, cursorPos, paintFactory.text())
+            cursorPos += CELL_HEIGHT
         }
+
         return cursorPos + TITLE_PADDING
     }
 }

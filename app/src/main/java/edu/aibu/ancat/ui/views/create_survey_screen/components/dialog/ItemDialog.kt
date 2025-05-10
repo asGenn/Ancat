@@ -105,14 +105,14 @@ fun SimpleQuestionDialog(
                         ),
                         onClick = {
                             text.removeAt(text.lastIndex)
+                            val descList = mutableListOf<Question.SurveyDescription>()
+                            text.forEach {
+                                descList.add(Question.SurveyDescription(description = it))
+                            }
                             if (text.isNotEmpty()) {
                                 val survey = SurveyItem(
                                     type = "0",
-                                    questions = listOf(
-                                        Question.SurveyDescription(
-                                            description = text
-                                        )
-                                    ),
+                                    questions = descList.toList(),
                                 )
                                 viewModel.addSurveyItem(survey)
                             }
