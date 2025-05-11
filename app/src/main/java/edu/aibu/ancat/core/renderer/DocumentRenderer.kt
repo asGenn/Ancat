@@ -33,7 +33,8 @@ class DocumentRenderer @Inject constructor(
         index: Int,
         jsonFileName: String,
         surveyIndex: Int,
-        context: Context
+        context: Context,
+        pageNumber: Int
     ): Float {
         var cursorPosition = cursor
 
@@ -51,8 +52,16 @@ class DocumentRenderer @Inject constructor(
             jsonFileName = jsonFileName,
         )
 
+        val content = """
+            {
+                "jsonFileName": "$jsonFileName",
+                "pageNumber": $pageNumber
+            }
+        """.trimIndent()
+
+
         // QR kodu oluştur ve render et
-        qrRendererStrategy.renderQRCode(canvas = canvas, content = jsonFileName)
+        qrRendererStrategy.renderQRCode(canvas = canvas, content = content)
 
         return cursorPosition
     }
