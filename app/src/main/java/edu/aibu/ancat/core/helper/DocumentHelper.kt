@@ -85,7 +85,8 @@ class DocumentHelper @Inject constructor(
                 index = index,
                 jsonFileName = jsonName,
                 surveyIndex = surveyIndex,
-                context = context
+                context = context,
+                pageNumber = pageNumber
             )
         }
     }

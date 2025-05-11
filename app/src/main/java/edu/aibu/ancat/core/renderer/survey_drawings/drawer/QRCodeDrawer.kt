@@ -22,7 +22,6 @@ class QRCodeDrawer {
     fun renderQRCode(canvas: Canvas, content: String) {
         try {
             // QR kod içeriğini oluştur
-            val qrContent = "FileName: $content"
             val qrBitmapSize = 800
 
             // QR kod yazıcısını oluştur
@@ -36,7 +35,7 @@ class QRCodeDrawer {
 
             // QR kodu oluştur
             val bitMatrix = writer.encode(
-                qrContent,
+                content,
                 BarcodeFormat.QR_CODE,
                 qrBitmapSize,
                 qrBitmapSize,
