@@ -23,6 +23,7 @@ class QRCodeDrawer {
         try {
             // QR kod içeriğini oluştur
             val qrContent = "FileName: $content"
+            val qrBitmapSize = 800
 
             // QR kod yazıcısını oluştur
             val writer = QRCodeWriter()
@@ -37,8 +38,8 @@ class QRCodeDrawer {
             val bitMatrix = writer.encode(
                 qrContent,
                 BarcodeFormat.QR_CODE,
-                80, // QR kod genişliği
-                80, // QR kod yüksekliği
+                qrBitmapSize,
+                qrBitmapSize,
                 hints
             )
 
@@ -63,9 +64,9 @@ class QRCodeDrawer {
             drawQR(canvas, bitmap, paint,topLeftX, topLeftY)
 
             // Sağ üst köşe
-            val topRightX = canvasWidth - qrSize - margin
+            /*val topRightX = canvasWidth - qrSize - margin
             val topRightY = margin
-            drawQR(canvas, bitmap, paint, topRightX, topRightY)
+            drawQR(canvas, bitmap, paint, topRightX, topRightY)*/
 
             // Sağ alt köşe
             val bottomRightX = canvasWidth - qrSize - margin
@@ -73,9 +74,9 @@ class QRCodeDrawer {
             drawQR(canvas, bitmap, paint, bottomRightX, bottomRightY)
 
             // Sol alt köşe
-            val bottomLeftX = margin
+            /*val bottomLeftX = margin
             val bottomLeftY = canvasHeight - qrSize - margin
-            drawQR(canvas, bitmap, paint, bottomLeftX, bottomLeftY)
+            drawQR(canvas, bitmap, paint, bottomLeftX, bottomLeftY)*/
 
             // Bitmap'i temizle
             bitmap.recycle()
