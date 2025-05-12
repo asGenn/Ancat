@@ -30,6 +30,9 @@ class DocumentHelper @Inject constructor(
     private lateinit var canvas: Canvas
 
     private var pageNumber = 1
+    private var firstSurveySection = 0
+    private var fistSurveyQuestion = 0
+    private var tempIndex = 0
     private var cursor = FIRST_PAGE
 
     /**
@@ -43,15 +46,14 @@ class DocumentHelper @Inject constructor(
         canvas = page.canvas
 
         data.forEachIndexed { index, it ->
+            tempIndex = data[index].questions.lastIndex
             processItem(context, it, index, jsonName)
             cursor += MARGIN * 2
         }
-
+        documentRenderer.renderQRCode(canvas, jsonName, pageNumber, firstSurveySection, fistSurveyQuestion, data.lastIndex, data[data.lastIndex].questions.lastIndex)
         documentFactory.finishPage(pdfDocument, page)
-
         val survey = data[0].questions[0] as Question.SurveyTitle
         val title = survey.title
-
         documentStorage.saveDocument(context, pdfDocument, title)
     }
 
@@ -71,10 +73,15 @@ class DocumentHelper @Inject constructor(
             Log.d("Cursor ->", "$cursor")
 
             if (needPageBreak) {
+                val adjustedSurveyIndex = if (index == 0) surveyIndex - 1 else surveyIndex
+                val adjustedTempIndex = if (index == 0) tempIndex else index - 1
+                documentRenderer.renderQRCode(canvas, jsonName, pageNumber, firstSurveySection, fistSurveyQuestion, adjustedSurveyIndex, adjustedTempIndex)
                 documentFactory.finishPage(pdfDocument, page)
                 page = documentFactory.createPage(pdfDocument, ++pageNumber)
                 canvas = page.canvas
                 cursor = START_CURSOR
+                firstSurveySection = surveyIndex
+                fistSurveyQuestion = index
             }
 
             cursor = documentRenderer.renderDocument(
@@ -85,8 +92,7 @@ class DocumentHelper @Inject constructor(
                 index = index,
                 jsonFileName = jsonName,
                 surveyIndex = surveyIndex,
-                context = context,
-                pageNumber = pageNumber
+                context = context
             )
         }
     }

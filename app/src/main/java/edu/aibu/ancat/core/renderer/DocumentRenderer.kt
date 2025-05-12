@@ -2,6 +2,7 @@ package edu.aibu.ancat.core.renderer
 
 import android.content.Context
 import android.graphics.Canvas
+import android.util.Log
 import edu.aibu.ancat.core.renderer.strategy.QRRendererStrategy
 import edu.aibu.ancat.core.renderer.strategy.QuestionStrategyFactory
 import edu.aibu.ancat.data.model.Question
@@ -34,7 +35,6 @@ class DocumentRenderer @Inject constructor(
         jsonFileName: String,
         surveyIndex: Int,
         context: Context,
-        pageNumber: Int
     ): Float {
         var cursorPosition = cursor
 
@@ -52,17 +52,31 @@ class DocumentRenderer @Inject constructor(
             jsonFileName = jsonFileName,
         )
 
+        return cursorPosition
+    }
+
+    fun renderQRCode(
+        canvas: Canvas,
+        jsonFileName: String,
+        pageNumber: Int,
+        firstSurveySection: Int,
+        fistSurveyQuestion: Int,
+        lastSurveySection: Int,
+        lastSurveyQuestion: Int,
+
+    ) {
         val content = """
             {
                 "jsonFileName": "$jsonFileName",
-                "pageNumber": $pageNumber
+                "pageNumber": "$pageNumber",
+                "firstQuestion": "[$firstSurveySection][$fistSurveyQuestion]",
+                "lastQuestion": "[$lastSurveySection][$lastSurveyQuestion]",
             }
         """.trimIndent()
 
+        Log.d("QR ->", content)
 
         // QR kodu oluştur ve render et
         qrRendererStrategy.renderQRCode(canvas = canvas, content = content)
-
-        return cursorPosition
     }
 }
