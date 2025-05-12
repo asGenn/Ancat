@@ -70,7 +70,7 @@ class DocumentRenderer @Inject constructor(
                 "jsonFileName": "$jsonFileName",
                 "pageNumber": "$pageNumber",
                 "firstQuestion": "[$firstSurveySection][$fistSurveyQuestion]",
-                "lastQuestion": "[$lastSurveySection][$lastSurveyQuestion]",
+                "lastQuestion": "[$lastSurveySection][$lastSurveyQuestion]"
             }
         """.trimIndent()
 
