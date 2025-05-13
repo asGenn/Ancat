@@ -1,11 +1,16 @@
 package edu.aibu.ancat.core.renderer
 
+import QrPayload
+import QuestionPosition
 import android.content.Context
 import android.graphics.Canvas
 import android.util.Log
 import edu.aibu.ancat.core.renderer.strategy.QRRendererStrategy
 import edu.aibu.ancat.core.renderer.strategy.QuestionStrategyFactory
+
 import edu.aibu.ancat.data.model.Question
+
+import kotlinx.serialization.json.Json
 import javax.inject.Inject
 
 /**
@@ -65,14 +70,27 @@ class DocumentRenderer @Inject constructor(
         lastSurveyQuestion: Int,
 
     ) {
-        val content = """
-            {
-                "jsonFileName": "$jsonFileName",
-                "pageNumber": "$pageNumber",
-                "firstQuestion": "[$firstSurveySection][$fistSurveyQuestion]",
-                "lastQuestion": "[$lastSurveySection][$lastSurveyQuestion]"
-            }
-        """.trimIndent()
+        val payload = QrPayload(
+            jsonFileName = jsonFileName,
+            pageNumber = pageNumber,
+            firstQuestion = QuestionPosition(
+                sectionIndex = firstSurveySection,
+                questionIndex = fistSurveyQuestion
+            ),
+            lastQuestion = QuestionPosition(
+                sectionIndex = lastSurveySection,
+                questionIndex = lastSurveyQuestion
+            )
+        )
+//        val content = """
+//            {
+//                "jsonFileName": "$jsonFileName",
+//                "pageNumber": "$pageNumber",
+//                "firstQuestion": "[$firstSurveySection][$fistSurveyQuestion]",
+//                "lastQuestion": "[$lastSurveySection][$lastSurveyQuestion]"
+//            }
+//        """.trimIndent()
+        val content = Json.encodeToString(QrPayload.serializer(), payload)
 
         Log.d("QR ->", content)
 

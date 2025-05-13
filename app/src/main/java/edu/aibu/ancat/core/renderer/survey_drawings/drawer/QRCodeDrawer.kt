@@ -7,12 +7,14 @@ import android.graphics.Paint
 import com.google.zxing.BarcodeFormat
 import com.google.zxing.EncodeHintType
 import com.google.zxing.qrcode.QRCodeWriter
+import androidx.core.graphics.createBitmap
+import androidx.core.graphics.set
 
 class QRCodeDrawer {
     // QR kodu canvas'a çiz
     private val paint = Paint()
     private val margin = 3f // Kenarlardan uzaklık
-    private val qrSize = 50f // QR kodun boyutu
+    private val qrSize = 85f // QR kodun boyutu
 
     /**
      * QR kodu oluşturur ve canvas'ın sağ alt köşesine render eder
@@ -45,11 +47,11 @@ class QRCodeDrawer {
             // QR kodu bitmap'e dönüştür
             val width = bitMatrix.width
             val height = bitMatrix.height
-            val bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888)
+            val bitmap = createBitmap(width, height)
 
             for (x in 0 until width) {
                 for (y in 0 until height) {
-                    bitmap.setPixel(x, y, if (bitMatrix[x, y]) Color.BLACK else Color.WHITE)
+                    bitmap[x, y] = if (bitMatrix[x, y]) Color.BLACK else Color.WHITE
                 }
             }
 

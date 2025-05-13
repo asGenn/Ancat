@@ -25,7 +25,7 @@ class MLKitBarcodeScanner {
 
     private val scanner = BarcodeScanning.getClient(
         BarcodeScannerOptions.Builder()
-            .setBarcodeFormats(Barcode.FORMAT_QR_CODE)
+            .setBarcodeFormats(Barcode.FORMAT_ALL_FORMATS)
             .enableAllPotentialBarcodes()
             .build()
     )
@@ -37,7 +37,8 @@ class MLKitBarcodeScanner {
     ) {
         try {
             val bitmap = loadBitmap(context, imageUri)
-            val image = InputImage.fromBitmap(bitmap, 0)
+            val image = InputImage.fromFilePath(context, imageUri)
+            //val image = InputImage.fromBitmap(bitmap, 0)
 
             scanner.process(image)
                 .addOnSuccessListener { barcodes ->

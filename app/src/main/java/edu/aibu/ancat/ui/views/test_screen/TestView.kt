@@ -1,16 +1,13 @@
 package edu.aibu.ancat.ui.views.test_screen
 
 import android.net.Uri
+import android.util.Log
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.camera.core.CameraSelector
-import androidx.camera.view.LifecycleCameraController
-
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Add
-import androidx.compose.material.icons.rounded.Close
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -19,7 +16,6 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import edu.aibu.ancat.core.helper.JsonHelper
-import edu.aibu.ancat.core.helper.camera.CustomCamera
 import edu.aibu.ancat.core.helper.imageProccess.MLKitBarcodeScanner
 import edu.aibu.ancat.domain.entity.JsonFilesInfoEntity
 import edu.aibu.ancat.ui.views.create_screen.CreateScreenViewModel
@@ -37,15 +33,7 @@ fun TestView() {
     val barcodeResult = remember { mutableStateOf<String?>(null) }
     val mlKitBarcodeScanner = remember { MLKitBarcodeScanner() }
 
-    // Kamera görünürlüğünü kontrol eden durum
-    var showCamera by remember { mutableStateOf(false) }
 
-    // Kamera controller'ı
-    val cameraController = remember { LifecycleCameraController(context) }
-
-    // Kamera izinlerini kontrol et
-    val camera = CustomCamera()
-    camera.checkCameraPermissions(context)
 
     // Galeriden resim seçmek için launcher
     val imagePicker = rememberLauncherForActivityResult(
@@ -65,6 +53,21 @@ fun TestView() {
                             "${barcodes.size} adet barkod tespit edildi",
                             Toast.LENGTH_LONG
                         ).show()
+                        // Barkodları işleme
+                        for (barcode in barcodes) {
+                            // 3) Bounding box’a zaten sahipsiniz:
+                            val rect = barcode.boundingBox
+                            // 4) Gömülü veriyi alalım:
+                            val rawValue = barcode.rawValue          // Ham veri (String?)
+                            val displayValue = barcode.displayValue  // Kullanıcıya gösterilebilir versiyon
+
+                            // 5) İsterseniz format bilgisi de alabilirsiniz:
+                            val format = barcode.format  // örn. Barcode.FORMAT_QR_CODE
+
+                            // Örnek log:
+                            Log.d("MLKit", "Bulunan barkod: format=$format, data=$rawValue")
+                            println("Bulunan barkod: format=$format, data=$rawValue")
+                        }
                     } else {
                         Toast.makeText(
                             context,
@@ -80,35 +83,7 @@ fun TestView() {
     Box(
         modifier = Modifier.fillMaxSize()
     ) {
-        if (showCamera) {
-            // Kamera önizleme ekranı gösteriliyor
-            Column(modifier = Modifier.fillMaxSize()) {
-                Box(modifier = Modifier.weight(1f)) {
-                    // Kamera önizleme bileşeni
-                    CameraPreview(
-                        modifier = Modifier.fillMaxSize(),
-                        controller = cameraController.apply {
-                            cameraSelector = CameraSelector.DEFAULT_BACK_CAMERA
-                        }
-                    )
-                }
 
-                // Kamera kapatma butonu
-                Button(
-                    onClick = { showCamera = false },
-                    modifier = Modifier
-                        .align(Alignment.CenterHorizontally)
-                        .padding(16.dp)
-                ) {
-                    Icon(
-                        imageVector = Icons.Rounded.Close,
-                        contentDescription = "Kamerayı Kapat"
-                    )
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Text("Kamerayı Kapat")
-                }
-            }
-        } else {
             // Normal görünüm gösteriliyor
             Column(
                 horizontalAlignment = Alignment.CenterHorizontally,
@@ -152,18 +127,7 @@ fun TestView() {
                     Text(text = "Test Anketi Ekle")
                 }
 
-                // Kamerayı açma butonu
-                Button(
-                    onClick = { showCamera = true }
-                ) {
-                    Icon(
-                        imageVector = Icons.Rounded.Add,
-                        contentDescription = "Kamerayı Aç",
-                        modifier = Modifier.size(24.dp)
-                    )
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Text("Kamerayı Aç")
-                }
+
 
                 // Barkod tarama butonu
                 Button(
@@ -184,5 +148,5 @@ fun TestView() {
                 }
             }
         }
-    }
+
 }
