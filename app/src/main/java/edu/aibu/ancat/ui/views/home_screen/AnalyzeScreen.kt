@@ -1,6 +1,7 @@
 package edu.aibu.ancat.ui.views.home_screen
 
 import android.app.Activity
+import android.util.Log
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.IntentSenderRequest
@@ -8,6 +9,7 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -26,6 +28,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -35,20 +38,21 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import coil3.compose.AsyncImage
+import edu.aibu.ancat.core.helper.imageProccess.MLKitBarcodeScanner
+import kotlin.collections.plusAssign
 
 @Composable
 fun AnalyzeScreen() {
     val viewModel: AnalyzeScreenViewModel = hiltViewModel()
     val context = LocalContext.current
-    
-    // MediaStore'dan görüntüleri yükle
-    LaunchedEffect(Unit) {
-        // Uygulama başladığında MediaStore'dan kayıtlı görüntüleri almak isterseniz
-        // bu kısmı etkinleştirebilirsiniz.
-        // val mediaStoreImages = viewModel.getImagesFromMediaStore(context)
-        // if (mediaStoreImages.isNotEmpty()) {
-        //    viewModel.loadImagesFromMediaStore(mediaStoreImages)
-        // }
+    val barcodeResult = remember { mutableStateOf<String?>(null) }
+    val mlKitBarcodeScanner = remember { MLKitBarcodeScanner() }
+
+    LaunchedEffect(viewModel.analyzeStatus.value) {
+        val currentStatus = viewModel.analyzeStatus.value
+        if (currentStatus.isNotEmpty()) {
+            Toast.makeText(context, currentStatus, Toast.LENGTH_SHORT).show()
+        }
     }
 
     Scaffold(
@@ -59,6 +63,7 @@ fun AnalyzeScreen() {
             contract = ActivityResultContracts.StartIntentSenderForResult(),
             onResult = { scanner ->
                 viewModel.handleScanResult(scanner)
+
             }
         )
 
@@ -68,11 +73,11 @@ fun AnalyzeScreen() {
                 .padding(innerPadding)
         ) {
             LazyVerticalGrid(
-                columns = GridCells.Fixed(2), // Yatayda 2 sütun olacak
-                modifier = Modifier.fillMaxSize(), // Tüm kullanılabilir alanı kaplar
-                verticalArrangement = Arrangement.spacedBy(8.dp), // Kartlar arası dikey boşluk
-                horizontalArrangement = Arrangement.spacedBy(8.dp), // Kartlar arası yatay boşluk
-                contentPadding = androidx.compose.foundation.layout.PaddingValues(8.dp)
+                columns = GridCells.Fixed(2),
+                modifier = Modifier.fillMaxSize(),
+                verticalArrangement = Arrangement.spacedBy(8.dp),
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                contentPadding = PaddingValues(8.dp)
             ) {
                 items(viewModel.imageUris) { uri ->
                     AsyncImage(
@@ -91,6 +96,33 @@ fun AnalyzeScreen() {
                     .align(Alignment.BottomEnd)
                     .padding(16.dp)
             ) {
+                // Barkod Analiz butonu
+                Button(
+                    modifier = Modifier
+                        .width(160.dp)
+                        .height(48.dp),
+                    shape = RoundedCornerShape(3.dp),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = MaterialTheme.colorScheme.secondary,
+                        contentColor = MaterialTheme.colorScheme.onSecondary
+                    ),
+                    onClick = {
+
+
+                        viewModel.analyzeAllImages(context)
+
+
+                    }
+                ) {
+                    Text(
+                        modifier = Modifier,
+                        textAlign = TextAlign.Center,
+                        text = "Barkodları Analiz Et"
+                    )
+                }
+
+                Spacer(modifier = Modifier.height(8.dp))
+
                 Button(
                     modifier = Modifier
                         .width(160.dp)
@@ -114,9 +146,9 @@ fun AnalyzeScreen() {
                         text = "MediaStore'a Kaydet"
                     )
                 }
-                
+
                 Spacer(modifier = Modifier.height(8.dp))
-                
+
                 Button(
                     modifier = Modifier
                         .width(160.dp)

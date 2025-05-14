@@ -13,8 +13,8 @@ import androidx.core.graphics.set
 class QRCodeDrawer {
     // QR kodu canvas'a çiz
     private val paint = Paint()
-    private val margin = 3f // Kenarlardan uzaklık
-    private val qrSize = 85f // QR kodun boyutu
+    private val margin = 0f // Kenarlardan uzaklık
+    private val qrSize = 73f // QR kodun boyutu
 
     /**
      * QR kodu oluşturur ve canvas'ın sağ alt köşesine render eder
