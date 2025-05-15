@@ -6,6 +6,7 @@ import android.content.ContentValues
 import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
+import android.graphics.Rect
 import android.net.Uri
 import android.os.Build
 import android.provider.MediaStore
@@ -40,6 +41,9 @@ import java.util.Date
 import java.util.Locale
 import javax.inject.Inject
 import androidx.core.graphics.createBitmap
+import edu.aibu.ancat.utils.DocumentConstants.PAGE_HEIGHT
+import edu.aibu.ancat.utils.DocumentConstants.PAGE_WIDTH
+import kotlin.math.absoluteValue
 
 @HiltViewModel
 class AnalyzeScreenViewModel @Inject constructor() : ViewModel() {
@@ -92,6 +96,7 @@ class AnalyzeScreenViewModel @Inject constructor() : ViewModel() {
         analyzeStatus.value = "Analiz başlıyor..."
 
         val tempBarcodes = mutableListOf<BarcodeData>()
+        val barcodeBounds = mutableListOf<Rect?>()
         var processedCount = 0
 
         // Her bir resim için barkod taraması yap
@@ -116,16 +121,24 @@ class AnalyzeScreenViewModel @Inject constructor() : ViewModel() {
                             try {
                                 val barcodeValue = barcode.rawValue ?: "{}"
                                 val jsonData = Json.decodeFromString<QrPayload>(barcodeValue)
+
+
                                 println("Bulunan barkod: format=${barcode.format}, data=$barcodeValue")
                                 println("barkod noktaları: ${barcode.cornerPoints?.joinToString(",")}")
                                 println(" barkod boindingBox" +barcode.boundingBox)
-                                println("barkod geoPoint" + barcode.geoPoint)
+
+
+
+
+
 
                                 val questionJson = jsonHelper.readJsonFile(jsonData.jsonFileName, context)
                                 jsonObject = Json.decodeFromString<List<SurveyItem>>(questionJson)
                                 println((jsonObject[1].questions[0] as Question.MultipleChoiceQuestion).marks)
 
-
+                                barcodeBounds.add(
+                                    barcode.boundingBox
+                                )
 
                                 tempBarcodes.add(
                                     BarcodeData(
@@ -161,7 +174,7 @@ class AnalyzeScreenViewModel @Inject constructor() : ViewModel() {
                             analyzeStatus.value = "Hiç barkod tespit edilemedi"
                         } else {
                             analyzeStatus.value = "Analiz tamamlandı, ${tempBarcodes.size} barkod bulundu"
-                            processDetectedData(tempBarcodes, context, uri,jsonObject )
+                            processDetectedData(tempBarcodes, context, uri,jsonObject,barcodeBounds )
                         }
                     }
                 }
@@ -286,8 +299,9 @@ class AnalyzeScreenViewModel @Inject constructor() : ViewModel() {
         barcodes: List<BarcodeData>,
         context: Context,
         uri: Uri,
-        jsonObject: List<SurveyItem>, ) {
-        val resultBitmap = drawBoxOnImage(context, uri, barcodes,jsonObject)
+        jsonObject: List<SurveyItem>,
+        barcodeBounds: MutableList<Rect?>, ) {
+        val resultBitmap = drawBoxOnImage(context, uri, barcodes,jsonObject, barcodeBounds)
         saveAndGallery(context, resultBitmap!!)
 
 
@@ -333,11 +347,33 @@ class AnalyzeScreenViewModel @Inject constructor() : ViewModel() {
         context: Context,
         uri: Uri,
         barcodes: List<BarcodeData>,
-        jsonObject: List<SurveyItem>,): Bitmap? {
+        jsonObject: List<SurveyItem>,
+        barcodeBounds: MutableList<Rect?>,): Bitmap? {
         val bitmap = getBitmapFromUri(context, uri) ?: return null
         val mat = bitmapToMat(bitmap)
         val height = mat.height()
         val width = mat.width()
+        var photoHeight  = 0
+        var photoWidth = 0
+        var topValue = 0
+        println("height : $height, width: $width")
+        val top = minOf(barcodeBounds[0]!!.top, barcodeBounds[1]!!.top)
+        val bottom = maxOf(barcodeBounds[0]!!.bottom, barcodeBounds[1]!!.bottom)
+        val left = minOf(barcodeBounds[0]!!.left, barcodeBounds[1]!!.left)
+        val right = maxOf(barcodeBounds[0]!!.right, barcodeBounds[1]!!.right)
+
+        topValue = top
+        photoHeight = bottom - top
+        photoWidth = right - left
+        val x = photoWidth.toDouble() / PAGE_WIDTH
+        val y = height.toDouble() / PAGE_HEIGHT
+
+
+
+
+
+
+
 
 
 
@@ -347,17 +383,28 @@ class AnalyzeScreenViewModel @Inject constructor() : ViewModel() {
         }
         for (barcode in barcodes) {
             val i = barcode.jsonData?.lastQuestion?.sectionIndex
-            val j = barcode.jsonData?.lastQuestion?.questionIndex
-            val question = (jsonObject[i!!].questions[j!!] as Question.MultipleChoiceQuestion).marks
 
-            barcode.barcode.cornerPoints
-            Imgproc.rectangle(
-                mat,
-                Point(425.0,question[1].toDouble()/842*height ),
-                Point(455.0,(question[1].toDouble()+30)/842*height ),
-                Scalar(255.0, 0.0, 0.0),  // BGR formatında: kırmızı
-                2 // kalınlık
-            )
+            for (k in 0..5) {
+                val j = barcode.jsonData?.lastQuestion?.questionIndex!! - k
+                val question = (jsonObject[i!!].questions[j] as Question.MultipleChoiceQuestion).marks
+
+                barcode.barcode.cornerPoints
+                Imgproc.rectangle(
+                    mat,
+                    Point(425.0 * x, (question[2].toDouble()) * y  ),
+                    Point(455.0 * x, (question[2].toDouble()) * y ),
+                    Scalar(255.0, 0.0, 0.0),
+                    2
+                )
+                println( "width: $width, height: $height")
+                println("topValue: $topValue")
+                println("photoWidth: $photoWidth")
+                println("photoHeight: $photoHeight")
+                println("x çarpanı: $x, y çarpanı: $y")
+            }
+
+
+
 
 
         }
