@@ -127,11 +127,6 @@ class AnalyzeScreenViewModel @Inject constructor() : ViewModel() {
                                 println("barkod noktaları: ${barcode.cornerPoints?.joinToString(",")}")
                                 println(" barkod boindingBox" +barcode.boundingBox)
 
-
-
-
-
-
                                 val questionJson = jsonHelper.readJsonFile(jsonData.jsonFileName, context)
                                 jsonObject = Json.decodeFromString<List<SurveyItem>>(questionJson)
                                 println((jsonObject[1].questions[0] as Question.MultipleChoiceQuestion).marks)
@@ -368,15 +363,6 @@ class AnalyzeScreenViewModel @Inject constructor() : ViewModel() {
         val x = photoWidth.toDouble() / PAGE_WIDTH
         val y = height.toDouble() / PAGE_HEIGHT
 
-
-
-
-
-
-
-
-
-
         // Renkli değilse RGB'ye çevir
         if (mat.channels() == 1) {
             Imgproc.cvtColor(mat, mat, Imgproc.COLOR_GRAY2RGB)
@@ -384,33 +370,27 @@ class AnalyzeScreenViewModel @Inject constructor() : ViewModel() {
         for (barcode in barcodes) {
             val i = barcode.jsonData?.lastQuestion?.sectionIndex
 
-            for (k in 0..5) {
+            for (k in 0..3) {
                 val j = barcode.jsonData?.lastQuestion?.questionIndex!! - k
-                val question = (jsonObject[i!!].questions[j] as Question.MultipleChoiceQuestion).marks
+                val question = (jsonObject[1].questions[j] as Question.MultipleChoiceQuestion).marks
 
                 barcode.barcode.cornerPoints
                 Imgproc.rectangle(
                     mat,
-                    Point(425.0 * x, (question[2].toDouble()) * y  ),
-                    Point(455.0 * x, (question[2].toDouble()) * y ),
+                    Point(440.0 * x, ((question[0].toDouble() + 2) * y) ),
+                    Point(452 * x, ((question[0].toDouble()- 10) * y) ),
                     Scalar(255.0, 0.0, 0.0),
                     2
                 )
+
+
                 println( "width: $width, height: $height")
                 println("topValue: $topValue")
                 println("photoWidth: $photoWidth")
                 println("photoHeight: $photoHeight")
                 println("x çarpanı: $x, y çarpanı: $y")
             }
-
-
-
-
-
         }
-
-
-
         // Mat'ten tekrar bitmap'e dön
         val resultBitmap = createBitmap(mat.cols(), mat.rows())
         Utils.matToBitmap(mat, resultBitmap)

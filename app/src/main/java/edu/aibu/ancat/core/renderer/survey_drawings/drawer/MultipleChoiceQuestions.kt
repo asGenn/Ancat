@@ -111,7 +111,7 @@ class MultipleChoiceQuestions @Inject constructor(
                     xCursor = PAGE_WIDTH - MARGIN * 17,
                     yCursor = textCenter
                 )
-                callback(textCenter)
+                callback(currentCursor)
             }
         }
         return currentCursor + MARGIN
