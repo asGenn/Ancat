@@ -7,6 +7,8 @@ import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.graphics.Rect
+
+
 import android.net.Uri
 import android.os.Build
 import android.provider.MediaStore
@@ -43,6 +45,7 @@ import javax.inject.Inject
 import androidx.core.graphics.createBitmap
 import edu.aibu.ancat.utils.DocumentConstants.PAGE_HEIGHT
 import edu.aibu.ancat.utils.DocumentConstants.PAGE_WIDTH
+import org.opencv.core.Core
 import kotlin.math.absoluteValue
 
 @HiltViewModel
@@ -295,7 +298,8 @@ class AnalyzeScreenViewModel @Inject constructor() : ViewModel() {
         context: Context,
         uri: Uri,
         jsonObject: List<SurveyItem>,
-        barcodeBounds: MutableList<Rect?>, ) {
+        barcodeBounds: MutableList<Rect?>,
+    ) {
         val resultBitmap = drawBoxOnImage(context, uri, barcodes,jsonObject, barcodeBounds)
         saveAndGallery(context, resultBitmap!!)
 
@@ -343,15 +347,16 @@ class AnalyzeScreenViewModel @Inject constructor() : ViewModel() {
         uri: Uri,
         barcodes: List<BarcodeData>,
         jsonObject: List<SurveyItem>,
-        barcodeBounds: MutableList<Rect?>,): Bitmap? {
+        barcodeBounds: MutableList<Rect?>,
+    ): Bitmap? {
         val bitmap = getBitmapFromUri(context, uri) ?: return null
         val mat = bitmapToMat(bitmap)
         val height = mat.height()
         val width = mat.width()
-        var photoHeight  = 0
+        var photoHeight = 0
         var photoWidth = 0
         var topValue = 0
-        println("height : $height, width: $width")
+
         val top = minOf(barcodeBounds[0]!!.top, barcodeBounds[1]!!.top)
         val bottom = maxOf(barcodeBounds[0]!!.bottom, barcodeBounds[1]!!.bottom)
         val left = minOf(barcodeBounds[0]!!.left, barcodeBounds[1]!!.left)
@@ -363,40 +368,59 @@ class AnalyzeScreenViewModel @Inject constructor() : ViewModel() {
         val x = photoWidth.toDouble() / PAGE_WIDTH
         val y = height.toDouble() / PAGE_HEIGHT
 
-        // Renkli değilse RGB'ye çevir
         if (mat.channels() == 1) {
             Imgproc.cvtColor(mat, mat, Imgproc.COLOR_GRAY2RGB)
         }
+
         for (barcode in barcodes) {
-            val i = barcode.jsonData?.lastQuestion?.sectionIndex
-
+            val sectionIndex = barcode.jsonData?.lastQuestion?.sectionIndex ?: continue
             for (k in 0..3) {
-                val j = barcode.jsonData?.lastQuestion?.questionIndex!! - k
-                val question = (jsonObject[1].questions[j] as Question.MultipleChoiceQuestion).marks
+                val questionIndex = barcode.jsonData?.lastQuestion?.questionIndex!! - k
+                val question = (jsonObject[1].questions[questionIndex] as Question.MultipleChoiceQuestion).marks
 
-                barcode.barcode.cornerPoints
+                val topLeft = Point(440.0 * x, ((question[0].toDouble() - 10) * y))
+                val bottomRight = Point(452 * x, ((question[0].toDouble() + 2) * y))
+
+                // ROI alanını kırp
+                val roiRect =org.opencv.core.Rect(
+                    topLeft.x.toInt(),
+                    topLeft.y.toInt(),
+                    (bottomRight.x - topLeft.x).toInt(),
+                    (bottomRight.y - topLeft.y).toInt()
+                )
+                val roi = Mat(mat , roiRect)
+
+                // Griye çevir
+                val grayROI = Mat()
+                Imgproc.cvtColor(roi, grayROI, Imgproc.COLOR_BGR2GRAY)
+
+                // Eşikleme (karanlık alanları tespit etmek için)
+                Imgproc.threshold(grayROI, grayROI, 127.0, 255.0, Imgproc.THRESH_BINARY_INV)
+
+                val blackPixels = Core.countNonZero(grayROI)
+                val totalPixels = grayROI.rows() * grayROI.cols()
+                val fillRatio = blackPixels.toDouble() / totalPixels
+
+                val isFilled = fillRatio > 0.5
+
+                // Kutu çiz
                 Imgproc.rectangle(
                     mat,
-                    Point(440.0 * x, ((question[0].toDouble() + 2) * y) ),
-                    Point(452 * x, ((question[0].toDouble()- 10) * y) ),
-                    Scalar(255.0, 0.0, 0.0),
+                    topLeft,
+                    bottomRight,
+                    if (isFilled) Scalar(0.0, 255.0, 0.0) else Scalar(255.0, 0.0, 0.0), // Yeşil = dolu, Kırmızı = boş
                     2
                 )
 
-
-                println( "width: $width, height: $height")
-                println("topValue: $topValue")
-                println("photoWidth: $photoWidth")
-                println("photoHeight: $photoHeight")
-                println("x çarpanı: $x, y çarpanı: $y")
+                Log.d("CheckBox", "Filled: $isFilled (Ratio: ${String.format("%.2f", fillRatio)})")
             }
         }
-        // Mat'ten tekrar bitmap'e dön
+
         val resultBitmap = createBitmap(mat.cols(), mat.rows())
         Utils.matToBitmap(mat, resultBitmap)
-
         return resultBitmap
     }
+
 
 
     // Barkod verisi veri sınıfı
