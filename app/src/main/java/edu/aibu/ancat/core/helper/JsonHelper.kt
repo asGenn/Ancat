@@ -62,6 +62,10 @@ class JsonHelper {
             return false
         }
     }
+    fun checkFileExists(fileName: String, context: Context): Boolean {
+        val file = File(context.filesDir, "JsonFiles/$fileName.json")
+        return file.exists()
+    }
 
     fun addMarksToRatingQuest(context: Context, data: Float, surveyIndex: Int, questionIndex: Int, fileName: String): Boolean {
         try {

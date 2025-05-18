@@ -7,8 +7,6 @@ import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.graphics.Rect
-
-
 import android.net.Uri
 import android.os.Build
 import android.provider.MediaStore
@@ -16,6 +14,7 @@ import android.util.Log
 import androidx.activity.result.ActivityResult
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
+import androidx.core.graphics.createBitmap
 import androidx.lifecycle.ViewModel
 import com.google.mlkit.vision.barcode.common.Barcode
 import com.google.mlkit.vision.documentscanner.GmsDocumentScannerOptions
@@ -28,9 +27,14 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import edu.aibu.ancat.core.helper.JsonHelper
 import edu.aibu.ancat.core.helper.imageProccess.MLKitBarcodeScanner
 import edu.aibu.ancat.data.model.Question
+import edu.aibu.ancat.data.model.SurveyAnalysisResult
 import edu.aibu.ancat.data.model.SurveyItem
+import edu.aibu.ancat.utils.DocumentConstants.PAGE_HEIGHT
+import edu.aibu.ancat.utils.DocumentConstants.PAGE_WIDTH
+import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import org.opencv.android.Utils
+import org.opencv.core.Core
 import org.opencv.core.Mat
 import org.opencv.core.Point
 import org.opencv.core.Scalar
@@ -43,16 +47,12 @@ import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 import javax.inject.Inject
-import androidx.core.graphics.createBitmap
-import edu.aibu.ancat.utils.DocumentConstants.PAGE_HEIGHT
-import edu.aibu.ancat.utils.DocumentConstants.PAGE_WIDTH
-import org.opencv.core.Core
 
 @HiltViewModel
 class AnalyzeScreenViewModel @Inject constructor() : ViewModel() {
 
 
-    lateinit var jsonObject : List<SurveyItem>
+    lateinit var jsonObject: List<SurveyItem>
     private val option = GmsDocumentScannerOptions.Builder()
         .setScannerMode(SCANNER_MODE_FULL)
         .setGalleryImportAllowed(true)
@@ -119,6 +119,7 @@ class AnalyzeScreenViewModel @Inject constructor() : ViewModel() {
 
 
                     if (success && barcodes.isNotEmpty()) {
+
                         barcodes.forEach { barcode ->
                             try {
                                 val barcodeValue = barcode.rawValue ?: "{}"
@@ -129,7 +130,8 @@ class AnalyzeScreenViewModel @Inject constructor() : ViewModel() {
 //                                println("barkod noktaları: ${barcode.cornerPoints?.joinToString(",")}")
 //                                println(" barkod boindingBox" +barcode.boundingBox)
 
-                                val questionJson = jsonHelper.readJsonFile(jsonData.jsonFileName, context)
+                                val questionJson =
+                                    jsonHelper.readJsonFile(jsonData.jsonFileName, context)
                                 jsonObject = Json.decodeFromString<List<SurveyItem>>(questionJson)
 //                                println((jsonObject[1].questions[0] as Question.MultipleChoiceQuestion).marks)
 
@@ -148,14 +150,15 @@ class AnalyzeScreenViewModel @Inject constructor() : ViewModel() {
                                     )
                                 )
 
-                            analyzeStatus.value = "${barcodes.size} barkod tespit edildi"
-                            }catch (e: Exception){
-                                Log.e("AnalyzeScreenViewModel", "Barkod verisi işlenirken hata: ${e.message}")
+                                analyzeStatus.value = "${barcodes.size} barkod tespit edildi"
+                            } catch (e: Exception) {
+                                Log.e(
+                                    "AnalyzeScreenViewModel",
+                                    "Barkod verisi işlenirken hata: ${e.message}"
+                                )
                                 analyzeStatus.value = "Barkod verisi işlenirken hata: ${e.message}"
                             }
                         }
-
-
 
 
                     } else {
@@ -170,8 +173,15 @@ class AnalyzeScreenViewModel @Inject constructor() : ViewModel() {
                         if (tempBarcodes.isEmpty()) {
                             analyzeStatus.value = "Hiç barkod tespit edilemedi"
                         } else {
-                            analyzeStatus.value = "Analiz tamamlandı, ${tempBarcodes.size} barkod bulundu"
-                            processDetectedData(tempBarcodes, context, uri,jsonObject,barcodeBounds )
+                            analyzeStatus.value =
+                                "Analiz tamamlandı, ${tempBarcodes.size} barkod bulundu"
+                            processDetectedData(
+                                tempBarcodes,
+                                context,
+                                uri,
+                                jsonObject,
+                                barcodeBounds
+                            )
                         }
                     }
                 }
@@ -201,7 +211,10 @@ class AnalyzeScreenViewModel @Inject constructor() : ViewModel() {
                     put(MediaStore.Images.Media.RELATIVE_PATH, "Pictures/Ancat")
                 }
 
-                val uri = contentResolver.insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, contentValues)
+                val uri = contentResolver.insert(
+                    MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
+                    contentValues
+                )
                 uri?.let { outputUri ->
                     val outputStream: OutputStream? = contentResolver.openOutputStream(outputUri)
                     outputStream?.use { output ->
@@ -271,7 +284,7 @@ class AnalyzeScreenViewModel @Inject constructor() : ViewModel() {
 
     // Barkod formatının adını döndür
     private fun getBarcodeFormatName(format: Int): String {
-        return when(format) {
+        return when (format) {
             Barcode.FORMAT_QR_CODE -> "QR Code"
             Barcode.FORMAT_AZTEC -> "Aztec"
             Barcode.FORMAT_CODABAR -> "Codabar"
@@ -290,7 +303,6 @@ class AnalyzeScreenViewModel @Inject constructor() : ViewModel() {
     }
 
 
-
     // Tespit edilen verileri işle (burada kendi özel mantığınızı uygulayabilirsiniz)
     private fun processDetectedData(
         barcodes: List<BarcodeData>,
@@ -299,33 +311,43 @@ class AnalyzeScreenViewModel @Inject constructor() : ViewModel() {
         jsonObject: List<SurveyItem>,
         barcodeBounds: MutableList<Rect?>,
     ) {
-        val resultBitmap = drawBoxOnImage(context, uri, barcodes,jsonObject, barcodeBounds)
+        var result : List<SurveyAnalysisResult>
+
+        if(JsonHelper().checkFileExists(fileName = "${barcodes[0].jsonData!!.jsonFileName}_result" , context = context)){
+
+            val jsonResult = JsonHelper().readJsonFile(fileName = "${barcodes[0].jsonData!!.jsonFileName}_result" , context = context)
+            result = Json.decodeFromString<List<SurveyAnalysisResult>>(jsonResult)
+
+        }else{
+            result = emptyList()
+        }
+
+        val resultBitmap = drawBoxOnImage(context, uri, barcodes, jsonObject, barcodeBounds,result)
         saveAndGallery(context, resultBitmap!!)
 
 
-
-
     }
+
     private fun saveAndGallery(ctx: Context, bmp: Bitmap): String {
         // 1) Cache’e kaydet
-        val file=File(ctx.cacheDir,"qr_${System.currentTimeMillis()}.jpg")
-        FileOutputStream(file).use{ bmp.compress(Bitmap.CompressFormat.JPEG,100,it) }
+        val file = File(ctx.cacheDir, "qr_${System.currentTimeMillis()}.jpg")
+        FileOutputStream(file).use { bmp.compress(Bitmap.CompressFormat.JPEG, 100, it) }
         // 2) Galeriye kaydet
-        val values=ContentValues().apply{
-            put(MediaStore.Images.Media.DISPLAY_NAME,file.name)
-            put(MediaStore.Images.Media.MIME_TYPE,"image/jpeg")
-            put(MediaStore.Images.Media.DATE_TAKEN,System.currentTimeMillis())
-            if(Build.VERSION.SDK_INT>= Build.VERSION_CODES.Q){
-                put(MediaStore.Images.Media.RELATIVE_PATH,"Pictures/AnCat")
-                put(MediaStore.Images.Media.IS_PENDING,1)
+        val values = ContentValues().apply {
+            put(MediaStore.Images.Media.DISPLAY_NAME, file.name)
+            put(MediaStore.Images.Media.MIME_TYPE, "image/jpeg")
+            put(MediaStore.Images.Media.DATE_TAKEN, System.currentTimeMillis())
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                put(MediaStore.Images.Media.RELATIVE_PATH, "Pictures/AnCat")
+                put(MediaStore.Images.Media.IS_PENDING, 1)
             }
         }
-        val uri=ctx.contentResolver.insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI,values)
-        uri?.let{
-            ctx.contentResolver.openOutputStream(it)?.use{ out-> file.inputStream().copyTo(out) }
-            if(Build.VERSION.SDK_INT>= Build.VERSION_CODES.Q){
-                values.clear(); values.put(MediaStore.Images.Media.IS_PENDING,0)
-                ctx.contentResolver.update(it,values,null,null)
+        val uri = ctx.contentResolver.insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, values)
+        uri?.let {
+            ctx.contentResolver.openOutputStream(it)?.use { out -> file.inputStream().copyTo(out) }
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                values.clear(); values.put(MediaStore.Images.Media.IS_PENDING, 0)
+                ctx.contentResolver.update(it, values, null, null)
             }
         }
         return file.absolutePath
@@ -336,17 +358,20 @@ class AnalyzeScreenViewModel @Inject constructor() : ViewModel() {
             BitmapFactory.decodeStream(it)
         }
     }
+
     fun bitmapToMat(bitmap: Bitmap): Mat {
         val mat = Mat()
         Utils.bitmapToMat(bitmap, mat)
         return mat
     }
+
     fun drawBoxOnImage(
         context: Context,
         uri: Uri,
         barcodes: List<BarcodeData>,
         jsonObject: List<SurveyItem>,
         barcodeBounds: MutableList<Rect?>,
+        result: List<SurveyAnalysisResult>,
     ): Bitmap? {
         val bitmap = getBitmapFromUri(context, uri) ?: return null
         val mat = bitmapToMat(bitmap)
@@ -374,20 +399,23 @@ class AnalyzeScreenViewModel @Inject constructor() : ViewModel() {
         val barcodeFirstSectionIdx = barcode.jsonData?.firstQuestion?.sectionIndex ?: 0
         val barcodeLastSectionIdx = barcode.jsonData?.lastQuestion?.sectionIndex ?: 0
 
-        val barcodeLastQuestionIdx = barcode.jsonData?.lastQuestion?.questionIndex  ?: 0
-        for(i in  barcodeFirstSectionIdx .. barcodeLastSectionIdx){
+        val barcodeLastQuestionIdx = barcode.jsonData?.lastQuestion?.questionIndex ?: 0
+        var newResult = result
+        for (i in barcodeFirstSectionIdx..barcodeLastSectionIdx) {
             jsonObject[i].questions.forEachIndexed { l, k ->
-                if (l == barcodeLastQuestionIdx && i == barcodeLastSectionIdx){
-                    when(jsonObject[i].type){
+                if (l == barcodeLastQuestionIdx && i == barcodeLastSectionIdx) {
+                    when (jsonObject[i].type) {
 
                         "1" -> {
-                            scanRatingQuestion(k, x, left, y, topValue, mat)
+                            newResult  =  scanRatingQuestion(k, x, left, y, topValue, mat,newResult,i ,l )
 
 
                         }
+
                         "2" -> {
-                            scanMultiChoiceQuestion(k, x, y, mat, topValue, left)
+                           newResult=  scanMultiChoiceQuestion(k, x, y, mat, topValue, left, newResult, i, l)
                         }
+
                         else -> {
 
                         }
@@ -395,17 +423,22 @@ class AnalyzeScreenViewModel @Inject constructor() : ViewModel() {
                     }
                     val resultBitmap = createBitmap(mat.cols(), mat.rows())
                     Utils.matToBitmap(mat, resultBitmap)
+                    JsonHelper().saveJsonToFile(Json.encodeToString(newResult), context = context, fileName = "${barcodes[0].jsonData!!.jsonFileName}_result" )
+
                     return resultBitmap
 
 
-                }else{
-                    when(jsonObject[i].type){
+                } else {
+                    when (jsonObject[i].type) {
                         "1" -> {
-                            scanRatingQuestion(k, x, left, y, topValue, mat)
+                           newResult =  scanRatingQuestion(k, x, left, y, topValue, mat, newResult, i, l)
+
                         }
+
                         "2" -> {
-                            scanMultiChoiceQuestion(k, x, y, mat, topValue, left)
+                            newResult =  scanMultiChoiceQuestion(k, x, y, mat, topValue, left, newResult,i,l)
                         }
+
                         else -> {
 
                         }
@@ -418,8 +451,12 @@ class AnalyzeScreenViewModel @Inject constructor() : ViewModel() {
         }
 
 
+
+
         val resultBitmap = createBitmap(mat.cols(), mat.rows())
         Utils.matToBitmap(mat, resultBitmap)
+
+        println(JsonHelper().saveJsonToFile(Json.encodeToString(newResult), context = context, fileName = "${barcodes[0].jsonData!!.jsonFileName}_result" ))
         return resultBitmap
     }
 
@@ -429,12 +466,122 @@ class AnalyzeScreenViewModel @Inject constructor() : ViewModel() {
         left: Int,
         y: Double,
         topValue: Int,
-        mat: Mat
-    ) {
+        mat: Mat,
+        result: List<SurveyAnalysisResult>,
+        i1: Int,
+        l: Int
+    ): MutableList<SurveyAnalysisResult> {
         k as Question.RatingQuestion
+        var analysisList = MutableList(5) { 0 }
+        var newResult = result.toMutableList()
+        var controlList = false
+        var controlInt = 0
+        result.forEachIndexed { idx , it ->
+            if ( it.questionIdx == l && it.sectionIdx == i1){
+                analysisList = it.analysis.toMutableList()
+                controlList = true
+                controlInt = idx
+            }
+        }
+
+
         for (i in 0..4) {
+
             val topLeft = Point((440.0 + i * 25) * x + left, (k.mark + 1) * y + topValue)
             val bottomRight = Point((454.0 + i * 25) * x + left, (k.mark + 15) * y + topValue)
+            val roiRect = org.opencv.core.Rect(
+                topLeft.x.toInt(),
+                topLeft.y.toInt(),
+                (bottomRight.x - topLeft.x).toInt(),
+                (bottomRight.y - topLeft.y).toInt()
+            )
+            val roi = Mat(mat, roiRect)
+            val grayROI = Mat()
+            val newList = mutableListOf<SurveyAnalysisResult>()
+            Imgproc.cvtColor(roi, grayROI, Imgproc.COLOR_BGR2GRAY)
+
+            // Eşikleme (karanlık alanları tespit etmek için)
+            Imgproc.threshold(grayROI, grayROI, 127.0, 255.0, Imgproc.THRESH_BINARY_INV)
+
+            val blackPixels = Core.countNonZero(grayROI)
+            val totalPixels = grayROI.rows() * grayROI.cols()
+            val fillRatio = blackPixels.toDouble() / totalPixels
+            println("fill ratio $fillRatio  question ${k.question}")
+
+            val isFilled = fillRatio > 0.35
+
+            // Kutu çiz
+            Imgproc.rectangle(
+                mat,
+                topLeft,
+                bottomRight,
+                if (isFilled) Scalar(0.0, 255.0, 0.0) else Scalar(
+                    255.0,
+                    0.0,
+                    0.0
+                ), // Yeşil = dolu, Kırmızı = boş
+                2
+            )
+
+
+            if (isFilled){
+                analysisList[i] += 1
+            }
+
+
+
+        }
+        if (controlList){
+            newResult[controlInt] = SurveyAnalysisResult(
+                sectionIdx = i1,
+                questionIdx = l,
+                type = "1",
+                analysis = analysisList
+
+            )
+
+        }else{
+            newResult.add(SurveyAnalysisResult(
+                sectionIdx = i1,
+                questionIdx = l,
+                type = "1",
+                analysis = analysisList
+
+            ))
+        }
+        return newResult
+
+    }
+
+    private fun scanMultiChoiceQuestion(
+        k: Question,
+        x: Double,
+        y: Double,
+        mat: Mat,
+        topValue: Int,
+        left: Int,
+        result: List<SurveyAnalysisResult>,
+        i1: Int,
+        l: Int
+    ): MutableList<SurveyAnalysisResult> {
+        k as Question.MultipleChoiceQuestion
+        var analysisList = MutableList(k.marks.size) { 0 }
+        var newResult = result.toMutableList()
+        var controlList = false
+        var controlInt = 0
+        result.forEachIndexed { idx , it ->
+            if ( it.questionIdx == l && it.sectionIdx == i1){
+                analysisList = it.analysis.toMutableList()
+                controlList = true
+                controlInt = idx
+            }
+        }
+
+
+        k.marks.forEachIndexed {idx , it ->
+
+            val topLeft = Point(438.0 * x + left, (it - 10) * y + topValue)
+            val bottomRight = Point(450 * x + left, (it + 2) * y + topValue)
             val roiRect = org.opencv.core.Rect(
                 topLeft.x.toInt(),
                 topLeft.y.toInt(),
@@ -453,7 +600,7 @@ class AnalyzeScreenViewModel @Inject constructor() : ViewModel() {
             val fillRatio = blackPixels.toDouble() / totalPixels
             println("fill ratio $fillRatio  question ${k.question}")
 
-            val isFilled = fillRatio > 0.5
+            val isFilled = fillRatio > 0.35
 
             // Kutu çiz
             Imgproc.rectangle(
@@ -467,63 +614,36 @@ class AnalyzeScreenViewModel @Inject constructor() : ViewModel() {
                 ), // Yeşil = dolu, Kırmızı = boş
                 2
             )
+            if (isFilled){
+                analysisList[idx] += 1
+            }
 
         }
-    }
+        if (controlList){
+            newResult[controlInt] = SurveyAnalysisResult(
+                sectionIdx = i1,
+                questionIdx = l,
+                type = "2",
+                analysis = analysisList
 
-    private fun scanMultiChoiceQuestion(
-        k: Question,
-        x: Double,
-        y: Double,
-        mat: Mat,
-        topValue: Int,
-        left: Int
-    ) {
-        k as Question.MultipleChoiceQuestion
-        k.marks.forEach {
-
-            val topLeft = Point(438.0 * x + left , (it - 10) * y + topValue)
-            val bottomRight = Point(450 * x + left, (it + 2) * y  + topValue)
-            val roiRect = org.opencv.core.Rect(
-                topLeft.x.toInt(),
-                topLeft.y.toInt(),
-                (bottomRight.x - topLeft.x).toInt(),
-                (bottomRight.y - topLeft.y).toInt()
-            )
-            val roi = Mat(mat, roiRect)
-            val grayROI = Mat()
-            Imgproc.cvtColor(roi, grayROI, Imgproc.COLOR_BGR2GRAY)
-
-            // Eşikleme (karanlık alanları tespit etmek için)
-            Imgproc.threshold(grayROI, grayROI, 127.0, 255.0, Imgproc.THRESH_BINARY_INV)
-
-            val blackPixels = Core.countNonZero(grayROI)
-            val totalPixels = grayROI.rows() * grayROI.cols()
-            val fillRatio = blackPixels.toDouble() / totalPixels
-            println("fill ratio $fillRatio  question ${k.question}" )
-
-            val isFilled = fillRatio > 0.5
-
-            // Kutu çiz
-            Imgproc.rectangle(
-                mat,
-                topLeft,
-                bottomRight,
-                if (isFilled) Scalar(0.0, 255.0, 0.0) else Scalar(
-                    255.0,
-                    0.0,
-                    0.0
-                ), // Yeşil = dolu, Kırmızı = boş
-                2
             )
 
+        }else{
+            newResult.add(SurveyAnalysisResult(
+                sectionIdx = i1,
+                questionIdx = l,
+                type = "2",
+                analysis = analysisList
+
+            ))
         }
+        return newResult
     }
 
 
     // Barkod verisi veri sınıfı
     data class BarcodeData(
-        val content: String,    
+        val content: String,
         val format: String,
         val imageUri: Uri,
         val processedImagePath: String?,
