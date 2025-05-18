@@ -14,6 +14,7 @@ import android.os.Build
 import android.provider.MediaStore
 import android.util.Log
 import androidx.activity.result.ActivityResult
+import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import com.google.mlkit.vision.barcode.common.Barcode
@@ -46,7 +47,6 @@ import androidx.core.graphics.createBitmap
 import edu.aibu.ancat.utils.DocumentConstants.PAGE_HEIGHT
 import edu.aibu.ancat.utils.DocumentConstants.PAGE_WIDTH
 import org.opencv.core.Core
-import kotlin.math.absoluteValue
 
 @HiltViewModel
 class AnalyzeScreenViewModel @Inject constructor() : ViewModel() {
@@ -69,13 +69,12 @@ class AnalyzeScreenViewModel @Inject constructor() : ViewModel() {
     private val barcodeScanner = MLKitBarcodeScanner()
 
     // Barkod analizi durum bilgisi
-    val analyzeProgress = mutableStateOf(0f)
+    val analyzeProgress = mutableFloatStateOf(0f)
     val isAnalyzing = mutableStateOf(false)
     val analyzeStatus = mutableStateOf("")
 
     // Tespit edilen barkod verilerini tutacak liste
     private val _detectedBarcodes = mutableStateOf<List<BarcodeData>>(emptyList())
-    val detectedBarcodes: List<BarcodeData> get() = _detectedBarcodes.value
 
     fun handleScanResult(scanner: ActivityResult) {
         if (scanner.resultCode == RESULT_OK) {
@@ -95,7 +94,7 @@ class AnalyzeScreenViewModel @Inject constructor() : ViewModel() {
         }
 
         isAnalyzing.value = true
-        analyzeProgress.value = 0f
+        analyzeProgress.floatValue = 0f
         analyzeStatus.value = "Analiz başlıyor..."
 
         val tempBarcodes = mutableListOf<BarcodeData>()
@@ -116,7 +115,7 @@ class AnalyzeScreenViewModel @Inject constructor() : ViewModel() {
                 onComplete = { success, barcodes, savedImagePath ->
 
                     processedCount++
-                    analyzeProgress.value = processedCount.toFloat() / _imageUris.value.size
+                    analyzeProgress.floatValue = processedCount.toFloat() / _imageUris.value.size
 
 
                     if (success && barcodes.isNotEmpty()) {
@@ -126,13 +125,13 @@ class AnalyzeScreenViewModel @Inject constructor() : ViewModel() {
                                 val jsonData = Json.decodeFromString<QrPayload>(barcodeValue)
 
 
-                                println("Bulunan barkod: format=${barcode.format}, data=$barcodeValue")
-                                println("barkod noktaları: ${barcode.cornerPoints?.joinToString(",")}")
-                                println(" barkod boindingBox" +barcode.boundingBox)
+//                                println("Bulunan barkod: format=${barcode.format}, data=$barcodeValue")
+//                                println("barkod noktaları: ${barcode.cornerPoints?.joinToString(",")}")
+//                                println(" barkod boindingBox" +barcode.boundingBox)
 
                                 val questionJson = jsonHelper.readJsonFile(jsonData.jsonFileName, context)
                                 jsonObject = Json.decodeFromString<List<SurveyItem>>(questionJson)
-                                println((jsonObject[1].questions[0] as Question.MultipleChoiceQuestion).marks)
+//                                println((jsonObject[1].questions[0] as Question.MultipleChoiceQuestion).marks)
 
                                 barcodeBounds.add(
                                     barcode.boundingBox
@@ -232,43 +231,43 @@ class AnalyzeScreenViewModel @Inject constructor() : ViewModel() {
         }
     }
 
-    // MediaStore'dan görüntüleri al
-    fun getImagesFromMediaStore(context: Context): List<Uri> {
-        val images = mutableListOf<Uri>()
-        val contentResolver = context.contentResolver
-
-        val projection = arrayOf(
-            MediaStore.Images.Media._ID,
-            MediaStore.Images.Media.DISPLAY_NAME
-        )
-
-        val selection = "${MediaStore.Images.Media.DISPLAY_NAME} LIKE ?"
-        val selectionArgs = arrayOf("ANCAT_SCAN_%")
-        val sortOrder = "${MediaStore.Images.Media.DATE_ADDED} DESC"
-
-        val query = contentResolver.query(
-            MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
-            projection,
-            selection,
-            selectionArgs,
-            sortOrder
-        )
-
-        query?.use { cursor ->
-            val idColumn = cursor.getColumnIndexOrThrow(MediaStore.Images.Media._ID)
-
-            while (cursor.moveToNext()) {
-                val id = cursor.getLong(idColumn)
-                val contentUri = Uri.withAppendedPath(
-                    MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
-                    id.toString()
-                )
-                images.add(contentUri)
-            }
-        }
-
-        return images
-    }
+//    // MediaStore'dan görüntüleri al
+//    fun getImagesFromMediaStore(context: Context): List<Uri> {
+//        val images = mutableListOf<Uri>()
+//        val contentResolver = context.contentResolver
+//
+//        val projection = arrayOf(
+//            MediaStore.Images.Media._ID,
+//            MediaStore.Images.Media.DISPLAY_NAME
+//        )
+//
+//        val selection = "${MediaStore.Images.Media.DISPLAY_NAME} LIKE ?"
+//        val selectionArgs = arrayOf("ANCAT_SCAN_%")
+//        val sortOrder = "${MediaStore.Images.Media.DATE_ADDED} DESC"
+//
+//        val query = contentResolver.query(
+//            MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
+//            projection,
+//            selection,
+//            selectionArgs,
+//            sortOrder
+//        )
+//
+//        query?.use { cursor ->
+//            val idColumn = cursor.getColumnIndexOrThrow(MediaStore.Images.Media._ID)
+//
+//            while (cursor.moveToNext()) {
+//                val id = cursor.getLong(idColumn)
+//                val contentUri = Uri.withAppendedPath(
+//                    MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
+//                    id.toString()
+//                )
+//                images.add(contentUri)
+//            }
+//        }
+//
+//        return images
+//    }
 
     // Barkod formatının adını döndür
     private fun getBarcodeFormatName(format: Int): String {
@@ -316,7 +315,7 @@ class AnalyzeScreenViewModel @Inject constructor() : ViewModel() {
             put(MediaStore.Images.Media.DISPLAY_NAME,file.name)
             put(MediaStore.Images.Media.MIME_TYPE,"image/jpeg")
             put(MediaStore.Images.Media.DATE_TAKEN,System.currentTimeMillis())
-            if(android.os.Build.VERSION.SDK_INT>=android.os.Build.VERSION_CODES.Q){
+            if(Build.VERSION.SDK_INT>= Build.VERSION_CODES.Q){
                 put(MediaStore.Images.Media.RELATIVE_PATH,"Pictures/AnCat")
                 put(MediaStore.Images.Media.IS_PENDING,1)
             }
@@ -324,7 +323,7 @@ class AnalyzeScreenViewModel @Inject constructor() : ViewModel() {
         val uri=ctx.contentResolver.insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI,values)
         uri?.let{
             ctx.contentResolver.openOutputStream(it)?.use{ out-> file.inputStream().copyTo(out) }
-            if(android.os.Build.VERSION.SDK_INT>=android.os.Build.VERSION_CODES.Q){
+            if(Build.VERSION.SDK_INT>= Build.VERSION_CODES.Q){
                 values.clear(); values.put(MediaStore.Images.Media.IS_PENDING,0)
                 ctx.contentResolver.update(it,values,null,null)
             }
@@ -351,8 +350,8 @@ class AnalyzeScreenViewModel @Inject constructor() : ViewModel() {
     ): Bitmap? {
         val bitmap = getBitmapFromUri(context, uri) ?: return null
         val mat = bitmapToMat(bitmap)
-        val height = mat.height()
-        val width = mat.width()
+        //val height = mat.height()
+        //val width = mat.width()
         var photoHeight = 0
         var photoWidth = 0
         var topValue = 0
@@ -366,66 +365,165 @@ class AnalyzeScreenViewModel @Inject constructor() : ViewModel() {
         photoHeight = bottom - top
         photoWidth = right - left
         val x = photoWidth.toDouble() / PAGE_WIDTH
-        val y = height.toDouble() / PAGE_HEIGHT
+        val y = photoHeight.toDouble() / PAGE_HEIGHT
 
         if (mat.channels() == 1) {
             Imgproc.cvtColor(mat, mat, Imgproc.COLOR_GRAY2RGB)
         }
+        val barcode = barcodes[0]
+        val barcodeFirstSectionIdx = barcode.jsonData?.firstQuestion?.sectionIndex ?: 0
+        val barcodeLastSectionIdx = barcode.jsonData?.lastQuestion?.sectionIndex ?: 0
 
-        for (barcode in barcodes) {
-            val sectionIndex = barcode.jsonData?.lastQuestion?.sectionIndex ?: continue
-            for (k in 0..3) {
-                val questionIndex = barcode.jsonData?.lastQuestion?.questionIndex!! - k
-                val question = (jsonObject[1].questions[questionIndex] as Question.MultipleChoiceQuestion).marks
+        val barcodeLastQuestionIdx = barcode.jsonData?.lastQuestion?.questionIndex  ?: 0
+        for(i in  barcodeFirstSectionIdx .. barcodeLastSectionIdx){
+            jsonObject[i].questions.forEachIndexed { l, k ->
+                if (l == barcodeLastQuestionIdx && i == barcodeLastSectionIdx){
+                    when(jsonObject[i].type){
 
-                val topLeft = Point(440.0 * x, ((question[0].toDouble() - 10) * y))
-                val bottomRight = Point(452 * x, ((question[0].toDouble() + 2) * y))
+                        "1" -> {
+                            scanRatingQuestion(k, x, left, y, topValue, mat)
 
-                // ROI alanını kırp
-                val roiRect =org.opencv.core.Rect(
-                    topLeft.x.toInt(),
-                    topLeft.y.toInt(),
-                    (bottomRight.x - topLeft.x).toInt(),
-                    (bottomRight.y - topLeft.y).toInt()
-                )
-                val roi = Mat(mat , roiRect)
 
-                // Griye çevir
-                val grayROI = Mat()
-                Imgproc.cvtColor(roi, grayROI, Imgproc.COLOR_BGR2GRAY)
+                        }
+                        "2" -> {
+                            scanMultiChoiceQuestion(k, x, y, mat, topValue, left)
+                        }
+                        else -> {
 
-                // Eşikleme (karanlık alanları tespit etmek için)
-                Imgproc.threshold(grayROI, grayROI, 127.0, 255.0, Imgproc.THRESH_BINARY_INV)
+                        }
 
-                val blackPixels = Core.countNonZero(grayROI)
-                val totalPixels = grayROI.rows() * grayROI.cols()
-                val fillRatio = blackPixels.toDouble() / totalPixels
+                    }
+                    val resultBitmap = createBitmap(mat.cols(), mat.rows())
+                    Utils.matToBitmap(mat, resultBitmap)
+                    return resultBitmap
 
-                val isFilled = fillRatio > 0.5
 
-                // Kutu çiz
-                Imgproc.rectangle(
-                    mat,
-                    topLeft,
-                    bottomRight,
-                    if (isFilled) Scalar(0.0, 255.0, 0.0) else Scalar(255.0, 0.0, 0.0), // Yeşil = dolu, Kırmızı = boş
-                    2
-                )
+                }else{
+                    when(jsonObject[i].type){
+                        "1" -> {
+                            scanRatingQuestion(k, x, left, y, topValue, mat)
+                        }
+                        "2" -> {
+                            scanMultiChoiceQuestion(k, x, y, mat, topValue, left)
+                        }
+                        else -> {
 
-                Log.d("CheckBox", "Filled: $isFilled (Ratio: ${String.format("%.2f", fillRatio)})")
+                        }
+
+                    }
+
+                }
             }
+
         }
+
 
         val resultBitmap = createBitmap(mat.cols(), mat.rows())
         Utils.matToBitmap(mat, resultBitmap)
         return resultBitmap
     }
 
+    private fun scanRatingQuestion(
+        k: Question,
+        x: Double,
+        left: Int,
+        y: Double,
+        topValue: Int,
+        mat: Mat
+    ) {
+        k as Question.RatingQuestion
+        for (i in 0..4) {
+            val topLeft = Point((440.0 + i * 25) * x + left, (k.mark + 1) * y + topValue)
+            val bottomRight = Point((454.0 + i * 25) * x + left, (k.mark + 15) * y + topValue)
+            val roiRect = org.opencv.core.Rect(
+                topLeft.x.toInt(),
+                topLeft.y.toInt(),
+                (bottomRight.x - topLeft.x).toInt(),
+                (bottomRight.y - topLeft.y).toInt()
+            )
+            val roi = Mat(mat, roiRect)
+            val grayROI = Mat()
+            Imgproc.cvtColor(roi, grayROI, Imgproc.COLOR_BGR2GRAY)
+
+            // Eşikleme (karanlık alanları tespit etmek için)
+            Imgproc.threshold(grayROI, grayROI, 127.0, 255.0, Imgproc.THRESH_BINARY_INV)
+
+            val blackPixels = Core.countNonZero(grayROI)
+            val totalPixels = grayROI.rows() * grayROI.cols()
+            val fillRatio = blackPixels.toDouble() / totalPixels
+            println("fill ratio $fillRatio  question ${k.question}")
+
+            val isFilled = fillRatio > 0.5
+
+            // Kutu çiz
+            Imgproc.rectangle(
+                mat,
+                topLeft,
+                bottomRight,
+                if (isFilled) Scalar(0.0, 255.0, 0.0) else Scalar(
+                    255.0,
+                    0.0,
+                    0.0
+                ), // Yeşil = dolu, Kırmızı = boş
+                2
+            )
+
+        }
+    }
+
+    private fun scanMultiChoiceQuestion(
+        k: Question,
+        x: Double,
+        y: Double,
+        mat: Mat,
+        topValue: Int,
+        left: Int
+    ) {
+        k as Question.MultipleChoiceQuestion
+        k.marks.forEach {
+
+            val topLeft = Point(438.0 * x + left , (it - 10) * y + topValue)
+            val bottomRight = Point(450 * x + left, (it + 2) * y  + topValue)
+            val roiRect = org.opencv.core.Rect(
+                topLeft.x.toInt(),
+                topLeft.y.toInt(),
+                (bottomRight.x - topLeft.x).toInt(),
+                (bottomRight.y - topLeft.y).toInt()
+            )
+            val roi = Mat(mat, roiRect)
+            val grayROI = Mat()
+            Imgproc.cvtColor(roi, grayROI, Imgproc.COLOR_BGR2GRAY)
+
+            // Eşikleme (karanlık alanları tespit etmek için)
+            Imgproc.threshold(grayROI, grayROI, 127.0, 255.0, Imgproc.THRESH_BINARY_INV)
+
+            val blackPixels = Core.countNonZero(grayROI)
+            val totalPixels = grayROI.rows() * grayROI.cols()
+            val fillRatio = blackPixels.toDouble() / totalPixels
+            println("fill ratio $fillRatio  question ${k.question}" )
+
+            val isFilled = fillRatio > 0.5
+
+            // Kutu çiz
+            Imgproc.rectangle(
+                mat,
+                topLeft,
+                bottomRight,
+                if (isFilled) Scalar(0.0, 255.0, 0.0) else Scalar(
+                    255.0,
+                    0.0,
+                    0.0
+                ), // Yeşil = dolu, Kırmızı = boş
+                2
+            )
+
+        }
+    }
 
 
     // Barkod verisi veri sınıfı
     data class BarcodeData(
-        val content: String,
+        val content: String,    
         val format: String,
         val imageUri: Uri,
         val processedImagePath: String?,
