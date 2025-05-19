@@ -27,4 +27,9 @@ class AnalysisScreenViewModel @Inject constructor(
         return data
     }
 
+    fun removeAnalysisFile(filePath: String, context: Context) {
+        jsonHelper.removeJsonFile(filePath, context)
+
+    }
+
 }

@@ -2,6 +2,7 @@ package edu.aibu.ancat.ui.views.test_screen
 
 import androidx.lifecycle.ViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
+import edu.aibu.ancat.data.model.SurveyAnalysisResult
 import edu.aibu.ancat.data.model.SurveyItem
 import kotlinx.serialization.json.Json
 import javax.inject.Inject
@@ -105,5 +106,19 @@ class TestViewModel @Inject constructor() : ViewModel() {
         ]
     """.trimIndent()
 
+    private val jsonResult = """
+        [
+          {"sectionIdx":1,"questionIdx":0,"type":"2","analysis":[25137,31245,17620,25998]},
+          {"sectionIdx":1,"questionIdx":1,"type":"2","analysis":[12983,14327,60249,12441]},
+          {"sectionIdx":1,"questionIdx":2,"type":"2","analysis":[67442,12987,9234,8347]},
+          {"sectionIdx":1,"questionIdx":3,"type":"2","analysis":[13546,67834,9232,5388]},
+          {"sectionIdx":2,"questionIdx":0,"type":"1","analysis":[92347,3821,1453,936,443]},
+          {"sectionIdx":2,"questionIdx":1,"type":"1","analysis":[41125,35223,10847,9023,7782]},
+          {"sectionIdx":2,"questionIdx":2,"type":"1","analysis":[24037,21458,20473,17861,16171]},
+          {"sectionIdx":2,"questionIdx":3,"type":"1","analysis":[24672,22311,20774,16780,15463]}
+        ]
+    """.trimIndent()
+
     val data = Json.decodeFromString<List<SurveyItem>>(json)
+    val resultData = Json.decodeFromString<List<SurveyAnalysisResult>>(jsonResult)
 }
