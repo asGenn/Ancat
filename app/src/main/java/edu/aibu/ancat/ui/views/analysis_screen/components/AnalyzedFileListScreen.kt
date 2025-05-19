@@ -26,7 +26,8 @@ import edu.aibu.ancat.core.navigation.AnalysisSurvey
 @Composable
 fun AnalyzedFileListScreen(
     navController: NavController,
-    data: SnapshotStateList<Pair<String, String>>
+    data: SnapshotStateList<Pair<String, String>>,
+    callBack: (Pair<String, String>) -> Unit
 ) {
     Column(
         modifier = Modifier
@@ -54,6 +55,7 @@ fun AnalyzedFileListScreen(
                         navController.navigate(AnalysisSurvey(item.first, item.second))
                     },
                     onDelete = {
+                        callBack(item)
                         // Buraya silme işlemi yapılabilir
                     }
                 )

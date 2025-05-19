@@ -148,6 +148,12 @@ fun AnalyzeScreen() {
                                 fileName = "TestData",
                                 jsonData = Json.encodeToString(testViewModel.data)
                             )
+                            // Add result JSON file
+                            JsonHelper().saveJsonToFile(
+                                context = context,
+                                fileName = "TestData_result",
+                                jsonData = Json.encodeToString(testViewModel.resultData)
+                            )
                             // Fetching existing files from DB
                             val data: List<JsonFilesInfoEntity> = viewModelSec.getJsonFiles()
 
@@ -167,7 +173,6 @@ fun AnalyzeScreen() {
                                 // Show a toast that the file was added successfully
                                 Toast.makeText(context, "Added successfully", Toast.LENGTH_SHORT).show()
                             }
-
                         }
                     }
                 ) {

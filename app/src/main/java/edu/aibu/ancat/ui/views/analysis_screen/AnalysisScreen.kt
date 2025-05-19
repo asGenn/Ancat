@@ -31,7 +31,12 @@ fun AnalysisScreen(navController: NavController) {
         if (jsonAnalysisList.isEmpty()) {
             UnanalyzedScreen()
         } else {
-            AnalyzedFileListScreen(navController, jsonAnalysisList)
+            AnalyzedFileListScreen(
+                navController, jsonAnalysisList, {
+                    viewModel.removeAnalysisFile(it.second, context)
+                    jsonAnalysisList.remove(it)
+                }
+            )
         }
     }
 
