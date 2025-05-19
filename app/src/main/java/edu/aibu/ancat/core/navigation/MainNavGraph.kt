@@ -1,6 +1,6 @@
 package edu.aibu.ancat.core.navigation
 
-import edu.aibu.ancat.ui.views.home_screen.AnalyzeScreen
+import edu.aibu.ancat.ui.views.camera_screen.AnalyzeScreen
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.navigation.NavHostController
@@ -15,7 +15,8 @@ import androidx.compose.animation.AnimatedContentTransitionScope
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
-import edu.aibu.ancat.ui.views.test_screen.TestView
+import edu.aibu.ancat.ui.views.analysis_result_screen.AnalysisResultScreen
+import edu.aibu.ancat.ui.views.analysis_screen.AnalysisScreen
 
 @Serializable
 object Home
@@ -32,7 +33,13 @@ object Create
 data class CreateSurvey(val title: String, val id: Int? = null)
 
 @Serializable
-object Survey
+object AnalysisNested
+
+@Serializable
+object Analysis
+
+@Serializable
+data class AnalysisSurvey(val title: String, val path: String)
 
 
 @Composable
@@ -77,7 +84,7 @@ fun MainNavGraph(modifier: Modifier = Modifier, navController: NavHostController
             composable<Create>(
                 enterTransition = {
                     val initialRoute = initialState.destination.route?.substringBefore("/") ?: ""
-                    val direction = if (initialRoute.contains("Survey")) {
+                    val direction = if (initialRoute.contains("Analysis")) {
                         AnimatedContentTransitionScope.SlideDirection.Right
                     } else {
                         AnimatedContentTransitionScope.SlideDirection.Left
@@ -90,7 +97,7 @@ fun MainNavGraph(modifier: Modifier = Modifier, navController: NavHostController
                 },
                 exitTransition = {
                     val targetRoute = targetState.destination.route?.substringBefore("/") ?: ""
-                    val direction = if (targetRoute.contains("Survey")) {
+                    val direction = if (targetRoute.contains("Analysis")) {
                         AnimatedContentTransitionScope.SlideDirection.Left
                     } else {
                         AnimatedContentTransitionScope.SlideDirection.Left
@@ -122,47 +129,53 @@ fun MainNavGraph(modifier: Modifier = Modifier, navController: NavHostController
             }
         }
 
-        composable<Survey>(
-            enterTransition = {
-                val initialRoute = initialState.destination.route?.substringBefore("/") ?: ""
-                val direction = if (initialRoute.contains("Create")) {
-                    AnimatedContentTransitionScope.SlideDirection.Left
-                } else {
-                    AnimatedContentTransitionScope.SlideDirection.Left
+        navigation<AnalysisNested>(startDestination = Analysis) {
+            composable<Analysis>(
+                enterTransition = {
+                    val initialRoute = initialState.destination.route?.substringBefore("/") ?: ""
+                    val direction = if (initialRoute.contains("Create")) {
+                        AnimatedContentTransitionScope.SlideDirection.Left
+                    } else {
+                        AnimatedContentTransitionScope.SlideDirection.Left
+                    }
+
+                    slideIntoContainer(
+                        towards = direction,
+                        animationSpec = tween(500)
+                    ) + fadeIn(animationSpec = tween(500))
+                },
+                exitTransition = {
+                    val targetRoute = targetState.destination.route?.substringBefore("/") ?: ""
+                    val direction = if (targetRoute.contains("Create")) {
+                        AnimatedContentTransitionScope.SlideDirection.Right
+                    } else {
+                        AnimatedContentTransitionScope.SlideDirection.Left
+                    }
+
+                    slideOutOfContainer(
+                        towards = direction,
+                        animationSpec = tween(500)
+                    ) + fadeOut(animationSpec = tween(500))
+                },
+                popEnterTransition = {
+                    slideIntoContainer(
+                        towards = AnimatedContentTransitionScope.SlideDirection.Right,
+                        animationSpec = tween(500)
+                    ) + fadeIn(animationSpec = tween(500))
+                },
+                popExitTransition = {
+                    slideOutOfContainer(
+                        towards = AnimatedContentTransitionScope.SlideDirection.Right,
+                        animationSpec = tween(500)
+                    ) + fadeOut(animationSpec = tween(500))
                 }
-                
-                slideIntoContainer(
-                    towards = direction,
-                    animationSpec = tween(500)
-                ) + fadeIn(animationSpec = tween(500))
-            },
-            exitTransition = {
-                val targetRoute = targetState.destination.route?.substringBefore("/") ?: ""
-                val direction = if (targetRoute.contains("Create")) {
-                    AnimatedContentTransitionScope.SlideDirection.Right
-                } else {
-                    AnimatedContentTransitionScope.SlideDirection.Left
-                }
-                
-                slideOutOfContainer(
-                    towards = direction,
-                    animationSpec = tween(500)
-                ) + fadeOut(animationSpec = tween(500))
-            },
-            popEnterTransition = {
-                slideIntoContainer(
-                    towards = AnimatedContentTransitionScope.SlideDirection.Right,
-                    animationSpec = tween(500)
-                ) + fadeIn(animationSpec = tween(500))
-            },
-            popExitTransition = {
-                slideOutOfContainer(
-                    towards = AnimatedContentTransitionScope.SlideDirection.Right,
-                    animationSpec = tween(500)
-                ) + fadeOut(animationSpec = tween(500))
+            ) {
+                AnalysisScreen(navController)
             }
-        ) {
-            TestView()
+            composable<AnalysisSurvey> { backStackEntry ->
+                val analysisSurvey: AnalysisSurvey = backStackEntry.toRoute()
+                AnalysisResultScreen(analysisSurvey.path, analysisSurvey.title)
+            }
         }
 
     }
