@@ -1,4 +1,4 @@
-package edu.aibu.ancat.ui.views.home_screen
+package edu.aibu.ancat.ui.views.camera_screen
 
 import QrPayload
 import android.app.Activity.RESULT_OK
@@ -49,7 +49,7 @@ import java.util.Locale
 import javax.inject.Inject
 
 @HiltViewModel
-class AnalyzeScreenViewModel @Inject constructor() : ViewModel() {
+class CameraScreenViewModel @Inject constructor() : ViewModel() {
 
 
     lateinit var jsonObject: List<SurveyItem>

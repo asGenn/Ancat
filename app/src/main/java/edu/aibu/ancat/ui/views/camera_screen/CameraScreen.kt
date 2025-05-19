@@ -1,7 +1,6 @@
-package edu.aibu.ancat.ui.views.home_screen
+package edu.aibu.ancat.ui.views.camera_screen
 
 import android.app.Activity
-import android.util.Log
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.IntentSenderRequest
@@ -10,7 +9,6 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -38,12 +36,22 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import coil3.compose.AsyncImage
+import edu.aibu.ancat.core.helper.JsonHelper
 import edu.aibu.ancat.core.helper.imageProccess.MLKitBarcodeScanner
-import kotlin.collections.plusAssign
+import edu.aibu.ancat.domain.entity.JsonFilesInfoEntity
+import edu.aibu.ancat.ui.views.create_screen.CreateScreenViewModel
+import edu.aibu.ancat.ui.views.test_screen.TestViewModel
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.serialization.encodeToString
+import kotlinx.serialization.json.Json
 
 @Composable
 fun AnalyzeScreen() {
-    val viewModel: AnalyzeScreenViewModel = hiltViewModel()
+    val viewModel: CameraScreenViewModel = hiltViewModel()
+    val testViewModel: TestViewModel = hiltViewModel()
+    val viewModelSec: CreateScreenViewModel = hiltViewModel()
     val context = LocalContext.current
     val barcodeResult = remember { mutableStateOf<String?>(null) }
     val mlKitBarcodeScanner = remember { MLKitBarcodeScanner() }
@@ -133,17 +141,40 @@ fun AnalyzeScreen() {
                         contentColor = MaterialTheme.colorScheme.onPrimary
                     ),
                     onClick = {
-                        // MediaStore'a kaydet
-                        if (viewModel.imageUris.isNotEmpty()) {
-                            viewModel.saveScannedImagesToMediaStore(context)
-                            Toast.makeText(context, "Görüntüler kaydedildi", Toast.LENGTH_SHORT).show()
+                        CoroutineScope(Dispatchers.Main).launch {
+                            // Saving JSON to file
+                            val path = JsonHelper().saveJsonToFile(
+                                context = context,
+                                fileName = "TestData",
+                                jsonData = Json.encodeToString(testViewModel.data)
+                            )
+                            // Fetching existing files from DB
+                            val data: List<JsonFilesInfoEntity> = viewModelSec.getJsonFiles()
+
+                            // Check if the file already exists in the database
+                            val fileExists = data.any { it.fileName == "TestData" }
+
+                            if (fileExists) {
+                                // Show a toast if the file already exists
+                                Toast.makeText(context, "Already exists", Toast.LENGTH_SHORT).show()
+                            } else {
+                                // Save the file to the database if it doesn't exist
+                                viewModelSec.saveJsonFileToDB(
+                                    fileName = "TestData",
+                                    filePath = path,
+                                    title = "Test Anketi"
+                                )
+                                // Show a toast that the file was added successfully
+                                Toast.makeText(context, "Added successfully", Toast.LENGTH_SHORT).show()
+                            }
+
                         }
                     }
                 ) {
                     Text(
                         modifier = Modifier,
                         textAlign = TextAlign.Center,
-                        text = "MediaStore'a Kaydet"
+                        text = "Test Anketi Ekle"
                     )
                 }
 

@@ -38,7 +38,7 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import edu.aibu.ancat.R
 import edu.aibu.ancat.core.navigation.Create
 import edu.aibu.ancat.core.navigation.Home
-import edu.aibu.ancat.core.navigation.Survey
+import edu.aibu.ancat.core.navigation.Analysis
 
 
 data class TopLevelRoute<T : Any>(val route: T, val icon: ImageVector, val label: String)
@@ -57,7 +57,7 @@ fun BottomNavigationBar(navController: NavController, modifier: Modifier = Modif
             label = "Create"
         ),
         TopLevelRoute(
-            route = Survey,
+            route = Analysis,
             icon = ImageVector.vectorResource(R.drawable.ic_questionnaire_24_24),
             label = "Survey"
         ),
