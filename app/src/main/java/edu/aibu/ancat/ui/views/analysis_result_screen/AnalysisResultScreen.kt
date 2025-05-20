@@ -124,7 +124,7 @@ fun AnalysisResultScreen(path: String, title: String) {
                                             verticalAlignment = Alignment.CenterVertically
                                         ) {
                                             Text(
-                                                text = "Puan ${idx + 1}",
+                                                text = "Puan ${5 - idx}",
                                                 fontSize = 12.sp,
                                                 lineHeight = 12.sp,
                                                 modifier = Modifier.weight(1f)
