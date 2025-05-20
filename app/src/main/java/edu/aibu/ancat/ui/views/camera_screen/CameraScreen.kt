@@ -1,5 +1,6 @@
 package edu.aibu.ancat.ui.views.camera_screen
 
+import ProblemImagesDialog
 import android.app.Activity
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -26,8 +27,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
+
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
@@ -37,7 +37,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import coil3.compose.AsyncImage
 import edu.aibu.ancat.core.helper.JsonHelper
-import edu.aibu.ancat.core.helper.imageProccess.MLKitBarcodeScanner
+
 import edu.aibu.ancat.domain.entity.JsonFilesInfoEntity
 import edu.aibu.ancat.ui.views.create_screen.CreateScreenViewModel
 import edu.aibu.ancat.ui.views.test_screen.TestViewModel
@@ -53,15 +53,48 @@ fun AnalyzeScreen() {
     val testViewModel: TestViewModel = hiltViewModel()
     val viewModelSec: CreateScreenViewModel = hiltViewModel()
     val context = LocalContext.current
-    val barcodeResult = remember { mutableStateOf<String?>(null) }
-    val mlKitBarcodeScanner = remember { MLKitBarcodeScanner() }
+    //val barcodeResult = remember { mutableStateOf<String?>(null) }
+    //val mlKitBarcodeScanner = remember { MLKitBarcodeScanner() }
 
-    LaunchedEffect(viewModel.analyzeStatus.value) {
-        val currentStatus = viewModel.analyzeStatus.value
-        if (currentStatus.isNotEmpty()) {
-            Toast.makeText(context, currentStatus, Toast.LENGTH_SHORT).show()
+    val scannerLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.StartIntentSenderForResult(),
+        onResult = { scanner ->
+            viewModel.handleScanResult(scanner)
+        }
+    )
+    LaunchedEffect(viewModel.imageUris) {
+        if (viewModel.autoAnalyzeAfterScan && viewModel.imageUris.isNotEmpty()) {
+            viewModel.analyzeAllImages(context)
         }
     }
+    // Bir resim yeniden çekilmek istendiğinde scanner'ı başlat
+    LaunchedEffect(viewModel.retakeImageTrigger) {
+        if (viewModel.retakeImageTrigger) {
+            viewModel.scanner.getStartScanIntent(context as Activity)
+                .addOnSuccessListener {
+                    scannerLauncher.launch(
+                        IntentSenderRequest.Builder(it).build()
+                    )
+                    // Tetikleyiciyi sıfırla
+                    viewModel.resetRetakeTrigger()
+                }
+                .addOnFailureListener {
+                    Toast.makeText(context, "Tarayıcı başlatılamadı", Toast.LENGTH_SHORT).show()
+                    viewModel.resetRetakeTrigger()
+                }
+        }
+    }
+
+
+    ProblemImagesDialog(
+        showDialog = viewModel.showProblemDialog,
+        problemImages = viewModel.problemImages,
+        //selectedImage = viewModel.selectedProblemImage,
+        onDismiss = { viewModel.closeProblemDialog() },
+        //onRetake = { viewModel.retakeImages() },
+        //onShowImage = { viewModel.showProblemImage(it) },
+        onRetakeSpecificImage = { uri, index -> viewModel.retakeSpecificImage(uri) }
+    )
 
     Scaffold(
         modifier = Modifier.fillMaxSize(),

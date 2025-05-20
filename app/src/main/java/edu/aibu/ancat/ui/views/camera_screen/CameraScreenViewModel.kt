@@ -20,7 +20,7 @@ import com.google.mlkit.vision.barcode.common.Barcode
 import com.google.mlkit.vision.documentscanner.GmsDocumentScannerOptions
 import com.google.mlkit.vision.documentscanner.GmsDocumentScannerOptions.RESULT_FORMAT_JPEG
 import com.google.mlkit.vision.documentscanner.GmsDocumentScannerOptions.RESULT_FORMAT_PDF
-import com.google.mlkit.vision.documentscanner.GmsDocumentScannerOptions.SCANNER_MODE_FULL
+import com.google.mlkit.vision.documentscanner.GmsDocumentScannerOptions.SCANNER_MODE_BASE_WITH_FILTER
 import com.google.mlkit.vision.documentscanner.GmsDocumentScanning
 import com.google.mlkit.vision.documentscanner.GmsDocumentScanningResult
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -31,6 +31,7 @@ import edu.aibu.ancat.data.model.SurveyAnalysisResult
 import edu.aibu.ancat.data.model.SurveyItem
 import edu.aibu.ancat.utils.DocumentConstants.PAGE_HEIGHT
 import edu.aibu.ancat.utils.DocumentConstants.PAGE_WIDTH
+
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import org.opencv.android.Utils
@@ -41,22 +42,22 @@ import org.opencv.core.Scalar
 import org.opencv.imgproc.Imgproc
 import java.io.File
 import java.io.FileOutputStream
-import java.io.InputStream
-import java.io.OutputStream
-import java.text.SimpleDateFormat
-import java.util.Date
-import java.util.Locale
+
 import javax.inject.Inject
+
+import kotlin.math.abs
+import kotlin.math.atan2
 
 @HiltViewModel
 class CameraScreenViewModel @Inject constructor() : ViewModel() {
 
 
-    lateinit var jsonObject: List<SurveyItem>
+    //lateinit var jsonObject: List<SurveyItem>
     private val option = GmsDocumentScannerOptions.Builder()
-        .setScannerMode(SCANNER_MODE_FULL)
+        .setScannerMode(SCANNER_MODE_BASE_WITH_FILTER)
         .setGalleryImportAllowed(true)
         .setResultFormats(RESULT_FORMAT_JPEG, RESULT_FORMAT_PDF)
+        //.setPageLimit() if you want to limit the number of pages
         .build()
 
     val scanner = GmsDocumentScanning.getClient(option)
@@ -68,6 +69,84 @@ class CameraScreenViewModel @Inject constructor() : ViewModel() {
     // Barkod tarama için MLKit tarayıcı
     private val barcodeScanner = MLKitBarcodeScanner()
 
+    // Dialog görünürlüğü için state
+    private val _showProblemDialog = mutableStateOf(false)
+    val showProblemDialog: Boolean get() = _showProblemDialog.value
+
+    // Problemli görüntüler için state
+    private val _problemImages = mutableStateOf<List<ProblemImage>>(emptyList())
+    val problemImages: List<ProblemImage> get() = _problemImages.value
+
+
+
+    // CameraScreenViewModel içinde
+    private val _retakeImageTrigger = mutableStateOf<Boolean>(false)
+    val retakeImageTrigger: Boolean get() = _retakeImageTrigger.value
+
+    private val _imageToRetake = mutableStateOf<Uri?>(null)
+    //val imageToRetake: Uri? get() = _imageToRetake.value
+
+    // CameraScreenViewModel.kt içinde
+// Otomatik analiz bayrağı ekleyelim
+    private val _autoAnalyzeAfterScan = mutableStateOf(false)
+    val autoAnalyzeAfterScan: Boolean get() = _autoAnalyzeAfterScan.value
+
+    fun retakeSpecificImage(uri: Uri) {
+        // Seçilen resmi _imageUris listesinden kaldır
+        val updatedUris = _imageUris.value.toMutableList()
+        val position = updatedUris.indexOf(uri)
+        if (position != -1) {
+            updatedUris.removeAt(position)
+            _imageUris.value = updatedUris
+        }
+
+        // Dialog kapat
+        _showProblemDialog.value = false
+
+        // Otomatik analiz bayrağını aktif et
+        _autoAnalyzeAfterScan.value = true
+
+        // Scanner başlatma tetikleyicisini ayarla
+        _imageToRetake.value = uri
+        _retakeImageTrigger.value = true
+    }
+
+    // Scanner başlatıldıktan sonra tetikleyiciyi sıfırla
+    fun resetRetakeTrigger() {
+        _retakeImageTrigger.value = false
+        _imageToRetake.value = null
+    }
+
+    fun handleScanResult(scanner: ActivityResult) {
+        if (scanner.resultCode == RESULT_OK) {
+            val result = GmsDocumentScanningResult.fromActivityResultIntent(scanner.data)
+            if (result != null) {
+                // Mevcut resimleri koru ve yenilerini ekle
+                val currentUris = _imageUris.value.toMutableList()
+                val newUris = result.pages?.map { it.imageUri } ?: emptyList()
+                currentUris.addAll(newUris)
+                _imageUris.value = currentUris
+                analyzeStatus.value = "Belgeler tarandı, analiz için hazır"
+
+                // Eğer otomatik analiz bayrağı aktifse tarama sonrası hemen analiz yap
+                if (_autoAnalyzeAfterScan.value) {
+                    _autoAnalyzeAfterScan.value = false
+                    // Kontekst gerektiği için bunu dışarıdan tetikleyeceğiz
+                }
+            }
+        }
+    }
+
+    // Dialog kapatma
+    fun closeProblemDialog() {
+        _showProblemDialog.value = false
+    }
+
+
+
+
+
+
     // Barkod analizi durum bilgisi
     val analyzeProgress = mutableFloatStateOf(0f)
     val isAnalyzing = mutableStateOf(false)
@@ -76,17 +155,7 @@ class CameraScreenViewModel @Inject constructor() : ViewModel() {
     // Tespit edilen barkod verilerini tutacak liste
     private val _detectedBarcodes = mutableStateOf<List<BarcodeData>>(emptyList())
 
-    fun handleScanResult(scanner: ActivityResult) {
-        if (scanner.resultCode == RESULT_OK) {
-            val result = GmsDocumentScanningResult.fromActivityResultIntent(scanner.data)
-            if (result != null) {
-                _imageUris.value = result.pages?.map { it.imageUri } ?: emptyList()
-                analyzeStatus.value = "Belgeler tarandı, analiz için hazır"
-            }
-        }
-    }
 
-    // Tüm resimlerdeki barkodları analiz et
     fun analyzeAllImages(context: Context) {
         if (_imageUris.value.isEmpty()) {
             analyzeStatus.value = "Analiz edilecek resim bulunamadı"
@@ -100,6 +169,8 @@ class CameraScreenViewModel @Inject constructor() : ViewModel() {
         val tempBarcodes = mutableListOf<BarcodeData>()
         val barcodeBounds = mutableListOf<Rect?>()
         var processedCount = 0
+        val problemImages = mutableListOf<ProblemImage>()
+        val successfullyAnalyzedUris = mutableListOf<Uri>() // Başarıyla analiz edilen URI'ler
 
         // Her bir resim için barkod taraması yap
         _imageUris.value.forEachIndexed { index, uri ->
@@ -107,142 +178,264 @@ class CameraScreenViewModel @Inject constructor() : ViewModel() {
             analyzeStatus.value = progressMessage
 
             val barcodeResult = mutableStateOf<String?>(null)
+            val currentBarcodeBounds = mutableListOf<Rect?>()
+            val currentBarcodes = mutableListOf<BarcodeData>()
 
             barcodeScanner.processImageFromUri(
                 context = context,
                 imageUri = uri,
                 result = barcodeResult,
                 onComplete = { success, barcodes, savedImagePath ->
-
                     processedCount++
                     analyzeProgress.floatValue = processedCount.toFloat() / _imageUris.value.size
 
-
-                    if (success && barcodes.isNotEmpty()) {
+                    // Başarısız tarama veya yetersiz barkod sayısı kontrolü
+                    if (!success || barcodes.size < 2) {
+                        problemImages.add(
+                            ProblemImage(
+                                uri = uri,
+                                reason = if (!success) "Tarama başarısız" else "Yetersiz QR kod (${barcodes.size})",
+                                index = index
+                            )
+                        )
+                        analyzeStatus.value = "Bu resimde yeterli QR kod tespit edilemedi"
+                    } else {
+                        // QR içeriği kontrolü
+                        var validBarcodeCount = 0
+                        var hasSkewedQRCode = false
+                        currentBarcodeBounds.clear()
+                        currentBarcodes.clear()
 
                         barcodes.forEach { barcode ->
                             try {
-                                val barcodeValue = barcode.rawValue ?: "{}"
-                                val jsonData = Json.decodeFromString<QrPayload>(barcodeValue)
+                                // QR kodunun eğimini kontrol et
+                                val cornerPoints = barcode.cornerPoints
+                                if (cornerPoints != null && cornerPoints.size >= 4) {
+                                    // Köşe noktalarını kullanarak eğimi hesapla
+                                    val isSkewed = isQRCodeSkewed(cornerPoints)
+                                    if (isSkewed) {
+                                        hasSkewedQRCode = true
+                                    }
+                                }
 
+                                val jsonData = barcode.displayValue?.let { content ->
+                                    Json.decodeFromString<QrPayload>(content)
+                                }
 
-//                                println("Bulunan barkod: format=${barcode.format}, data=$barcodeValue")
-//                                println("barkod noktaları: ${barcode.cornerPoints?.joinToString(",")}")
-//                                println(" barkod boindingBox" +barcode.boundingBox)
-
-                                val questionJson =
-                                    jsonHelper.readJsonFile(jsonData.jsonFileName, context)
-                                jsonObject = Json.decodeFromString<List<SurveyItem>>(questionJson)
-//                                println((jsonObject[1].questions[0] as Question.MultipleChoiceQuestion).marks)
-
-                                barcodeBounds.add(
-                                    barcode.boundingBox
-                                )
-
-                                tempBarcodes.add(
+                                currentBarcodeBounds.add(barcode.boundingBox)
+                                currentBarcodes.add(
                                     BarcodeData(
-                                        content = barcodeValue,
+                                        content = barcode.displayValue ?: "",
                                         format = getBarcodeFormatName(barcode.format),
                                         imageUri = uri,
                                         processedImagePath = savedImagePath,
                                         jsonData = jsonData,
-                                        barcode = barcode,
+                                        barcode = barcode
                                     )
                                 )
-
-                                analyzeStatus.value = "${barcodes.size} barkod tespit edildi"
+                                validBarcodeCount++
                             } catch (e: Exception) {
-                                Log.e(
-                                    "AnalyzeScreenViewModel",
-                                    "Barkod verisi işlenirken hata: ${e.message}"
-                                )
-                                analyzeStatus.value = "Barkod verisi işlenirken hata: ${e.message}"
+                                analyzeStatus.value = "Bu QR kod geçerli bir JSON verisi içermiyor"
+                                Log.e("BarcodeScanner", "JSON parse hatası", e)
                             }
                         }
 
+                        if (hasSkewedQRCode) {
+                            // Eğik QR kodu tespit edildiğinde problem olarak işaretle
+                            problemImages.add(
+                                ProblemImage(
+                                    uri = uri,
+                                    reason = "QR kodlar düz değil, lütfen kamerayı dik tutarak yeniden çekin",
+                                    index = index
+                                )
+                            )
+                            analyzeStatus.value = "QR kodlar eğik çekilmiş, düz çekim yapınız"
+                        } else if (validBarcodeCount < 2) {
+                            problemImages.add(
+                                ProblemImage(
+                                    uri = uri,
+                                    reason = "Geçerli QR kod sayısı yetersiz",
+                                    index = index
+                                )
+                            )
+                            analyzeStatus.value = "Bu resimde geçerli QR kod sayısı yetersiz"
+                        } else {
+                            analyzeStatus.value = "$validBarcodeCount geçerli QR kod tespit edildi"
 
-                    } else {
-                        analyzeStatus.value = "Bu resimde barkod tespit edilemedi"
+                            // JSON verilerini işle ve barkodları ekle
+                            tempBarcodes.addAll(currentBarcodes)
+                            barcodeBounds.addAll(currentBarcodeBounds)
+
+                            // Barkod verileri işleme
+                            try {
+                                val jsonObject = jsonHelper.readJsonFile(
+                                    currentBarcodes[0].jsonData!!.jsonFileName,
+                                    context
+                                )
+                                val decodedObject = Json.decodeFromString<List<SurveyItem>>(jsonObject)
+
+                                // Barkod verilerini işle
+                                processDetectedData(
+                                    barcodes = currentBarcodes,
+                                    context = context,
+                                    uri = uri,
+                                    jsonObject = decodedObject,
+                                    barcodeBounds = barcodeBounds.toMutableList()
+                                )
+
+                                // Başarıyla analiz edilen URI'leri listeye ekle
+                                successfullyAnalyzedUris.add(uri)
+                            } catch (e: Exception) {
+                                problemImages.add(
+                                    ProblemImage(
+                                        uri = uri,
+                                        reason = "JSON dosyası okunamadı: ${e.message}",
+                                        index = index
+                                    )
+                                )
+                                analyzeStatus.value = "JSON dosyası okunamadı"
+                                Log.e("BarcodeScanner", "JSON dosyası okuma hatası", e)
+                            }
+                        }
                     }
 
                     // Tüm resimler işlendiyse sonuçları güncelle
                     if (processedCount >= _imageUris.value.size) {
+                        // Başarıyla analiz edilen resimleri listeden kaldır
+                        if (successfullyAnalyzedUris.isNotEmpty()) {
+                            val remainingUris = _imageUris.value.toMutableList()
+                            remainingUris.removeAll(successfullyAnalyzedUris)
+                            _imageUris.value = remainingUris
+
+                            // Başarıyla analiz edilen resimleri problem listesinden de kaldır
+                            val updatedProblemImages = problemImages.filter { problemImage ->
+                                !successfullyAnalyzedUris.contains(problemImage.uri)
+                            }
+                            problemImages.clear()
+                            problemImages.addAll(updatedProblemImages)
+                        }
+
                         _detectedBarcodes.value = tempBarcodes
                         isAnalyzing.value = false
 
                         if (tempBarcodes.isEmpty()) {
-                            analyzeStatus.value = "Hiç barkod tespit edilemedi"
+                            analyzeStatus.value = "Hiç QR kod tespit edilemedi"
+                            showProblemImagesDialog( problemImages)
+                        } else if (problemImages.isNotEmpty()) {
+                            analyzeStatus.value = "Bazı resimlerde QR kod tespit edilemedi"
+                            showProblemImagesDialog( problemImages)
                         } else {
-                            analyzeStatus.value =
-                                "Analiz tamamlandı, ${tempBarcodes.size} barkod bulundu"
-                            processDetectedData(
-                                tempBarcodes,
-                                context,
-                                uri,
-                                jsonObject,
-                                barcodeBounds
-                            )
+                            analyzeStatus.value = "Analiz tamamlandı, ${tempBarcodes.size} QR kod bulundu"
                         }
                     }
                 }
             )
         }
     }
+    // QR kodunun eğimli olup olmadığını kontrol et
+    private fun isQRCodeSkewed(cornerPoints: Array<android.graphics.Point>): Boolean {
+        if (cornerPoints.size < 4) return false
+
+        // Yatay kenarların eğimini hesapla
+        val topEdgeAngle = calculateAngle(cornerPoints[0], cornerPoints[1])
+        val bottomEdgeAngle = calculateAngle(cornerPoints[3], cornerPoints[2])
+
+        // Dikey kenarların eğimini hesapla
+        val leftEdgeAngle = calculateAngle(cornerPoints[0], cornerPoints[3])
+        val rightEdgeAngle = calculateAngle(cornerPoints[1], cornerPoints[2])
+
+        // Kabul edilebilir eğim açısı (derece)
+        val maxAllowedAngle = 1.85
+
+        // Yatay kenarlar yaklaşık olarak yatay (0 derece), dikey kenarlar yaklaşık olarak dikey (90 derece) olmalı
+        val isHorizontalSkewed = abs(topEdgeAngle) > maxAllowedAngle || Math.abs(bottomEdgeAngle) > maxAllowedAngle
+        val isVerticalSkewed = abs(leftEdgeAngle - 90) > maxAllowedAngle || abs(rightEdgeAngle - 90) > maxAllowedAngle
+
+        return isHorizontalSkewed || isVerticalSkewed
+    }
+
+    // İki nokta arasındaki çizginin yatay eksene göre açısını hesapla (derece)
+    private fun calculateAngle(p1: android.graphics.Point, p2: android.graphics.Point): Double {
+        val dx = p2.x - p1.x
+        val dy = p2.y - p1.y
+        val angleRadians = atan2(dy.toDouble(), dx.toDouble())
+        return Math.toDegrees(angleRadians)
+    }
+
+    // Problem resim data class
+    data class ProblemImage(
+        val uri: Uri,
+        val reason: String,
+        val index: Int
+    )
+
+    // Compose Dialog
+    fun showProblemImagesDialog( problemImages: List<ProblemImage>) {
+        if (problemImages.isEmpty()) {
+            // Problem kalmadıysa dialog gösterme
+            _showProblemDialog.value = false
+            return
+        }
+
+        // Compose Dialog için UI state'ini güncelleyin
+        _showProblemDialog.value = true
+        _problemImages.value = problemImages
+    }
 
     // MediaStore'a taranan görüntüleri kaydetme fonksiyonu
-    fun saveScannedImagesToMediaStore(context: Context) {
-        _imageUris.value.forEach { uri ->
-            saveImageToMediaStore(context, uri)
-        }
-    }
+//    fun saveScannedImagesToMediaStore(context: Context) {
+//        _imageUris.value.forEach { uri ->
+//            saveImageToMediaStore(context, uri)
+//        }
+//    }
 
-    // Bir Uri'yi MediaStore'a kaydetme
-    private fun saveImageToMediaStore(context: Context, imageUri: Uri) {
-        val contentResolver = context.contentResolver
-        val timestamp = SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault()).format(Date())
-        val fileName = "ANCAT_SCAN_$timestamp.jpg"
-
-        val inputStream: InputStream? = contentResolver.openInputStream(imageUri)
-        if (inputStream != null) {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-                val contentValues = ContentValues().apply {
-                    put(MediaStore.Images.Media.DISPLAY_NAME, fileName)
-                    put(MediaStore.Images.Media.MIME_TYPE, "image/jpeg")
-                    put(MediaStore.Images.Media.RELATIVE_PATH, "Pictures/Ancat")
-                }
-
-                val uri = contentResolver.insert(
-                    MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
-                    contentValues
-                )
-                uri?.let { outputUri ->
-                    val outputStream: OutputStream? = contentResolver.openOutputStream(outputUri)
-                    outputStream?.use { output ->
-                        inputStream.copyTo(output)
-                    }
-                }
-            } else {
-                // API 29'dan düşük sürümler için klasik dosya sistemini kullan
-                val imagesDir = File(context.getExternalFilesDir(null), "Ancat")
-                if (!imagesDir.exists()) imagesDir.mkdirs()
-
-                val file = File(imagesDir, fileName)
-                val outputStream = FileOutputStream(file)
-                outputStream.use { output ->
-                    inputStream.copyTo(output)
-                }
-
-                // MediaStore'a ekle
-                val contentValues = ContentValues().apply {
-                    put(MediaStore.Images.Media.DISPLAY_NAME, fileName)
-                    put(MediaStore.Images.Media.MIME_TYPE, "image/jpeg")
-                    put(MediaStore.Images.Media.DATA, file.absolutePath)
-                }
-                contentResolver.insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, contentValues)
-            }
-            inputStream.close()
-        }
-    }
+//    // Bir Uri'yi MediaStore'a kaydetme
+//    private fun saveImageToMediaStore(context: Context, imageUri: Uri) {
+//        val contentResolver = context.contentResolver
+//        val timestamp = SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault()).format(Date())
+//        val fileName = "ANCAT_SCAN_$timestamp.jpg"
+//
+//        val inputStream: InputStream? = contentResolver.openInputStream(imageUri)
+//        if (inputStream != null) {
+//            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+//                val contentValues = ContentValues().apply {
+//                    put(MediaStore.Images.Media.DISPLAY_NAME, fileName)
+//                    put(MediaStore.Images.Media.MIME_TYPE, "image/jpeg")
+//                    put(MediaStore.Images.Media.RELATIVE_PATH, "Pictures/Ancat")
+//                }
+//
+//                val uri = contentResolver.insert(
+//                    MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
+//                    contentValues
+//                )
+//                uri?.let { outputUri ->
+//                    val outputStream: OutputStream? = contentResolver.openOutputStream(outputUri)
+//                    outputStream?.use { output ->
+//                        inputStream.copyTo(output)
+//                    }
+//                }
+//            } else {
+//                // API 29'dan düşük sürümler için klasik dosya sistemini kullan
+//                val imagesDir = File(context.getExternalFilesDir(null), "Ancat")
+//                if (!imagesDir.exists()) imagesDir.mkdirs()
+//
+//                val file = File(imagesDir, fileName)
+//                val outputStream = FileOutputStream(file)
+//                outputStream.use { output ->
+//                    inputStream.copyTo(output)
+//                }
+//
+//                // MediaStore'a ekle
+//                val contentValues = ContentValues().apply {
+//                    put(MediaStore.Images.Media.DISPLAY_NAME, fileName)
+//                    put(MediaStore.Images.Media.MIME_TYPE, "image/jpeg")
+//                    put(MediaStore.Images.Media.DATA, file.absolutePath)
+//                }
+//                contentResolver.insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, contentValues)
+//            }
+//            inputStream.close()
+//        }
+//    }
 
 //    // MediaStore'dan görüntüleri al
 //    fun getImagesFromMediaStore(context: Context): List<Uri> {
@@ -311,18 +504,25 @@ class CameraScreenViewModel @Inject constructor() : ViewModel() {
         jsonObject: List<SurveyItem>,
         barcodeBounds: MutableList<Rect?>,
     ) {
-        var result : List<SurveyAnalysisResult>
+        var result: List<SurveyAnalysisResult>
 
-        if(JsonHelper().checkFileExists(fileName = "${barcodes[0].jsonData!!.jsonFileName}_result" , context = context)){
+        if (JsonHelper().checkFileExists(
+                fileName = "${barcodes[0].jsonData!!.jsonFileName}_result",
+                context = context
+            )
+        ) {
 
-            val jsonResult = JsonHelper().readJsonFile(fileName = "${barcodes[0].jsonData!!.jsonFileName}_result" , context = context)
+            val jsonResult = JsonHelper().readJsonFile(
+                fileName = "${barcodes[0].jsonData!!.jsonFileName}_result",
+                context = context
+            )
             result = Json.decodeFromString<List<SurveyAnalysisResult>>(jsonResult)
 
-        }else{
+        } else {
             result = emptyList()
         }
 
-        val resultBitmap = drawBoxOnImage(context, uri, barcodes, jsonObject, barcodeBounds,result)
+        val resultBitmap = drawBoxOnImage(context, uri, barcodes, jsonObject, barcodeBounds, result)
         saveAndGallery(context, resultBitmap!!)
 
 
@@ -407,13 +607,24 @@ class CameraScreenViewModel @Inject constructor() : ViewModel() {
                     when (jsonObject[i].type) {
 
                         "1" -> {
-                            newResult  =  scanRatingQuestion(k, x, left, y, topValue, mat,newResult,i ,l )
+                            newResult =
+                                scanRatingQuestion(k, x, left, y, topValue, mat, newResult, i, l)
 
 
                         }
 
                         "2" -> {
-                           newResult=  scanMultiChoiceQuestion(k, x, y, mat, topValue, left, newResult, i, l)
+                            newResult = scanMultiChoiceQuestion(
+                                k,
+                                x,
+                                y,
+                                mat,
+                                topValue,
+                                left,
+                                newResult,
+                                i,
+                                l
+                            )
                         }
 
                         else -> {
@@ -423,7 +634,11 @@ class CameraScreenViewModel @Inject constructor() : ViewModel() {
                     }
                     val resultBitmap = createBitmap(mat.cols(), mat.rows())
                     Utils.matToBitmap(mat, resultBitmap)
-                    JsonHelper().saveJsonToFile(Json.encodeToString(newResult), context = context, fileName = "${barcodes[0].jsonData!!.jsonFileName}_result" )
+                    JsonHelper().saveJsonToFile(
+                        Json.encodeToString(newResult),
+                        context = context,
+                        fileName = "${barcodes[0].jsonData!!.jsonFileName}_result"
+                    )
 
                     return resultBitmap
 
@@ -431,12 +646,23 @@ class CameraScreenViewModel @Inject constructor() : ViewModel() {
                 } else {
                     when (jsonObject[i].type) {
                         "1" -> {
-                           newResult =  scanRatingQuestion(k, x, left, y, topValue, mat, newResult, i, l)
+                            newResult =
+                                scanRatingQuestion(k, x, left, y, topValue, mat, newResult, i, l)
 
                         }
 
                         "2" -> {
-                            newResult =  scanMultiChoiceQuestion(k, x, y, mat, topValue, left, newResult,i,l)
+                            newResult = scanMultiChoiceQuestion(
+                                k,
+                                x,
+                                y,
+                                mat,
+                                topValue,
+                                left,
+                                newResult,
+                                i,
+                                l
+                            )
                         }
 
                         else -> {
@@ -451,12 +677,16 @@ class CameraScreenViewModel @Inject constructor() : ViewModel() {
         }
 
 
-
-
         val resultBitmap = createBitmap(mat.cols(), mat.rows())
         Utils.matToBitmap(mat, resultBitmap)
 
-        println(JsonHelper().saveJsonToFile(Json.encodeToString(newResult), context = context, fileName = "${barcodes[0].jsonData!!.jsonFileName}_result" ))
+        println(
+            JsonHelper().saveJsonToFile(
+                Json.encodeToString(newResult),
+                context = context,
+                fileName = "${barcodes[0].jsonData!!.jsonFileName}_result"
+            )
+        )
         return resultBitmap
     }
 
@@ -476,8 +706,8 @@ class CameraScreenViewModel @Inject constructor() : ViewModel() {
         var newResult = result.toMutableList()
         var controlList = false
         var controlInt = 0
-        result.forEachIndexed { idx , it ->
-            if ( it.questionIdx == l && it.sectionIdx == i1){
+        result.forEachIndexed { idx, it ->
+            if (it.questionIdx == l && it.sectionIdx == i1) {
                 analysisList = it.analysis.toMutableList()
                 controlList = true
                 controlInt = idx
@@ -497,7 +727,7 @@ class CameraScreenViewModel @Inject constructor() : ViewModel() {
             )
             val roi = Mat(mat, roiRect)
             val grayROI = Mat()
-            val newList = mutableListOf<SurveyAnalysisResult>()
+
             Imgproc.cvtColor(roi, grayROI, Imgproc.COLOR_BGR2GRAY)
 
             // Eşikleme (karanlık alanları tespit etmek için)
@@ -524,14 +754,13 @@ class CameraScreenViewModel @Inject constructor() : ViewModel() {
             )
 
 
-            if (isFilled){
+            if (isFilled) {
                 analysisList[i] += 1
             }
 
 
-
         }
-        if (controlList){
+        if (controlList) {
             newResult[controlInt] = SurveyAnalysisResult(
                 sectionIdx = i1,
                 questionIdx = l,
@@ -540,14 +769,16 @@ class CameraScreenViewModel @Inject constructor() : ViewModel() {
 
             )
 
-        }else{
-            newResult.add(SurveyAnalysisResult(
-                sectionIdx = i1,
-                questionIdx = l,
-                type = "1",
-                analysis = analysisList
+        } else {
+            newResult.add(
+                SurveyAnalysisResult(
+                    sectionIdx = i1,
+                    questionIdx = l,
+                    type = "1",
+                    analysis = analysisList
 
-            ))
+                )
+            )
         }
         return newResult
 
@@ -569,8 +800,8 @@ class CameraScreenViewModel @Inject constructor() : ViewModel() {
         var newResult = result.toMutableList()
         var controlList = false
         var controlInt = 0
-        result.forEachIndexed { idx , it ->
-            if ( it.questionIdx == l && it.sectionIdx == i1){
+        result.forEachIndexed { idx, it ->
+            if (it.questionIdx == l && it.sectionIdx == i1) {
                 analysisList = it.analysis.toMutableList()
                 controlList = true
                 controlInt = idx
@@ -578,7 +809,7 @@ class CameraScreenViewModel @Inject constructor() : ViewModel() {
         }
 
 
-        k.marks.forEachIndexed {idx , it ->
+        k.marks.forEachIndexed { idx, it ->
 
             val topLeft = Point(438.0 * x + left, (it - 10) * y + topValue)
             val bottomRight = Point(450 * x + left, (it + 2) * y + topValue)
@@ -614,12 +845,12 @@ class CameraScreenViewModel @Inject constructor() : ViewModel() {
                 ), // Yeşil = dolu, Kırmızı = boş
                 2
             )
-            if (isFilled){
+            if (isFilled) {
                 analysisList[idx] += 1
             }
 
         }
-        if (controlList){
+        if (controlList) {
             newResult[controlInt] = SurveyAnalysisResult(
                 sectionIdx = i1,
                 questionIdx = l,
@@ -628,14 +859,16 @@ class CameraScreenViewModel @Inject constructor() : ViewModel() {
 
             )
 
-        }else{
-            newResult.add(SurveyAnalysisResult(
-                sectionIdx = i1,
-                questionIdx = l,
-                type = "2",
-                analysis = analysisList
+        } else {
+            newResult.add(
+                SurveyAnalysisResult(
+                    sectionIdx = i1,
+                    questionIdx = l,
+                    type = "2",
+                    analysis = analysisList
 
-            ))
+                )
+            )
         }
         return newResult
     }
