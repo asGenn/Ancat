@@ -53,14 +53,27 @@ class CameraScreenViewModel @Inject constructor() : ViewModel() {
 
 
     //lateinit var jsonObject: List<SurveyItem>
-    private val option = GmsDocumentScannerOptions.Builder()
+    // CameraScreenViewModel.kt içinde
+// Standart tarama için seçenekler (sayfa limiti yok)
+    private val standardOption = GmsDocumentScannerOptions.Builder()
         .setScannerMode(SCANNER_MODE_BASE_WITH_FILTER)
         .setGalleryImportAllowed(true)
         .setResultFormats(RESULT_FORMAT_JPEG, RESULT_FORMAT_PDF)
-        //.setPageLimit() if you want to limit the number of pages
         .build()
 
-    val scanner = GmsDocumentScanning.getClient(option)
+    // Yeniden çekim için seçenekler (sayfa limiti 1)
+    private val retakeOption = GmsDocumentScannerOptions.Builder()
+        .setScannerMode(SCANNER_MODE_BASE_WITH_FILTER)
+        .setGalleryImportAllowed(true)
+        .setResultFormats(RESULT_FORMAT_JPEG, RESULT_FORMAT_PDF)
+        .setPageLimit(1) // Sayfa sınırını 1 olarak ayarla
+        .build()
+
+    // İki ayrı scanner nesnesi oluştur
+    val scanner = GmsDocumentScanning.getClient(standardOption)
+    val retakeScanner = GmsDocumentScanning.getClient(retakeOption)
+
+
     val jsonHelper = JsonHelper()
 
     private val _imageUris = mutableStateOf<List<Uri>>(emptyList())
@@ -92,7 +105,7 @@ class CameraScreenViewModel @Inject constructor() : ViewModel() {
     val autoAnalyzeAfterScan: Boolean get() = _autoAnalyzeAfterScan.value
 
     fun retakeSpecificImage(uri: Uri) {
-        // Seçilen resmi _imageUris listesinden kaldır
+        // Seçilen resmi listeden kaldır
         val updatedUris = _imageUris.value.toMutableList()
         val position = updatedUris.indexOf(uri)
         if (position != -1) {
@@ -106,11 +119,10 @@ class CameraScreenViewModel @Inject constructor() : ViewModel() {
         // Otomatik analiz bayrağını aktif et
         _autoAnalyzeAfterScan.value = true
 
-        // Scanner başlatma tetikleyicisini ayarla
+        // Yeniden çekim için tetikleyiciyi ayarla
         _imageToRetake.value = uri
         _retakeImageTrigger.value = true
     }
-
     // Scanner başlatıldıktan sonra tetikleyiciyi sıfırla
     fun resetRetakeTrigger() {
         _retakeImageTrigger.value = false

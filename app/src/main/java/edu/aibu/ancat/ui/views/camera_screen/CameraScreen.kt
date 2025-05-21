@@ -67,10 +67,11 @@ fun AnalyzeScreen() {
             viewModel.analyzeAllImages(context)
         }
     }
-    // Bir resim yeniden çekilmek istendiğinde scanner'ı başlat
+
     LaunchedEffect(viewModel.retakeImageTrigger) {
         if (viewModel.retakeImageTrigger) {
-            viewModel.scanner.getStartScanIntent(context as Activity)
+            // Sayfa limitli scanner'ı kullan
+            viewModel.retakeScanner.getStartScanIntent(context as Activity)
                 .addOnSuccessListener {
                     scannerLauncher.launch(
                         IntentSenderRequest.Builder(it).build()
