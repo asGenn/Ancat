@@ -102,7 +102,7 @@ class MultipleChoiceQuestions @Inject constructor(
                 maxWidth = PAGE_WIDTH - MARGIN * 3
             )
 
-            textList.forEach { text ->
+            textList.forEachIndexed { idx, text ->
                 val textCenter = currentCursor + (CELL_HEIGHT + paintFactory.text().textSize) / 2
                 currentCursor = canvasContentDrawer.writeText(
                     canvas = canvas,
@@ -111,7 +111,7 @@ class MultipleChoiceQuestions @Inject constructor(
                     xCursor = PAGE_WIDTH - MARGIN * 17,
                     yCursor = textCenter
                 )
-                callback(currentCursor)
+                if (idx == 0) callback(currentCursor)
             }
         }
         return currentCursor + MARGIN
