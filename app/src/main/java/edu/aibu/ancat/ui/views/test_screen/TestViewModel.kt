@@ -59,17 +59,6 @@ class TestViewModel @Inject constructor() : ViewModel() {
                   "Klasik"
                 ],
                 "marks": []
-              },
-              {
-                "type": "edu.aibu.ancat.data.model.Question.MultipleChoiceQuestion",
-                "question": "Hangi yemek türünü daha çok seversiniz?",
-                "options": [
-                  "Türk Mutfağı",
-                  "İtalyan Mutfağı",
-                  "Meksika Mutfağı",
-                  "Japon Mutfağı"
-                ],
-                "marks": []
               }
             ]
           },
@@ -89,16 +78,6 @@ class TestViewModel @Inject constructor() : ViewModel() {
               {
                 "type": "edu.aibu.ancat.data.model.Question.RatingQuestion",
                 "question": "Hizmet kalitemizi 1 ile 5 arasında nasıl değerlendirirsiniz?",
-                "mark" : 0
-              },
-              {
-                "type": "edu.aibu.ancat.data.model.Question.RatingQuestion",
-                "question": "Mobil uygulamamızın hızını 1 ile 5 arasında puanlayın.",
-                "mark" : 0
-              },
-              {
-                "type": "edu.aibu.ancat.data.model.Question.RatingQuestion",
-                "question": "Destek ekibimizin sorunlarınıza çözüm bulma hızını 1 ile 5 arasında değerlendirin.",
                 "mark" : 0
               }
             ]

@@ -21,6 +21,7 @@ import com.google.mlkit.vision.documentscanner.GmsDocumentScannerOptions
 import com.google.mlkit.vision.documentscanner.GmsDocumentScannerOptions.RESULT_FORMAT_JPEG
 import com.google.mlkit.vision.documentscanner.GmsDocumentScannerOptions.RESULT_FORMAT_PDF
 import com.google.mlkit.vision.documentscanner.GmsDocumentScannerOptions.SCANNER_MODE_BASE_WITH_FILTER
+import com.google.mlkit.vision.documentscanner.GmsDocumentScannerOptions.SCANNER_MODE_FULL
 import com.google.mlkit.vision.documentscanner.GmsDocumentScanning
 import com.google.mlkit.vision.documentscanner.GmsDocumentScanningResult
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -56,14 +57,14 @@ class CameraScreenViewModel @Inject constructor() : ViewModel() {
     // CameraScreenViewModel.kt içinde
 // Standart tarama için seçenekler (sayfa limiti yok)
     private val standardOption = GmsDocumentScannerOptions.Builder()
-        .setScannerMode(SCANNER_MODE_BASE_WITH_FILTER)
+        .setScannerMode(SCANNER_MODE_FULL )
         .setGalleryImportAllowed(true)
         .setResultFormats(RESULT_FORMAT_JPEG, RESULT_FORMAT_PDF)
         .build()
 
     // Yeniden çekim için seçenekler (sayfa limiti 1)
     private val retakeOption = GmsDocumentScannerOptions.Builder()
-        .setScannerMode(SCANNER_MODE_BASE_WITH_FILTER)
+        .setScannerMode(SCANNER_MODE_FULL)
         .setGalleryImportAllowed(true)
         .setResultFormats(RESULT_FORMAT_JPEG, RESULT_FORMAT_PDF)
         .setPageLimit(1) // Sayfa sınırını 1 olarak ayarla
@@ -352,12 +353,15 @@ class CameraScreenViewModel @Inject constructor() : ViewModel() {
         val topEdgeAngle = calculateAngle(cornerPoints[0], cornerPoints[1])
         val bottomEdgeAngle = calculateAngle(cornerPoints[3], cornerPoints[2])
 
+
         // Dikey kenarların eğimini hesapla
         val leftEdgeAngle = calculateAngle(cornerPoints[0], cornerPoints[3])
         val rightEdgeAngle = calculateAngle(cornerPoints[1], cornerPoints[2])
 
+        println( " $topEdgeAngle $bottomEdgeAngle $leftEdgeAngle $rightEdgeAngle")
+
         // Kabul edilebilir eğim açısı (derece)
-        val maxAllowedAngle = 1.85
+        val maxAllowedAngle = 2
 
         // Yatay kenarlar yaklaşık olarak yatay (0 derece), dikey kenarlar yaklaşık olarak dikey (90 derece) olmalı
         val isHorizontalSkewed = abs(topEdgeAngle) > maxAllowedAngle || Math.abs(bottomEdgeAngle) > maxAllowedAngle
@@ -535,7 +539,7 @@ class CameraScreenViewModel @Inject constructor() : ViewModel() {
         }
 
         val resultBitmap = drawBoxOnImage(context, uri, barcodes, jsonObject, barcodeBounds, result)
-        saveAndGallery(context, resultBitmap!!)
+        //saveAndGallery(context, resultBitmap!!)
 
 
     }
@@ -576,6 +580,39 @@ class CameraScreenViewModel @Inject constructor() : ViewModel() {
         Utils.bitmapToMat(bitmap, mat)
         return mat
     }
+    /**
+     * İki QR koduna bakarak belgenin X ve Y eksenindeki ötelemesini hesaplar.
+     *
+     * @param qrTL           Sol-üst QR kodunun bounding Rect’i (piksel cinsinden)
+     * @param qrBR           Sağ-alt QR kodunun bounding Rect’i (piksel cinsinden)
+
+     * @return Pair(width,height) Belge düzleminin kameraya göre ötelemesi, birim cinsinden
+     */
+    fun computeTranslationXY(
+        qrTL: Rect,
+        qrBR: Rect,
+
+    ): Pair<Int, Int> {
+
+        val qrTLHeight  = qrTL.bottom - qrTL.top
+        val qrTLWidth = qrTL.right - qrTL.left
+        val qrBRHeight  = qrBR.bottom - qrBR.top
+        val qrBRWidth = qrBR.right - qrBR.left
+
+
+        val width =  qrBRWidth - qrTLWidth
+        val height =  qrBRHeight - qrTLHeight
+
+
+
+
+
+
+
+        return Pair(width, height)
+    }
+
+
 
     fun drawBoxOnImage(
         context: Context,
@@ -593,6 +630,15 @@ class CameraScreenViewModel @Inject constructor() : ViewModel() {
         var photoWidth = 0
         var topValue = 0
 
+        val translation : Pair<Int, Int> = if (barcodeBounds[0]!!.top < barcodeBounds[1]!!.top) {
+
+            computeTranslationXY(qrTL =barcodeBounds[0]!! , qrBR = barcodeBounds[1]!! )
+
+
+        }else {
+            computeTranslationXY(qrTL =barcodeBounds[1]!! , qrBR = barcodeBounds[0]!! )
+        }
+
         val top = minOf(barcodeBounds[0]!!.top, barcodeBounds[1]!!.top)
         val bottom = maxOf(barcodeBounds[0]!!.bottom, barcodeBounds[1]!!.bottom)
         val left = minOf(barcodeBounds[0]!!.left, barcodeBounds[1]!!.left)
@@ -607,6 +653,7 @@ class CameraScreenViewModel @Inject constructor() : ViewModel() {
         if (mat.channels() == 1) {
             Imgproc.cvtColor(mat, mat, Imgproc.COLOR_GRAY2RGB)
         }
+        println("barcodeBounds $barcodeBounds")
         val barcode = barcodes[0]
         val barcodeFirstSectionIdx = barcode.jsonData?.firstQuestion?.sectionIndex ?: 0
         val barcodeLastSectionIdx = barcode.jsonData?.lastQuestion?.sectionIndex ?: 0
@@ -620,7 +667,7 @@ class CameraScreenViewModel @Inject constructor() : ViewModel() {
 
                         "1" -> {
                             newResult =
-                                scanRatingQuestion(k, x, left, y, topValue, mat, newResult, i, l)
+                                scanRatingQuestion(k, x, left, y, topValue, mat, newResult, i, l, translation)
 
 
                         }
@@ -635,7 +682,7 @@ class CameraScreenViewModel @Inject constructor() : ViewModel() {
                                 left,
                                 newResult,
                                 i,
-                                l
+                                l, translation
                             )
                         }
 
@@ -659,7 +706,18 @@ class CameraScreenViewModel @Inject constructor() : ViewModel() {
                     when (jsonObject[i].type) {
                         "1" -> {
                             newResult =
-                                scanRatingQuestion(k, x, left, y, topValue, mat, newResult, i, l)
+                                scanRatingQuestion(
+                                    k,
+                                    x,
+                                    left,
+                                    y,
+                                    topValue,
+                                    mat,
+                                    newResult,
+                                    i,
+                                    l,
+                                    translation
+                                )
 
                         }
 
@@ -673,7 +731,8 @@ class CameraScreenViewModel @Inject constructor() : ViewModel() {
                                 left,
                                 newResult,
                                 i,
-                                l
+                                l,
+                                translation
                             )
                         }
 
@@ -711,7 +770,8 @@ class CameraScreenViewModel @Inject constructor() : ViewModel() {
         mat: Mat,
         result: List<SurveyAnalysisResult>,
         i1: Int,
-        l: Int
+        l: Int,
+        translation: Pair<Int, Int>
     ): MutableList<SurveyAnalysisResult> {
         k as Question.RatingQuestion
         var analysisList = MutableList(5) { 0 }
@@ -726,11 +786,14 @@ class CameraScreenViewModel @Inject constructor() : ViewModel() {
             }
         }
 
+        var tempIdx = 0
+        var tempFilled = 0.0
+
 
         for (i in 0..4) {
 
-            val topLeft = Point((440.0 + i * 25) * x + left, (k.mark + 1) * y + topValue)
-            val bottomRight = Point((454.0 + i * 25) * x + left, (k.mark + 15) * y + topValue)
+            val topLeft = Point((440.0 + i * 25) * x + left  + translation.first, (k.mark ) * y + topValue + translation.second)
+            val bottomRight = Point((455.0 + i * 25) * x + left  -translation.first, (k.mark + 16) * y + topValue - translation.second)
             val roiRect = org.opencv.core.Rect(
                 topLeft.x.toInt(),
                 topLeft.y.toInt(),
@@ -750,7 +813,7 @@ class CameraScreenViewModel @Inject constructor() : ViewModel() {
             val fillRatio = blackPixels.toDouble() / totalPixels
             println("fill ratio $fillRatio  question ${k.question}")
 
-            val isFilled = fillRatio > 0.35
+            val isFilled = fillRatio > 0.20
 
             // Kutu çiz
             Imgproc.rectangle(
@@ -766,12 +829,14 @@ class CameraScreenViewModel @Inject constructor() : ViewModel() {
             )
 
 
-            if (isFilled) {
-                analysisList[i] += 1
+            if (fillRatio > tempFilled) {
+                tempFilled = fillRatio
+                tempIdx = i
             }
 
 
         }
+        analysisList[tempIdx] += 1
         if (controlList) {
             newResult[controlInt] = SurveyAnalysisResult(
                 sectionIdx = i1,
@@ -805,13 +870,18 @@ class CameraScreenViewModel @Inject constructor() : ViewModel() {
         left: Int,
         result: List<SurveyAnalysisResult>,
         i1: Int,
-        l: Int
+        l: Int,
+        translation: Pair<Int, Int>
     ): MutableList<SurveyAnalysisResult> {
         k as Question.MultipleChoiceQuestion
         var analysisList = MutableList(k.marks.size) { 0 }
         var newResult = result.toMutableList()
         var controlList = false
         var controlInt = 0
+
+        var tempIdx = 0
+        var tempFilled = 0.0
+
         result.forEachIndexed { idx, it ->
             if (it.questionIdx == l && it.sectionIdx == i1) {
                 analysisList = it.analysis.toMutableList()
@@ -823,8 +893,8 @@ class CameraScreenViewModel @Inject constructor() : ViewModel() {
 
         k.marks.forEachIndexed { idx, it ->
 
-            val topLeft = Point(438.0 * x + left, (it - 10) * y + topValue)
-            val bottomRight = Point(450 * x + left, (it + 2) * y + topValue)
+            val topLeft = Point(436.0 * x + left +translation.first, (it - 10) * y + topValue + translation.second)
+            val bottomRight = Point(451 * x + left - translation.first, (it + 4) * y + topValue - translation.second)
             val roiRect = org.opencv.core.Rect(
                 topLeft.x.toInt(),
                 topLeft.y.toInt(),
@@ -843,7 +913,7 @@ class CameraScreenViewModel @Inject constructor() : ViewModel() {
             val fillRatio = blackPixels.toDouble() / totalPixels
             println("fill ratio $fillRatio  question ${k.question}")
 
-            val isFilled = fillRatio > 0.35
+            val isFilled = fillRatio > 0.25
 
             // Kutu çiz
             Imgproc.rectangle(
@@ -857,11 +927,12 @@ class CameraScreenViewModel @Inject constructor() : ViewModel() {
                 ), // Yeşil = dolu, Kırmızı = boş
                 2
             )
-            if (isFilled) {
-                analysisList[idx] += 1
+            if (fillRatio > tempFilled) {
+                tempFilled = fillRatio
+                tempIdx = idx
             }
-
         }
+        analysisList[tempIdx] += 1
         if (controlList) {
             newResult[controlInt] = SurveyAnalysisResult(
                 sectionIdx = i1,
